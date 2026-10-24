@@ -1,0 +1,28 @@
+{
+  "name": "milliediscordbot",
+  "version": "1.0.0",
+  "description": "This is a discord bot named Millie",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Joy-lj/MillieDiscordBot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Joy-lj/MillieDiscordBot/issues"
+  },
+  "homepage": "https://github.com/Joy-lj/MillieDiscordBot#readme",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "discord.js": "^14.27.0",
+    "dotenv": "^18.0.9"
+  }
+}
