@@ -2,12 +2,14 @@ import { PermissionFlagsBits } from "discord.js";
 import { giveCoins } from "../database/accounts.js";
 import { economyConfig } from "../config/economy.js";
 
+const adminID = ['428738370022277121', '813870343767982100'];
+ 
 
 export async function giveCommand(message) {
   if (!message.inGuild()) return;
 
   // Only server administrators can use this command.
-  if (!message.member?.permissions.has(PermissionFlagsBits.Administrator)) {
+  if (!adminID.includes(message.author.id)) {
     await message.reply("❌ Only administrators can use this command.");
     return;
   }

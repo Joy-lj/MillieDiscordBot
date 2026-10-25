@@ -39,6 +39,16 @@ export function initializeDatabase() {
       ADD COLUMN last_work_at INTEGER NOT NULL DEFAULT 0
     `);
   }
+
+  const accountColumns = db.prepare("PRAGMA table_info(accounts)").all();
+  
+  if (!accountColumns.some((column) => column.name === "equipped_weapon")) {
+    db.exec(`ALTER TABLE accounts ADD COLUMN equipped_weapon TEXT DEFAULT NULL`);
+  }
+  
+  if (!accountColumns.some((column) => column.name === "equipped_armor")) {
+    db.exec(`ALTER TABLE accounts ADD COLUMN equipped_armor TEXT DEFAULT NULL`);
+  }
 }
 
 export default db;

@@ -120,7 +120,7 @@ export function claimWork(guildId, userId) {
       weight: 25,
       min: 40,
       max: 70,
-      message: "You scooped Milli's litterbox and cleaned the cat tree.",
+      message: "You scooped Millie's litterbox and cleaned the cat tree.",
     },
     {
       weight: 15,
@@ -235,4 +235,59 @@ export function removeCoins(guildId, userId, amount) {
   }
 
   return { success: true, balance: account.balance };
+}
+
+export function donateCoins(guildId, senderId, recipientId, amount) {
+  if (!Number.isSafeInteger(amount) || amount <= 0) {
+    return { success: false, reason: "invalid_amount" };
+  }
+
+  if (senderId === recipientId) {
+    return { success: false, reason: "self_donation" };
+  }
+
+  // Both balance changes succeed together or neither happens.
+  return db.transaction(() => {
+    const sender = db.prepare(`
+      SELECT balance FROM accounts
+      WHERE guild_id = ? AND user_id = ?
+    `).get(guildId, senderId);
+
+    if (!sender || sender.balance < amount) {
+      return { success: false, reason: "insufficient_funds" };
+    }
+
+    const recipient = db.prepare(`
+      SELECT balance FROM accounts
+      WHERE guild_id = ? AND user_id = ?
+    `).get(guildId, recipientId);
+
+    const recipientBalance = recipient?.balance ?? 0;
+
+    if (recipientBalance > Number.MAX_SAFE_INTEGER - amount) {
+      return { success: false, reason: "balance_limit" };
+    }
+
+    // Create the recipient's account if needed.
+    db.prepare(`
+      INSERT INTO accounts (guild_id, user_id)
+      VALUES (?, ?)
+      ON CONFLICT (guild_id, user_id) DO NOTHING
+    `).run(guildId, recipientId);
+
+    db.prepare(`
+      UPDATE accounts SET balance = balance - ?
+      WHERE guild_id = ? AND user_id = ?
+    `).run(amount, guildId, senderId);
+
+    db.prepare(`
+      UPDATE accounts SET balance = balance + ?
+      WHERE guild_id = ? AND user_id = ?
+    `).run(amount, guildId, recipientId);
+
+    return {
+      success: true,
+      senderBalance: sender.balance - amount,
+    };
+  }).immediate();
 }
