@@ -166,42 +166,53 @@ export function buyItem(guildId, userId, itemId) {
 }
 
 // Sell an item back for its purchase price
-export function sellItem(guildId, userId, itemId) {
+export function sellItem(guildId, userId, itemId, amount = 1) {
+  // 1. Fetch item details from your ITEMS manifest
   const item = ITEMS[itemId];
-  if (!item) return { success: false, reason: "invalid_item" };
+  if (!item) throw new Error("Item does not exist.");
 
-  const sale = db.transaction(() => {
-    const inventoryItem = db.prepare(`
-      SELECT quantity FROM inventory
-      WHERE guild_id = ? AND user_id = ? AND item_id = ?
-    `).get(guildId, userId, itemId);
+  // 2. Run transaction atomically
+  return db.transaction(() => {
+    // Check user's current item quantity
+    const invRow = db
+      .prepare(`SELECT quantity FROM inventory WHERE guild_id = ? AND user_id = ? AND item_id = ?`)
+      .get(guildId, userId, itemId);
 
-    if (!inventoryItem || inventoryItem.quantity <= 0) {
-      return { success: false, reason: "not_owned" };
+    if (!invRow || invRow.quantity < amount) {
+      throw new Error("You do not have enough of this item to sell!");
     }
 
-    db.prepare(`
-      UPDATE inventory
-      SET quantity = quantity - 1
-      WHERE guild_id = ? AND user_id = ? AND item_id = ?
-    `).run(guildId, userId, itemId);
+    // Check equipped status from user's equipment table/columns
+    const equipRow = db
+      .prepare(`SELECT equipped_weapon, equipped_armor FROM user_equipment WHERE guild_id = ? AND user_id = ?`)
+      .get(guildId, userId);
 
-    const updatedAccount = db.prepare(`
-      UPDATE accounts
-      SET balance = balance + ?
-      WHERE guild_id = ? AND user_id = ?
-      RETURNING balance
-    `).get(item.price, guildId, userId);
+    // If selling down to 0, check if it's currently equipped and unequip it
+    const remainingQty = invRow.quantity - amount;
 
-    return { 
-      success: true, 
-      item: item.name, 
-      price: item.price, 
-      newBalance: updatedAccount.balance 
-    };
-  });
+    if (remainingQty <= 0) {
+      if (equipRow) {
+        if (equipRow.equipped_weapon === itemId) {
+          db.prepare(`UPDATE user_equipment SET equipped_weapon = NULL WHERE guild_id = ? AND user_id = ?`).run(guildId, userId);
+        }
+        if (equipRow.equipped_armor === itemId) {
+          db.prepare(`UPDATE user_equipment SET equipped_armor = NULL WHERE guild_id = ? AND user_id = ?`).run(guildId, userId);
+        }
+      }
 
-  return sale.immediate();
+      // Remove from inventory
+      db.prepare(`DELETE FROM inventory WHERE guild_id = ? AND user_id = ? AND item_id = ?`).run(guildId, userId, itemId);
+    } else {
+      // Reduce item count
+      db.prepare(`UPDATE inventory SET quantity = quantity - ? WHERE guild_id = ? AND user_id = ? AND item_id = ?`).run(amount, guildId, userId, itemId);
+    }
+
+    // 3. Credit cookies/currency back to user account
+    const totalEarnings = item.price * amount;
+    db.prepare(`UPDATE accounts SET balance = balance + ? WHERE guild_id = ? AND user_id = ?`).run(totalEarnings, guildId, userId);
+
+    return { totalEarnings, remainingQty };
+  })();
 }
 
 export function unequipItem(guildId, userId, itemType) {
