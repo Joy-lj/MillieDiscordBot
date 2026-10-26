@@ -219,6 +219,27 @@ export function sellItemInstance(guildId, userId, itemInstanceId) {
   }).immediate();
 }
 
+export function sellItemBySerial(guildId, userId, itemId, serialNumber) {
+  const item = ITEMS[itemId];
+  if (!item) return { success: false, reason: "invalid_item" };
+
+  return db.transaction(() => {
+    // Find the exact instance matching both item_id and serial_number
+    const itemRow = db.prepare(`
+      SELECT id FROM user_items
+      WHERE guild_id = ? AND user_id = ? AND item_id = ? AND serial_number = ?
+    `).get(guildId, userId, itemId, serialNumber);
+
+    if (!itemRow) {
+      return { success: false, reason: "not_owned" };
+    }
+
+    // Sell using the instance ID
+    const result = sellItemInstance(guildId, userId, itemRow.id);
+    return { ...result, itemKey: itemId, serialNumber };
+  }).immediate();
+}
+
 export function equipItemInstance(guildId, userId, itemInstanceId) {
   return db.transaction(() => {
     const itemRow = db.prepare(`
