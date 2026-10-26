@@ -55,11 +55,6 @@ Shop
             - Padded Pants
             - Bulletproof Vest
         - Magic (later)
-    - Cute Cat Cards (later)
+    - Card Shop ✅
+        - Cute Cat Cards (only 2 right now)
 
-
-Bugs to fix
-- Need to only equip one weapon and one armor
-- Still showing up in inventory after selling if still equipped
-- Update sell and buy to have quantity
-- Update unequip to specify item
