@@ -20,6 +20,8 @@ import { equipCommand } from "./commands/equip.js";
 import { unequipCommand } from "./commands/unequip.js";
 import { duelCommand } from "./commands/duel.js";
 import { cardShopCommand, buyCardCommand, sellCardCommand } from "./commands/cardshop.js";
+import { hotColdCommand } from "./commands/hc.js";
+import { cardInventoryCommand } from "./commands/cardinventory.js";
 
 // Choose which Discord events the bot can receive.
 const client = new Client({
@@ -102,6 +104,21 @@ client.on(Events.MessageCreate, async (message) => {
     }
     if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!buycard") {
       await buyCardCommand(message);
+    }
+    if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!sellcard") {
+      await sellCardCommand(message);
+    }
+    if (
+      message.content.trim().split(/\s+/)[0].toLowerCase() === "!hc"
+    ) {
+      await hotColdCommand(message);
+    }
+    if (
+      ["!cardinventory", "!cardinv"].includes(
+        message.content.trim().split(/\s+/)[0].toLowerCase()
+      )
+    ) {
+      await cardInventoryCommand(message);
     }
   } catch (error) {
     console.error("Command failed:", error);

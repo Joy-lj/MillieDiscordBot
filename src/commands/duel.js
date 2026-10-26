@@ -11,7 +11,7 @@ import db from "../database/connection.js";
 import {
   getUserCombatStats,
   getUserInventory,
-  equipItem,
+  equipItemInstance,
   unequipItem,
   ITEMS,
 } from "../database/items.js";
@@ -21,11 +21,8 @@ export async function duelCommand(message) {
   const targetUser = message.mentions.users.first();
   const betAmount = parseInt(args[2], 10);
 
-  // --- 1. Validation Checks ---
   if (!targetUser) {
-    return message.reply(
-      "Please mention a user to duel! Example: `!duel @username 100`"
-    );
+    return message.reply("Please mention a user to duel! Example: `!duel @username 100`");
   }
   if (targetUser.bot) {
     return message.reply("You cannot duel a bot!");
@@ -34,9 +31,7 @@ export async function duelCommand(message) {
     return message.reply("You cannot duel yourself!");
   }
   if (isNaN(betAmount) || betAmount <= 0) {
-    return message.reply(
-      "Please specify a valid positive number of cookies to bet! Example: `!duel @username 100`"
-    );
+    return message.reply("Please specify a valid positive number of cookies to bet! Example: `!duel @username 100`");
   }
 
   const guildId = message.guild.id;
@@ -45,36 +40,23 @@ export async function duelCommand(message) {
 
   const challengerStats = getUserCombatStats(guildId, challengerId);
   if (challengerStats.balance < betAmount) {
-    return message.reply(
-      `You don't have enough cookies! Balance: **${challengerStats.balance}** cookies.`
-    );
+    return message.reply(`You don't have enough cookies! Balance: **${challengerStats.balance}** cookies.`);
   }
 
   const opponentStats = getUserCombatStats(guildId, opponentId);
   if (opponentStats.balance < betAmount) {
-    return message.reply(
-      `${targetUser.username} doesn't have enough cookies to match that bet!`
-    );
+    return message.reply(`${targetUser.username} doesn't have enough cookies to match that bet!`);
   }
 
-  // --- 2. Initial Challenge Step (60s Invite Timer) ---
   const inviteEmbed = new EmbedBuilder()
     .setColor(0xff0000)
     .setTitle("⚔️ DUEL CHALLENGE!")
-    .setDescription(
-      `<@${opponentId}>, you have been challenged to a duel by <@${challengerId}>!\n\n💰 **Wager:** ${betAmount} cookies each\n\n*Click accept within 60 seconds to enter the lobby!*`
-    )
+    .setDescription(`<@${opponentId}>, you have been challenged to a duel by <@${challengerId}>!\n\n💰 **Wager:** ${betAmount} cookies each\n\n*Click accept within 60 seconds to enter the lobby!*`)
     .setTimestamp();
 
   const inviteRow = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId("accept_duel")
-      .setLabel("Accept ⚔️")
-      .setStyle(ButtonStyle.Success),
-    new ButtonBuilder()
-      .setCustomId("decline_duel")
-      .setLabel("Decline ❌")
-      .setStyle(ButtonStyle.Danger)
+    new ButtonBuilder().setCustomId("accept_duel").setLabel("Accept ⚔️").setStyle(ButtonStyle.Success),
+    new ButtonBuilder().setCustomId("decline_duel").setLabel("Decline ❌").setStyle(ButtonStyle.Danger)
   );
 
   const duelMessage = await message.reply({
@@ -83,16 +65,11 @@ export async function duelCommand(message) {
     components: [inviteRow],
   });
 
-  const inviteCollector = duelMessage.createMessageComponentCollector({
-    time: 60000,
-  });
+  const inviteCollector = duelMessage.createMessageComponentCollector({ time: 60000 });
 
   inviteCollector.on("collect", async (interaction) => {
     if (interaction.user.id !== opponentId) {
-      return interaction.reply({
-        content: "❌ This duel invitation is not for you!",
-        flags: [MessageFlags.Ephemeral],
-      });
+      return interaction.reply({ content: "❌ This duel invitation is not for you!", flags: [MessageFlags.Ephemeral] });
     }
 
     if (interaction.customId === "decline_duel") {
@@ -102,9 +79,7 @@ export async function duelCommand(message) {
       const declinedEmbed = new EmbedBuilder()
         .setColor(0x999999)
         .setTitle("⚔️ Duel Declined")
-        .setDescription(
-          `<@${opponentId}> declined the duel challenge from <@${challengerId}>.`
-        );
+        .setDescription(`<@${opponentId}> declined the duel challenge from <@${challengerId}>.`);
       return duelMessage.edit({ embeds: [declinedEmbed], components: [] });
     }
 
@@ -112,13 +87,7 @@ export async function duelCommand(message) {
       await interaction.deferUpdate();
       inviteCollector.stop("accepted");
 
-      await startLobbyPhase(
-        duelMessage,
-        guildId,
-        message.author,
-        targetUser,
-        betAmount
-      );
+      await startLobbyPhase(duelMessage, guildId, message.author, targetUser, betAmount);
     }
   });
 
@@ -127,24 +96,13 @@ export async function duelCommand(message) {
       const expiredEmbed = new EmbedBuilder()
         .setColor(0x999999)
         .setTitle("⚔️ Duel Challenge Expired")
-        .setDescription(
-          "The duel challenge timed out because the opponent did not respond within 60 seconds."
-        );
-      await duelMessage
-        .edit({ embeds: [expiredEmbed], components: [] })
-        .catch(() => {});
+        .setDescription("The duel challenge timed out because the opponent did not respond within 60 seconds.");
+      await duelMessage.edit({ embeds: [expiredEmbed], components: [] }).catch(() => {});
     }
   });
 }
 
-// --- 3. Lobby Phase Function (Direct-Update Flow) ---
-async function startLobbyPhase(
-  duelMessage,
-  guildId,
-  challenger,
-  opponent,
-  betAmount
-) {
+async function startLobbyPhase(duelMessage, guildId, challenger, opponent, betAmount) {
   let challengerReady = false;
   let opponentReady = false;
 
@@ -155,21 +113,15 @@ async function startLobbyPhase(
     return new EmbedBuilder()
       .setColor(0xffaa00)
       .setTitle("🛡️ DUEL LOBBY — Prepare for Battle!")
-      .setDescription(
-        `Use your respective dropdown below to manage your gear.\nClick **"READY"** when you are fully prepared!\n\n💰 **Wager:** ${betAmount} cookies`
-      )
+      .setDescription(`Use your respective dropdown below to manage your gear.\nClick **"READY"** when you are fully prepared!\n\n💰 **Wager:** ${betAmount} cookies`)
       .addFields(
         {
-          name: `${challenger.username} ${
-            challengerReady ? "✅ [READY]" : "⏳ [PREPARING]"
-          }`,
+          name: `${challenger.username} ${challengerReady ? "✅ [READY]" : "⏳ [PREPARING]"}`,
           value: `⚔️ Weapon: **${cStats.weaponName}** (+${cStats.attack} STR)\n🛡️ Armor: **${cStats.armorName}** (+${cStats.defense} DEF)\n💥 Total Power: **${cStats.totalPower}**`,
           inline: true,
         },
         {
-          name: `${opponent.username} ${
-            opponentReady ? "✅ [READY]" : "⏳ [PREPARING]"
-          }`,
+          name: `${opponent.username} ${opponentReady ? "✅ [READY]" : "⏳ [PREPARING]"}`,
           value: `⚔️ Weapon: **${oStats.weaponName}** (+${oStats.attack} STR)\n🛡️ Armor: **${oStats.armorName}** (+${oStats.defense} DEF)\n💥 Total Power: **${oStats.totalPower}**`,
           inline: true,
         }
@@ -180,37 +132,46 @@ async function startLobbyPhase(
   const buildGearSelect = (userId, customId, placeholder) => {
     const userInv = getUserInventory(guildId, userId);
     const cStats = getUserCombatStats(guildId, userId);
+    const options = [];
 
-    const options = [
-      new StringSelectMenuOptionBuilder()
-        .setLabel("Unequip Weapon")
-        .setValue("unequip_weapon")
-        .setDescription("Remove your currently equipped weapon"),
-      new StringSelectMenuOptionBuilder()
-        .setLabel("Unequip Armor")
-        .setValue("unequip_armor")
-        .setDescription("Remove your currently equipped armor"),
-    ];
+    if (cStats.equippedWeaponInstanceId) {
+      options.push(
+        new StringSelectMenuOptionBuilder()
+          .setLabel(`Unequip Weapon (${cStats.weaponName})`)
+          .setValue("unequip_weapon")
+          .setDescription("Remove your currently equipped weapon")
+      );
+    }
+    if (cStats.equippedArmorInstanceId) {
+      options.push(
+        new StringSelectMenuOptionBuilder()
+          .setLabel(`Unequip Armor (${cStats.armorName})`)
+          .setValue("unequip_armor")
+          .setDescription("Remove your currently equipped armor")
+      );
+    }
 
     for (const row of userInv) {
       const item = ITEMS[row.item_id];
       if (!item) continue;
 
-      const isEquipped =
-        cStats.weaponName === item.name || cStats.armorName === item.name;
+      const isEquipped = cStats.equippedWeaponInstanceId === row.id || cStats.equippedArmorInstanceId === row.id;
       const statType = item.type === "weapon" ? "STR" : "DEF";
 
       options.push(
         new StringSelectMenuOptionBuilder()
-          .setLabel(
-            `${item.name} (+${item.stat} ${statType}) ${
-              isEquipped ? "[Equipped]" : ""
-            }`
-          )
-          .setValue(row.item_id)
-          .setDescription(
-            `Type: ${item.type.toUpperCase()} | Qty: ${row.quantity}`
-          )
+          .setLabel(`${item.name} #${row.serial_number} (+${item.stat} ${statType}) ${isEquipped ? "[Equipped]" : ""}`)
+          .setValue(String(row.id))
+          .setDescription(`Type: ${item.type.toUpperCase()}`)
+      );
+    }
+
+    if (options.length === 0) {
+      options.push(
+        new StringSelectMenuOptionBuilder()
+          .setLabel("No Gear Available")
+          .setValue("none")
+          .setDescription("You have no items in your inventory")
       );
     }
 
@@ -222,28 +183,14 @@ async function startLobbyPhase(
 
   const buildComponents = () => {
     const readyRow = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("ready_button")
-        .setLabel("READY ✅")
-        .setStyle(ButtonStyle.Success)
+      new ButtonBuilder().setCustomId("ready_button").setLabel("READY ✅").setStyle(ButtonStyle.Success)
     );
-
     const challengerSelectRow = new ActionRowBuilder().addComponents(
-      buildGearSelect(
-        challenger.id,
-        `gear_select_${challenger.id}`,
-        `${challenger.username}'s Gear Inventory`
-      )
+      buildGearSelect(challenger.id, `gear_select_${challenger.id}`, `${challenger.username}'s Gear Inventory`)
     );
-
     const opponentSelectRow = new ActionRowBuilder().addComponents(
-      buildGearSelect(
-        opponent.id,
-        `gear_select_${opponent.id}`,
-        `${opponent.username}'s Gear Inventory`
-      )
+      buildGearSelect(opponent.id, `gear_select_${opponent.id}`, `${opponent.username}'s Gear Inventory`)
     );
-
     return [readyRow, challengerSelectRow, opponentSelectRow];
   };
 
@@ -252,28 +199,17 @@ async function startLobbyPhase(
     components: buildComponents(),
   });
 
-  const lobbyCollector = duelMessage.createMessageComponentCollector({
-    time: 180000,
-  });
+  const lobbyCollector = duelMessage.createMessageComponentCollector({ time: 180000 });
 
   lobbyCollector.on("collect", async (i) => {
-    // 1. Block outsiders completely
     if (i.user.id !== challenger.id && i.user.id !== opponent.id) {
-      return i.reply({
-        content: "❌ You are not a participant in this duel!",
-        flags: [MessageFlags.Ephemeral],
-      });
+      return i.reply({ content: "❌ You are not a participant in this duel!", flags: [MessageFlags.Ephemeral] });
     }
 
-    // 2. Handle Gear Dropdowns with strict ownership checks
     if (i.isStringSelectMenu()) {
       const expectedCustomId = `gear_select_${i.user.id}`;
-      
       if (i.customId !== expectedCustomId) {
-        return i.reply({
-          content: "❌ You can only manage your own gear inventory!",
-          flags: [MessageFlags.Ephemeral],
-        });
+        return i.reply({ content: "❌ You can only manage your own gear inventory!", flags: [MessageFlags.Ephemeral] });
       }
 
       await i.deferUpdate();
@@ -287,8 +223,8 @@ async function startLobbyPhase(
         unequipItem(guildId, i.user.id, "weapon");
       } else if (selectedValue === "unequip_armor") {
         unequipItem(guildId, i.user.id, "armor");
-      } else {
-        equipItem(guildId, i.user.id, selectedValue);
+      } else if (selectedValue !== "none") {
+        equipItemInstance(guildId, i.user.id, parseInt(selectedValue, 10));
       }
 
       return duelMessage.edit({
@@ -297,7 +233,6 @@ async function startLobbyPhase(
       });
     }
 
-    // 3. Ready Button Handling
     if (i.customId === "ready_button") {
       await i.deferUpdate();
 
@@ -322,14 +257,11 @@ async function startLobbyPhase(
         .setColor(0x999999)
         .setTitle("⚔️ Duel Cancelled")
         .setDescription("The lobby timed out before both players readied up.");
-      await duelMessage
-        .edit({ embeds: [expiredEmbed], components: [] })
-        .catch(() => {});
+      await duelMessage.edit({ embeds: [expiredEmbed], components: [] }).catch(() => {});
     }
   });
 }
 
-// --- 4. Resolve Combat Settlement ---
 async function resolveDuel(guildId, challenger, opponent, betAmount, duelMessage) {
   const finalChallenger = getUserCombatStats(guildId, challenger.id);
   const finalOpponent = getUserCombatStats(guildId, opponent.id);
@@ -338,9 +270,7 @@ async function resolveDuel(guildId, challenger, opponent, betAmount, duelMessage
     const cancelEmbed = new EmbedBuilder()
       .setColor(0xff0000)
       .setTitle("❌ Duel Cancelled")
-      .setDescription(
-        "One of the players no longer has enough cookies to fulfill the bet!"
-      );
+      .setDescription("One of the players no longer has enough cookies to fulfill the bet!");
     return duelMessage.edit({ embeds: [cancelEmbed], components: [] });
   }
 
@@ -354,12 +284,8 @@ async function resolveDuel(guildId, challenger, opponent, betAmount, duelMessage
   const loserName = challengerWon ? opponent.username : challenger.username;
 
   db.transaction(() => {
-    db.prepare(
-      `UPDATE accounts SET balance = balance - ? WHERE guild_id = ? AND user_id = ?`
-    ).run(betAmount, guildId, loserId);
-    db.prepare(
-      `UPDATE accounts SET balance = balance + ? WHERE guild_id = ? AND user_id = ?`
-    ).run(betAmount, guildId, winnerId);
+    db.prepare(`UPDATE accounts SET balance = balance - ? WHERE guild_id = ? AND user_id = ?`).run(betAmount, guildId, loserId);
+    db.prepare(`UPDATE accounts SET balance = balance + ? WHERE guild_id = ? AND user_id = ?`).run(betAmount, guildId, winnerId);
   }).immediate();
 
   const resultEmbed = new EmbedBuilder()
