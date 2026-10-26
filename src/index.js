@@ -19,6 +19,7 @@ import { flowerPokerCommand } from "./commands/flowerpoker.js";
 import { equipCommand } from "./commands/equip.js";
 import { unequipCommand } from "./commands/unequip.js";
 import { duelCommand } from "./commands/duel.js";
+import { cardShopCommand, buyCardCommand, sellCardCommand } from "./commands/cardshop.js";
 
 // Choose which Discord events the bot can receive.
 const client = new Client({
@@ -95,6 +96,12 @@ client.on(Events.MessageCreate, async (message) => {
     }
     if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!duel") {
       await duelCommand(message);
+    }
+    if (message.content.trim().toLowerCase() === "!cardshop") {
+      await cardShopCommand(message);
+    }
+    if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!buycard") {
+      await buyCardCommand(message);
     }
   } catch (error) {
     console.error("Command failed:", error);
