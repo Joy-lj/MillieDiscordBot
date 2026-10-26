@@ -21,6 +21,15 @@ export function initializeDatabase() {
     )
   `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_cards (
+      guild_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      card_id TEXT NOT NULL,
+      PRIMARY KEY (guild_id, user_id, card_id)
+    )
+  `);
+
   // Check whether the daily cooldown column already exists.
   const columns = db.prepare("PRAGMA table_info(accounts)").all();
 

@@ -31,7 +31,7 @@ Gamble ✅
 - Multiplayer ✅
 
 
-Duels
+Duels ✅
 - Items ✅
 - Shop ✅
 - Inventory ✅
@@ -55,4 +55,11 @@ Shop
             - Padded Pants
             - Bulletproof Vest
         - Magic (later)
-    - Cards (later)
+    - Cute Cat Cards (later)
+
+
+Bugs to fix
+- Need to only equip one weapon and one armor
+- Still showing up in inventory after selling if still equipped
+- Update sell and buy to have quantity
+- Update unequip to specify item
