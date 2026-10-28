@@ -79,3 +79,6 @@ Bugs to fix
 🥈 @joy — 565 Millie Cookies
 🥉 @vic — 42 Millie Cookies
 4. @asiandudethatlifts — 0 Millie Cookies
+
+
+ --no-fund --no-audit; fi && exec node ${STARTUP_FILE}
