@@ -34,13 +34,14 @@ export async function inventoryCommand(message) {
         if (!item) return null;
         const statLabel = item.type === "weapon" ? "STR" : "DEF";
         const isEquipped = stats.equippedWeaponInstanceId === row.id || stats.equippedArmorInstanceId === row.id;
-        return `• **${item.name} #${row.serial_number}** (+${item.stat} ${statLabel}) ${isEquipped ? "✅ [Equipped]" : ""} — ID: \`${row.id}\``;
+        
+        return `• **${item.name} #${row.serial_number}** (+${item.stat} ${statLabel}) ${isEquipped ? "✅ [Equipped]" : ""} — \`${row.item_id}\``;
       })
       .filter(Boolean)
       .join("\n");
 
     embed.addFields({
-      name: "📦 Items Owned (Numbered Instances)",
+      name: "📦 Items Owned",
       value: itemList || "*No items found.*",
       inline: false,
     });

@@ -1,4 +1,4 @@
-import db from "../database/connection.js";
+/*import db from "../database/connection.js";
 import { EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import path from "path";
 import fs from "fs";
@@ -120,4 +120,4 @@ export async function cardInventoryCommand(message) {
       // Message was deleted
     }
   });
-}
+}*/

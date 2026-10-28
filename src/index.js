@@ -19,9 +19,13 @@ import { flowerPokerCommand } from "./commands/flowerpoker.js";
 import { equipCommand } from "./commands/equip.js";
 import { unequipCommand } from "./commands/unequip.js";
 import { duelCommand } from "./commands/duel.js";
-import { cardShopCommand, buyCardCommand, sellCardCommand } from "./commands/cardshop.js";
 import { hotColdCommand } from "./commands/hc.js";
-import { cardInventoryCommand } from "./commands/cardinventory.js";
+import { levelCommand } from "./commands/level.js";
+import { initializeCardShop } from "./database/cardShop.js";
+import { addXp } from "./database/accounts.js";
+import { adminXpCommand } from "./commands/adminXp.js"; 
+import { cardShopCommand, packsCommand, cardsCommand, handleCardShopInteraction } from "./commands/cardShop.js";
+import {rpsCommand} from "./commands/rps.js";
 
 // Choose which Discord events the bot can receive.
 const client = new Client({
@@ -37,6 +41,18 @@ client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot || !message.inGuild()) return;
 
   try {
+    const cardCommand = message.content
+    .trim()
+    .split(/\s+/)[0]
+    .toLowerCase();
+
+  if (cardCommand === "!cardshop") {
+    await cardShopCommand(message);
+  } else if (cardCommand === "!packs") {
+  await packsCommand(message);
+  } else if (cardCommand === "!cards") {
+    await cardsCommand(message);
+  }
     if (message.content.trim().toLowerCase() === "!balance" || message.content.trim().toLowerCase() === "!bal") {
       await balanceCommand(message);
     }
@@ -99,9 +115,7 @@ client.on(Events.MessageCreate, async (message) => {
     if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!duel") {
       await duelCommand(message);
     }
-    if (message.content.trim().toLowerCase() === "!cardshop") {
-      await cardShopCommand(message);
-    }
+
     if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!buycard") {
       await buyCardCommand(message);
     }
@@ -120,6 +134,59 @@ client.on(Events.MessageCreate, async (message) => {
     ) {
       await cardInventoryCommand(message);
     }
+    if (message.content.trim().toLowerCase() === "!level" || message.content.trim().toLowerCase() === "!rank") {
+      await levelCommand(message);
+    }
+
+    if (message.content.trim().toLowerCase() === "!adminxp") {
+      await adminXpCommand(message);
+    }
+
+    if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!rps") {
+      await rpsCommand(message);
+    } 
+  
+
+    const xpGained = Math.floor(Math.random() * 11) + 15; // Random 15-25 XP
+    const xpResult = addXp(message.guild.id, message.author.id, xpGained);
+
+    // Announce level-ups in chat if they leveled up
+    if (xpResult.leveledUp) {
+      let levelUpText = `🎉 Congratulations <@${message.author.id}>! You leveled up to **Level ${xpResult.newLevel}**!`;
+      if (xpResult.rewardGiven > 0) {
+        levelUpText += ` 💰 Milestone reward: **${xpResult.rewardGiven} cookies**!`;
+      }
+      
+      // --- AUTOMATIC ROLE ASSIGNMENT ---
+      try {
+        const member = message.member; // Get the guild member object
+        
+        // Example: Assign a specific role ID based on their level milestone
+        // Make sure to replace these placeholder strings with your actual Discord Role IDs!
+        let roleIdToAssign = null;
+        
+        if (xpResult.newLevel === 5) {
+          roleIdToAssign = "1565118264793628692";
+        } else if (xpResult.newLevel === 10) {
+          roleIdToAssign = "YOUR_LEVEL_10_ROLE_ID";
+        } else if (xpResult.newLevel === 15) {
+          roleIdToAssign = "YOUR_LEVEL_15_ROLE_ID";
+        }
+        // You can add more thresholds or map every multiple of 5 dynamically!
+
+        if (roleIdToAssign) {
+          await member.roles.add(roleIdToAssign);
+          levelUpText += ` 🎖️ You were awarded a new role for reaching **Level ${xpResult.newLevel}**!`;
+        }
+      } catch (roleError) {
+        console.error("Failed to assign level role (Check bot permissions & role hierarchy):", roleError);
+      }
+
+      const primaryCommand = message.content.trim().split(/\s+/)[0].toLowerCase();
+
+      message.channel.send(levelUpText).catch(() => {});
+    }
+
   } catch (error) {
     console.error("Command failed:", error);
   }
@@ -129,7 +196,7 @@ client.on(Events.MessageCreate, async (message) => {
 async function startBot() {
   initializeDatabase();
   initializeBetting();
-
+  initializeCardShop();
   await client.login(process.env.TOKEN);
 }
 
@@ -139,5 +206,7 @@ startBot().catch(console.error);
 client.on("interactionCreate", async (interaction) => {
   // If an interaction isn't handled by any active message component collector,
   // ensure it doesn't leave Discord waiting indefinitely.
+  if (await handleCardShopInteraction(interaction)) return;
   if (!interaction.isButton() || !interaction.isStringSelectMenu()) return;
+  
 });

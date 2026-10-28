@@ -291,3 +291,55 @@ export function donateCoins(guildId, senderId, recipientId, amount) {
     };
   }).immediate();
 }
+
+export function addXp(guildId, userId, amount = 15) {
+  return db.transaction(() => {
+    db.prepare(`
+      INSERT INTO accounts (guild_id, user_id)
+      VALUES (?, ?)
+      ON CONFLICT (guild_id, user_id) DO NOTHING
+    `).run(guildId, userId);
+
+    const account = db.prepare(`
+      SELECT level, xp, balance FROM accounts
+      WHERE guild_id = ? AND user_id = ?
+    `).get(guildId, userId);
+
+    let { level, xp, balance } = account;
+    xp += amount;
+
+    let xpNeeded = level * 150; 
+    let leveledUp = false;
+    let rewardGiven = 0;
+    let hitMilestone = false;
+
+    while (xp >= xpNeeded) {
+      xp -= xpNeeded;
+      level += 1;
+      leveledUp = true;
+
+      // Reward currency & track milestones every 5 levels
+      if (level % 5 === 0) {
+        const milestoneReward = (level / 5) * 250; 
+        balance += milestoneReward;
+        rewardGiven += milestoneReward;
+        hitMilestone = true;
+      }
+
+      xpNeeded = level * 150; 
+    }
+
+    db.prepare(`
+      UPDATE accounts
+      SET level = ?, xp = ?, balance = ?
+      WHERE guild_id = ? AND user_id = ?
+    `).run(level, xp, balance, guildId, userId);
+
+    return {
+      leveledUp,
+      newLevel: level,
+      rewardGiven,
+      hitMilestone,
+    };
+  }).immediate();
+}

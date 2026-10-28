@@ -1,6 +1,7 @@
 import db from "./connection.js";
 
 export const ITEMS = {
+  // Weapons (Strength stat)
   "foam-sword": {
     name: "Foam Sword",
     type: "weapon",
@@ -33,6 +34,8 @@ export const ITEMS = {
     description: "A standard firearm loaded with cookie shrapnel.",
     use: "Shoot targets from a distance."
   },
+  
+  // Armor (Defense stat)
   "bicycle-helmet": {
     name: "Bicycle Helmet",
     type: "armor",
@@ -151,16 +154,25 @@ export function buyItem(guildId, userId, itemId, quantity = 1) {
 
     db.prepare(`UPDATE accounts SET balance = balance - ? WHERE guild_id = ? AND user_id = ?`).run(totalPrice, guildId, userId);
 
-    const maxSerialRow = db.prepare(`
-      SELECT MAX(serial_number) as max_serial FROM user_items
-      WHERE guild_id = ? AND user_id = ? AND item_id = ?
-    `).get(guildId, userId, itemId);
-
-    let nextSerial = (maxSerialRow?.max_serial || 0);
     const addedItems = [];
 
+    // Fills gaps in serial numbers first before incrementing
     for (let i = 0; i < qty; i++) {
-      nextSerial++;
+      const existingSerials = db.prepare(`
+        SELECT serial_number FROM user_items
+        WHERE guild_id = ? AND user_id = ? AND item_id = ?
+        ORDER BY serial_number ASC
+      `).all(guildId, userId, itemId).map(r => r.serial_number);
+
+      let nextSerial = 1;
+      for (const s of existingSerials) {
+        if (s === nextSerial) {
+          nextSerial++;
+        } else {
+          break;
+        }
+      }
+
       const info = db.prepare(`
         INSERT INTO user_items (guild_id, user_id, item_id, serial_number)
         VALUES (?, ?, ?, ?)
@@ -180,29 +192,31 @@ export function buyItem(guildId, userId, itemId, quantity = 1) {
   }).immediate();
 }
 
-export function sellItemInstance(guildId, userId, itemInstanceId) {
+export function sellItemBySerial(guildId, userId, itemId, serialNumber) {
+  const item = ITEMS[itemId];
+  if (!item) return { success: false, reason: "invalid_item" };
+
   return db.transaction(() => {
     const itemRow = db.prepare(`
       SELECT id, item_id, serial_number FROM user_items
-      WHERE id = ? AND guild_id = ? AND user_id = ?
-    `).get(itemInstanceId, guildId, userId);
+      WHERE guild_id = ? AND user_id = ? AND item_id = ? AND serial_number = ?
+    `).get(guildId, userId, itemId, serialNumber);
 
     if (!itemRow) {
       return { success: false, reason: "not_owned" };
     }
 
-    const item = ITEMS[itemRow.item_id];
     const sellPrice = Math.floor(item.price * 0.5);
 
     const account = db.prepare(`SELECT equipped_weapon_id, equipped_armor_id FROM accounts WHERE guild_id = ? AND user_id = ?`).get(guildId, userId);
-    if (account?.equipped_weapon_id === itemInstanceId) {
+    if (account?.equipped_weapon_id === itemRow.id) {
       db.prepare(`UPDATE accounts SET equipped_weapon_id = NULL WHERE guild_id = ? AND user_id = ?`).run(guildId, userId);
     }
-    if (account?.equipped_armor_id === itemInstanceId) {
+    if (account?.equipped_armor_id === itemRow.id) {
       db.prepare(`UPDATE accounts SET equipped_armor_id = NULL WHERE guild_id = ? AND user_id = ?`).run(guildId, userId);
     }
 
-    db.prepare(`DELETE FROM user_items WHERE id = ?`).run(itemInstanceId);
+    db.prepare(`DELETE FROM user_items WHERE id = ?`).run(itemRow.id);
 
     const updated = db.prepare(`
       UPDATE accounts SET balance = balance + ?
@@ -219,14 +233,13 @@ export function sellItemInstance(guildId, userId, itemInstanceId) {
   }).immediate();
 }
 
-export function sellItemBySerial(guildId, userId, itemId, serialNumber) {
+export function equipItemBySerial(guildId, userId, itemId, serialNumber) {
   const item = ITEMS[itemId];
   if (!item) return { success: false, reason: "invalid_item" };
 
   return db.transaction(() => {
-    // Find the exact instance matching both item_id and serial_number
     const itemRow = db.prepare(`
-      SELECT id FROM user_items
+      SELECT id, item_id, serial_number FROM user_items
       WHERE guild_id = ? AND user_id = ? AND item_id = ? AND serial_number = ?
     `).get(guildId, userId, itemId, serialNumber);
 
@@ -234,55 +247,48 @@ export function sellItemBySerial(guildId, userId, itemId, serialNumber) {
       return { success: false, reason: "not_owned" };
     }
 
-    // Sell using the instance ID
-    const result = sellItemInstance(guildId, userId, itemRow.id);
-    return { ...result, itemKey: itemId, serialNumber };
-  }).immediate();
-}
-
-export function equipItemInstance(guildId, userId, itemInstanceId) {
-  return db.transaction(() => {
-    const itemRow = db.prepare(`
-      SELECT id, item_id, serial_number FROM user_items
-      WHERE id = ? AND guild_id = ? AND user_id = ?
-    `).get(itemInstanceId, guildId, userId);
-
-    if (!itemRow) {
-      return { success: false, reason: "not_owned" };
-    }
-
-    const item = ITEMS[itemRow.item_id];
-
     db.prepare(`
       INSERT INTO accounts (guild_id, user_id) VALUES (?, ?)
       ON CONFLICT (guild_id, user_id) DO NOTHING
     `).run(guildId, userId);
 
     if (item.type === "weapon") {
-      db.prepare(`UPDATE accounts SET equipped_weapon_id = ? WHERE guild_id = ? AND user_id = ?`).run(itemInstanceId, guildId, userId);
+      db.prepare(`UPDATE accounts SET equipped_weapon_id = ? WHERE guild_id = ? AND user_id = ?`).run(itemRow.id, guildId, userId);
     } else if (item.type === "armor") {
-      db.prepare(`UPDATE accounts SET equipped_armor_id = ? WHERE guild_id = ? AND user_id = ?`).run(itemInstanceId, guildId, userId);
+      db.prepare(`UPDATE accounts SET equipped_armor_id = ? WHERE guild_id = ? AND user_id = ?`).run(itemRow.id, guildId, userId);
     }
 
     return { success: true, item, serialNumber: itemRow.serial_number };
   }).immediate();
 }
 
-export function unequipItem(guildId, userId, targetType) {
-  if (!["weapon", "armor"].includes(targetType)) {
-    return { success: false, reason: "invalid_type" };
-  }
-
-  const column = targetType === "weapon" ? "equipped_weapon_id" : "equipped_armor_id";
+export function unequipItemBySerial(guildId, userId, target, serialNumber) {
+  const item = ITEMS[target];
+  const targetType = item ? item.type : target;
 
   return db.transaction(() => {
-    const account = db.prepare(`SELECT ${column} FROM accounts WHERE guild_id = ? AND user_id = ?`).get(guildId, userId);
-    if (!account || !account[column]) {
-      return { success: false, reason: "nothing_equipped" };
+    const account = db.prepare(`SELECT equipped_weapon_id, equipped_armor_id FROM accounts WHERE guild_id = ? AND user_id = ?`).get(guildId, userId);
+    if (!account) return { success: false, reason: "nothing_equipped" };
+
+    if ((targetType === "weapon" || targetType === "armor") && serialNumber) {
+      const col = targetType === "weapon" ? "equipped_weapon_id" : "equipped_armor_id";
+      const uRow = db.prepare(`SELECT id FROM user_items WHERE id = ? AND item_id = ? AND serial_number = ?`).get(account[col], target, serialNumber);
+      if (uRow) {
+        db.prepare(`UPDATE accounts SET ${col} = NULL WHERE guild_id = ? AND user_id = ?`).run(guildId, userId);
+        return { success: true, item };
+      }
+      return { success: false, reason: "not_equipped" };
+    } else if (targetType === "weapon" || targetType === "armor") {
+      const column = targetType === "weapon" ? "equipped_weapon_id" : "equipped_armor_id";
+      if (!account[column]) return { success: false, reason: "nothing_equipped" };
+      
+      const uRow = db.prepare(`SELECT item_id FROM user_items WHERE id = ?`).get(account[column]);
+      const uItem = uRow ? ITEMS[uRow.item_id] : null;
+
+      db.prepare(`UPDATE accounts SET ${column} = NULL WHERE guild_id = ? AND user_id = ?`).run(guildId, userId);
+      return { success: true, item: uItem };
     }
 
-    db.prepare(`UPDATE accounts SET ${column} = NULL WHERE guild_id = ? AND user_id = ?`).run(guildId, userId);
-
-    return { success: true };
+    return { success: false, reason: "invalid_type" };
   }).immediate();
 }

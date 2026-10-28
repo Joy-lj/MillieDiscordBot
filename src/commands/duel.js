@@ -11,8 +11,8 @@ import db from "../database/connection.js";
 import {
   getUserCombatStats,
   getUserInventory,
-  equipItemInstance,
-  unequipItem,
+  equipItemBySerial,
+  unequipItemBySerial,
   ITEMS,
 } from "../database/items.js";
 
@@ -22,7 +22,7 @@ export async function duelCommand(message) {
   const betAmount = parseInt(args[2], 10);
 
   if (!targetUser) {
-    return message.reply("Please mention a user to duel! Example: `!duel @username 100`");
+    return message.reply("Please mention a user to duel! Example: `!duel @username 100` drop");
   }
   if (targetUser.bot) {
     return message.reply("You cannot duel a bot!");
@@ -161,7 +161,7 @@ async function startLobbyPhase(duelMessage, guildId, challenger, opponent, betAm
       options.push(
         new StringSelectMenuOptionBuilder()
           .setLabel(`${item.name} #${row.serial_number} (+${item.stat} ${statType}) ${isEquipped ? "[Equipped]" : ""}`)
-          .setValue(String(row.id))
+          .setValue(`${row.item_id}:${row.serial_number}`)
           .setDescription(`Type: ${item.type.toUpperCase()}`)
       );
     }
@@ -220,11 +220,12 @@ async function startLobbyPhase(duelMessage, guildId, challenger, opponent, betAm
       const selectedValue = i.values[0];
 
       if (selectedValue === "unequip_weapon") {
-        unequipItem(guildId, i.user.id, "weapon");
+        unequipItemBySerial(guildId, i.user.id, "weapon");
       } else if (selectedValue === "unequip_armor") {
-        unequipItem(guildId, i.user.id, "armor");
+        unequipItemBySerial(guildId, i.user.id, "armor");
       } else if (selectedValue !== "none") {
-        equipItemInstance(guildId, i.user.id, parseInt(selectedValue, 10));
+        const [itemId, serialNumStr] = selectedValue.split(":");
+        equipItemBySerial(guildId, i.user.id, itemId, parseInt(serialNumStr, 10));
       }
 
       return duelMessage.edit({

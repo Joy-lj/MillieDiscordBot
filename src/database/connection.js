@@ -14,6 +14,8 @@ export function initializeDatabase() {
       guild_id TEXT NOT NULL,
       user_id TEXT NOT NULL,
       balance INTEGER NOT NULL DEFAULT 0 CHECK (balance >= 0),
+      level INTEGER NOT NULL DEFAULT 1,
+      xp INTEGER NOT NULL DEFAULT 0,
       equipped_weapon_id INTEGER DEFAULT NULL,
       equipped_armor_id INTEGER DEFAULT NULL,
       last_daily_at INTEGER NOT NULL DEFAULT 0,
@@ -32,6 +34,7 @@ export function initializeDatabase() {
     )
   `);
 
+  // Migration checks for existing databases
   const accountColumns = db.prepare("PRAGMA table_info(accounts)").all();
 
   if (!accountColumns.some((col) => col.name === "equipped_weapon_id")) {
@@ -39,6 +42,12 @@ export function initializeDatabase() {
   }
   if (!accountColumns.some((col) => col.name === "equipped_armor_id")) {
     db.exec(`ALTER TABLE accounts ADD COLUMN equipped_armor_id INTEGER DEFAULT NULL`);
+  }
+  if (!accountColumns.some((col) => col.name === "level")) {
+    db.exec(`ALTER TABLE accounts ADD COLUMN level INTEGER NOT NULL DEFAULT 1`);
+  }
+  if (!accountColumns.some((col) => col.name === "xp")) {
+    db.exec(`ALTER TABLE accounts ADD COLUMN xp INTEGER NOT NULL DEFAULT 0`);
   }
 }
 

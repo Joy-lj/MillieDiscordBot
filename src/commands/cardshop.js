@@ -1,188 +1,255 @@
-import db from "../database/connection.js";
-import { EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
-import path from "path";
-import fs from "fs";
+import {
+  ActionRowBuilder,AttachmentBuilder,ButtonBuilder,ButtonStyle,EmbedBuilder,
+  MessageFlags,StringSelectMenuBuilder, 
+} from "discord.js";
+import { cardShop } from "../database/cardShop.js";
+import { economyConfig } from "../config/economy.js";
+import { groupLabels } from "../config/cardShop.js";
+import { CardShopError } from "../../services/cardShopStore.js";
+import { renderCard } from "../cards/renderCard.js";
+import { renderCardGrid } from "../cards/renderCardGrid.js";
 
-// Define your cards
-const CARDS = [
-  { id: "shadow_tabby", name: "🌑 Shadow Tabby", price: 500, rarity: "Epic", sellPrice: 250, baseName: "shadow_tabby" },
-  { id: "moonglow_tabby", name: "✨ Moonglow Tabby", price: 1000, rarity: "Legendary", sellPrice: 500, baseName: "moonglow_tabby" }
-];
 
-function findCardImage(baseName) {
-  const possibleDirs = [
-    path.join(process.cwd(), "cards"),
-    path.join(process.cwd(), "src", "cards"),
-    path.join(process.cwd(), "images")
-  ];
+const quiet={parse:[],repliedUser:false};
+const money=(n)=>`${n.toLocaleString("en-US")} ${economyConfig.currencyName}`;
+const clean=(s,max=80)=>String(s??"").slice(0,max).replace(/([\\`*_~|>])/g,"\\$1");
+const cid=(u,action,target="-",page=0)=>`cs:${u}:${action}:${target}:${page}`;
+const button=(u,label,action,target="-",page=0,style=ButtonStyle.Secondary,disabled=false)=>
+  new ButtonBuilder().setCustomId(cid(u,action,target,page)).setLabel(label).setStyle(style).setDisabled(disabled);
+const row=(...buttons)=>new ActionRowBuilder().addComponents(buttons);
+const payload=(embed,components=[])=>({embeds:[embed],components,allowedMentions:quiet,files:[]});
 
-  const extensions = [".png", ".jpg", ".jpeg", ".PNG", ".JPG", ".JPEG"];
+function slotText(slots) {
+  return slots.map((weights,i)=>{
+    const total=Object.values(weights).reduce((s,w)=>s+w,0);
+    return `**${i+1}.** ${Object.entries(weights).map(([group,w])=>
+      `${groupLabels[group]} ${(w/total*100).toFixed(1)}%`).join(" / ")}`;
+  }).join("\n");
+}
 
-  for (const dir of possibleDirs) {
-    if (!fs.existsSync(dir)) continue;
-    for (const ext of extensions) {
-      const fullPath = path.join(dir, `${baseName}${ext}`);
-      if (fs.existsSync(fullPath)) {
-        return { path: fullPath, filename: `${baseName}${ext}` };
-      }
+function shopView(user,page=0) {
+  const offers=cardShop.offers();
+  page=Math.max(0,Math.min(page,offers.length-1));
+  const pack=offers[page];
+  if(!pack) throw new CardShopError("No packs configured.");
+  const embed=new EmbedBuilder().setTitle(`🛍️ Card Shop — ${pack.name}`).setColor(pack.color)
+    .setDescription(`${pack.description}\n\nBuy 1: **${money(pack.price)}**\nBuy 5: **${money(pack.price*5)}**\nBuy 10: **${money(pack.price*10)}**\nUnopened sell-back: **${money(pack.sellPrice)} per pack**`)
+    .addFields({name:"Slot odds",value:slotText(pack.slots)},
+      {name:"Source sets",value:pack.setIds.join(", ")},
+      {name:"Availability",value:pack.ready?"Ready":clean(pack.reason,240)})
+    .setFooter({text:`Pack ${page+1}/${offers.length} • Special = all other TCGdex rarity labels • Custom virtual odds`});
+  return payload(embed,[
+    row(...[1,5,10].map((quantity)=>button(user,
+      `Buy ${quantity} · ${(pack.price*quantity).toLocaleString("en-US")}`,
+      "buy",`${pack.id}~${pack.quote??"unavailable"}~${quantity}`,0,ButtonStyle.Success,!pack.ready))),
+    row(
+    button(user,"Previous","shop","-",page-1,ButtonStyle.Secondary,page===0),
+    button(user,"Next","shop","-",page+1,ButtonStyle.Secondary,page===offers.length-1),
+    button(user,"My packs","packs"),button(user,"My cards","cards"),
+  )]);
+}
+
+function packsView(guild,user,page=0) {
+  const inventory=cardShop.listPacks(guild,user,page);
+  const embed=new EmbedBuilder().setTitle("🎒 Your Unopened Packs").setColor(0x39c995)
+    .setDescription(inventory.total?inventory.rows.map((pack,i)=>
+      `**${i+1}. ${clean(pack.snapshot.name)}** — sell for ${money(pack.snapshot.sellPrice)}`
+    ).join("\n"):"You don't have any unopened packs. Visit `!cardshop`.")
+    .setFooter({text:`${inventory.total} unopened • Page ${inventory.page+1}/${inventory.pages}`});
+  const components=[];
+  if(inventory.rows.length) components.push(new ActionRowBuilder().addComponents(
+    new StringSelectMenuBuilder().setCustomId(cid(user,"pick")).setPlaceholder("Select a pack to open or sell")
+      .addOptions(inventory.rows.map((pack,i)=>({label:`${i+1}. ${pack.snapshot.name}`.slice(0,100),
+        description:`${pack.snapshot.slots.length} cards • Sell for ${money(pack.snapshot.sellPrice)}`.slice(0,100),value:pack.id})))
+  ));
+  components.push(row(
+    button(user,"Previous","packs","-",inventory.page-1,ButtonStyle.Secondary,inventory.page===0),
+    button(user,"Next","packs","-",inventory.page+1,ButtonStyle.Secondary,inventory.page===inventory.pages-1),
+    button(user,"Shop","shop"),button(user,"My cards","cards"),
+  ));
+  return payload(embed,components);
+}
+
+function packView(guild,user,id) {
+  const {owned,count}=cardShop.packGroup(guild,user,id);
+  const pack=owned.snapshot;
+  const embed=new EmbedBuilder().setTitle(`📦 ${pack.name}`).setColor(pack.color??0x39c995)
+    .setDescription(`Opening consumes this pack and saves **${pack.slots.length} cards**.\n`+
+      `You own **${count}** unopened packs of this type.\n`+
+      `Open All opens only this type. Each pack keeps its own saved odds.\n`+
+      `Sell this one unopened pack for **${money(pack.sellPrice)}**.`)
+    .addFields({name:"Saved slot odds",value:slotText(pack.slots)})
+    .setFooter({text:`Pack ${id.slice(0,8)} • Odds were locked at purchase`});
+  return payload(embed,[row(
+    button(user,"Open 1","open",id,0,ButtonStyle.Success),
+    button(user,"Open 5","open",`${id}~5`,0,ButtonStyle.Success,count<5),
+    button(user,"Open 10","open",`${id}~10`,0,ButtonStyle.Success,count<10),
+    button(user,`Open all (${count})`,"open",`${id}~all`,0,ButtonStyle.Success),
+  ),row(
+    button(user,`Sell 1 · ${pack.sellPrice.toLocaleString("en-US")}`,"sell",id,0,ButtonStyle.Danger),
+    button(user,"My packs","packs"),
+  )]);
+}
+
+async function attachCard(data,item) {
+  try {
+    const png=await renderCard(item.card,item.copyId);
+    data.files=[new AttachmentBuilder(png,{name:"card.png"})];
+    data.embeds[0].setImage("attachment://card.png");
+  } catch(error) {
+    console.error("Card render failed; keeping awarded card:",error);
+    data.embeds[0].addFields({name:"Image unavailable",value:"Your card is saved. View it again with !cards."});
+  }
+  return data;
+}
+
+async function openingView(guild,user,openingId,page=0) {
+  const opened=cardShop.opening(guild,user,openingId);
+  page=Math.max(0,Math.min(page,opened.cards.length-1));
+  const item=opened.cards[page];
+  const summaryStart=Math.floor(page/10)*10;
+  const summary=opened.cards.slice(summaryStart,summaryStart+10);
+  const embed=new EmbedBuilder().setTitle(`✨ Opened ${opened.name}`).setColor(0xf4bd51)
+    .setDescription(`Opened **${opened.quantity??1} pack(s)** and saved **${opened.cards.length} cards**.\n\n`+
+      summary.map((pull,i)=>`${summaryStart+i===page?"▶":"•"} ${summaryStart+i+1}. **${clean(pull.card.name,40)}** — ${clean(pull.card.rarity,25)}`).join("\n"))
+    .setFooter({text:`Pull ${page+1}/${opened.cards.length} • All cards are already saved to your collection`});
+  const data=payload(embed,[row(
+    button(user,"Previous card","reveal",openingId,page-1,ButtonStyle.Secondary,page===0),
+    button(user,"Next card","reveal",openingId,page+1,ButtonStyle.Secondary,page===opened.cards.length-1),
+    button(user,"My packs","packs"),button(user,"My cards","cards"),
+  )]);
+  return attachCard(data,item);
+}
+
+async function cardsView(guild,user,page=0) {
+  const collection=cardShop.listCards(guild,user,page);
+  const first=collection.page*collection.pageSize+1;
+  const last=first+collection.items.length-1;
+  const embed=new EmbedBuilder().setTitle("🃏 Your Card Collection").setColor(0x63acff)
+    .setDescription(collection.total
+      ? `Showing **${first}–${last}** of **${collection.total}** cards.\n`+
+        "Select a numbered card below to see its full image and Copy ID."
+      : "No cards yet. Open a pack with `!packs`.")
+    .setFooter({text:`Page ${collection.page+1}/${collection.pages} • Up to 50 cards per page`});
+  const components=[];
+  for(let offset=0;offset<collection.items.length;offset+=25) {
+    const choices=collection.items.slice(offset,offset+25);
+    components.push(new ActionRowBuilder().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId(cid(user,"cardpick",String(offset/25),collection.page))
+        .setPlaceholder(`View card ${first+offset}–${first+offset+choices.length-1}`)
+        .addOptions(choices.map((item,i)=>({
+          label:`${first+offset+i}. ${item.card.name}`.slice(0,100),
+          description:`${item.card.rarity} • ${item.card.set?.name??"Unknown set"} • ${item.copyId.slice(0,8)}`.slice(0,100),
+          value:item.copyId,
+        })))
+    ));
+  }
+  components.push(row(
+    button(user,"Previous page","cards","-",collection.page-1,ButtonStyle.Secondary,collection.page===0),
+    button(user,"Next page","cards","-",collection.page+1,ButtonStyle.Secondary,collection.page===collection.pages-1),
+    button(user,"My packs","packs"),button(user,"Shop","shop"),
+  ));
+  const data=payload(embed,components);
+  if(collection.items.length) {
+    try {
+      const grid=await renderCardGrid(collection.items,{startNumber:first});
+      data.files=[new AttachmentBuilder(grid.image,{name:"collection.jpg"})];
+      embed.setImage("attachment://collection.jpg");
+      if(grid.missing) embed.addFields({name:"Some artwork is unavailable",value:
+        `${grid.missing} thumbnail(s) could not load. The numbered cards are still selectable below.`});
+    } catch(error) {
+      console.error("Collection grid failed:",error);
+      embed.addFields({name:"Grid unavailable",value:"Use the dropdowns to view individual cards. Your collection is saved."});
     }
   }
-  return null;
+  return data;
+}
+
+async function singleCardView(guild,user,copyId,collectionPage=0) {
+  const item=cardShop.ownedCard(guild,user,copyId);
+  const embed=new EmbedBuilder().setTitle(`🃏 ${clean(item.card.name)}`).setColor(0x63acff)
+    .setDescription(`**${clean(item.card.rarity)}** • ${clean(item.card.set?.name)}\nCopy ID: \`${item.copyId}\``)
+    .setFooter({text:"Select Back to collection to return to your 50-card page"});
+  const data=payload(embed,[row(
+    button(user,"Back to collection","cards","-",collectionPage),
+    button(user,"My packs","packs"),button(user,"Shop","shop"),
+  )]);
+  return attachCard(data,item);
 }
 
 export async function cardShopCommand(message) {
-  let currentIndex = 0;
-
-  // Helper to generate the message payload for a given card index
-  const generateShopPayload = (index) => {
-    const card = CARDS[index];
-    const cardImage = findCardImage(card.baseName);
-
-    const embed = new EmbedBuilder()
-      .setColor("#9b59b6")
-      .setTitle("🐾 Cat Card Shop")
-      .setDescription(`Viewing card **${index + 1}** of **${CARDS.length}**\n\nUse \`!buycard <card_id>\` to purchase!`)
-      .addFields(
-        { name: `Card Name`, value: `${card.name} (${card.rarity})`, inline: false },
-        { name: `Price`, value: `**${card.price} coins**`, inline: true },
-        { name: `Sell Value`, value: `**${card.sellPrice} coins**`, inline: true },
-        { name: `ID`, value: `\`${card.id}\``, inline: true }
-      )
-      .setFooter({ text: `Requested by ${message.author.username}` });
-
-    let files = [];
-    if (cardImage) {
-      const attachment = new AttachmentBuilder(cardImage.path, { name: cardImage.filename });
-      embed.setImage(`attachment://${cardImage.filename}`);
-      files.push(attachment);
-    }
-
-    // Navigation buttons
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("prev_card")
-        .setLabel("◀ Prev")
-        .setStyle(ButtonStyle.Primary)
-        .setDisabled(CARDS.length <= 1),
-      new ButtonBuilder()
-        .setCustomId("next_card")
-        .setLabel("Next ▶")
-        .setStyle(ButtonStyle.Primary)
-        .setDisabled(CARDS.length <= 1)
-    );
-
-    return { embeds: [embed], files: files, components: [row] };
-  };
-
-  const initialMessage = await message.channel.send(generateShopPayload(currentIndex));
-
-  // Collector that listens for button clicks for 60 seconds
-  const collector = initialMessage.createMessageComponentCollector({
-    filter: (i) => i.user.id === message.author.id,
-    time: 60000 
-  });
-
-  collector.on("collect", async (interaction) => {
-    if (interaction.customId === "prev_card") {
-      currentIndex = (currentIndex - 1 + CARDS.length) % CARDS.length;
-    } else if (interaction.customId === "next_card") {
-      currentIndex = (currentIndex + 1) % CARDS.length;
-    }
-
-    await interaction.update(generateShopPayload(currentIndex));
-  });
-
-  collector.on("end", async () => {
-    // Disable buttons when timer runs out
-    const disabledRow = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId("prev_card").setLabel("◀ Prev").setStyle(ButtonStyle.Primary).setDisabled(true),
-      new ButtonBuilder().setCustomId("next_card").setLabel("Next ▶").setStyle(ButtonStyle.Primary).setDisabled(true)
-    );
-    try {
-      await initialMessage.edit({ components: [disabledRow] });
-    } catch (e) {
-      // Message might have been deleted
-    }
-  });
+  if(!message.inGuild() || message.author.bot) return;
+  await message.reply(shopView(message.author.id));
+}
+export async function packsCommand(message) {
+  if(!message.inGuild() || message.author.bot) return;
+  await message.reply(packsView(message.guildId,message.author.id));
+}
+export async function cardsCommand(message) {
+  if(!message.inGuild() || message.author.bot) return;
+  const loading=await message.reply({content:"Loading your card collection…",allowedMentions:quiet});
+  try {
+    await loading.edit({...await cardsView(message.guildId,message.author.id),content:null,attachments:[]});
+  } catch(error) {
+    console.error("Collection failed:",error);
+    await loading.edit({content:"Could not load your collection. Try !cards again.",embeds:[],components:[]});
+  }
 }
 
-export async function buyCardCommand(message) {
-  const args = message.content.trim().split(/\s+/);
-  const cardId = args[1]?.toLowerCase();
-
-  if (!cardId) {
-    return message.reply("❌ Please specify a card to buy! Example: `!buycard shadow_tabby`");
+// Register this once in your existing InteractionCreate handler. No collectors.
+export async function handleCardShopInteraction(interaction) {
+  if(!interaction.isMessageComponent() || !interaction.customId.startsWith("cs:")) return false;
+  const [,owner,action,target,pageText]=interaction.customId.split(":");
+  if(!interaction.inGuild() || interaction.user.id!==owner) {
+    await interaction.reply({content:"These controls belong to another player. Run !cardshop or !packs yourself.",flags:MessageFlags.Ephemeral});
+    return true;
   }
-
-  const card = CARDS.find(c => c.id === cardId);
-  if (!card) {
-    return message.reply("❌ That card doesn't exist! Check `!cardshop` to see available cards.");
+  const page=/^-?\d+$/.test(pageText??"")?Number(pageText):0;
+  if(!Number.isSafeInteger(page) || Math.abs(page)>1_000_000) return true;
+  const navigation=["shop","packs","pick","cards","cardpick","reveal"].includes(action);
+  if(navigation) await interaction.deferUpdate();
+  else await interaction.deferReply({flags:MessageFlags.Ephemeral});
+  const guild=interaction.guildId,user=interaction.user.id;
+  let committed=false;
+  try {
+    let data;
+    if(action==="shop") data=shopView(user,page);
+    else if(action==="packs") data=packsView(guild,user,page);
+    else if(action==="pick" && interaction.isStringSelectMenu()) data=packView(guild,user,interaction.values[0]);
+    else if(action==="cards") data=await cardsView(guild,user,page);
+    else if(action==="cardpick" && interaction.isStringSelectMenu()) {
+      data=await singleCardView(guild,user,interaction.values[0],page);
+    }
+    else if(action==="reveal") data=await openingView(guild,user,target,page);
+    else if(action==="buy") {
+      const [offerId,quote,quantityText="1"]=target.split("~");
+      if (!quote) throw new CardShopError("Refresh !cardshop before buying.");
+      const quantity=Number(quantityText);
+      const receipt=cardShop.buy(guild,user,offerId,interaction.id,quote,quantity); committed=true;
+      data=packView(guild,user,receipt.packId);
+      const details=data.embeds[0].data.description;
+      data.embeds[0].setDescription(
+        `✅ Bought **${quantity} × ${clean(receipt.name)}** for **${money(receipt.price)}**.\n`+
+        `Balance: **${money(receipt.balance)}**.\n\n${details}`
+      );
+    } else if(action==="open") {
+      const [packId,countText="1"]=target.split("~");
+      const quantity=countText==="all"?"all":Number(countText);
+      cardShop.openMany(guild,user,packId,interaction.id,quantity); committed=true;
+      data=await openingView(guild,user,interaction.id);
+    } else if(action==="sell") {
+      const receipt=cardShop.sell(guild,user,target,interaction.id); committed=true;
+      data=payload(new EmbedBuilder().setTitle("💰 Pack Sold").setColor(0x39c995)
+        .setDescription(`Sold **${receipt.name}** for **${money(receipt.price)}**.\nBalance: **${money(receipt.balance)}**.`),
+        [row(button(user,"My packs","packs"),button(user,"Shop","shop"))]);
+    } else throw new CardShopError("Unknown control. Run !cardshop again.");
+    await interaction.editReply({...data,attachments:[]});
+  } catch(error) {
+    console.error("Cardshop interaction failed:",error);
+    const text=committed?"The action completed, but the display failed. Check !packs or !cards. It was not repeated or refunded.":
+      error instanceof CardShopError?error.message:"The action failed. Refresh !packs or check the bot log.";
+    await interaction.editReply({content:text,embeds:[],components:[],attachments:[]}).catch(console.error);
   }
-
-  const guildId = message.guild.id;
-  const userId = message.author.id;
-
-  let account = db.prepare("SELECT balance FROM accounts WHERE guild_id = ? AND user_id = ?").get(guildId, userId);
-  
-  if (!account || account.balance < card.price) {
-    const currentBal = account ? account.balance : 0;
-    return message.reply(`❌ You need **${card.price}** coins, but you only have **${currentBal}** coins.`);
-  }
-
-  const existingCard = db.prepare("SELECT 1 FROM user_cards WHERE guild_id = ? AND user_id = ? AND card_id = ?").get(guildId, userId, card.id);
-  if (existingCard) {
-    return message.reply(`❌ You already own the **${card.name}** card!`);
-  }
-
-  const transaction = db.transaction(() => {
-    db.prepare("UPDATE accounts SET balance = balance - ? WHERE guild_id = ? AND user_id = ?").run(card.price, guildId, userId);
-    db.prepare("INSERT INTO user_cards (guild_id, user_id, card_id) VALUES (?, ?, ?)").run(guildId, userId, card.id);
-  });
-
-  transaction();
-
-  const cardImage = findCardImage(card.baseName);
-  let files = [];
-  if (cardImage) {
-    files.push(new AttachmentBuilder(cardImage.path));
-  }
-
-  return message.reply({
-    content: `🎉 Success! You purchased the **${card.name}** card for **${card.price}** coins!`,
-    files: files
-  });
-}
-
-export async function sellCardCommand(message) {
-  const args = message.content.trim().split(/\s+/);
-  const cardId = args[1]?.toLowerCase();
-
-  if (!cardId) {
-    return message.reply("❌ Please specify which card to sell! Example: `!sellcard shadow_tabby`");
-  }
-
-  const card = CARDS.find(c => c.id === cardId);
-  if (!card) {
-    return message.reply("❌ That card doesn't exist!");
-  }
-
-  const guildId = message.guild.id;
-  const userId = message.author.id;
-
-  const ownedCard = db.prepare("SELECT 1 FROM user_cards WHERE guild_id = ? AND user_id = ? AND card_id = ?").get(guildId, userId, card.id);
-  
-  if (!ownedCard) {
-    return message.reply(`❌ You don't own the **${card.name}** card to sell!`);
-  }
-
-  const sellValue = card.sellPrice;
-
-  const transaction = db.transaction(() => {
-    db.prepare("DELETE FROM user_cards WHERE guild_id = ? AND user_id = ? AND card_id = ?").run(guildId, userId, card.id);
-    db.prepare("UPDATE accounts SET balance = balance + ? WHERE guild_id = ? AND user_id = ?").run(sellValue, guildId, userId);
-  });
-
-  transaction();
-
-  return message.reply(`💰 Success! You sold your **${card.name}** card for **${sellValue}** coins.`);
+  return true;
 }
