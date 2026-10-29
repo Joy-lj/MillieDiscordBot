@@ -97,7 +97,7 @@ export const fishingConfig = {
     {
       id: "shark",
       name: "Kraken Shark",
-      emoji: 🦈,
+      emoji: "🦈",
       rarity: "Legendary",
       weight: 7, // 0.07%
       sellValue: 45000,
