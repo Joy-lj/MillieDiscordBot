@@ -1,7 +1,7 @@
 import { EmbedBuilder } from "discord.js";
 import { buyPetFood, getPetFood } from "../database/pets.js";
 
-const FOOD_COST = 50; // Cost in Millie Cookies
+const FOOD_COST = 5000; // Cost in Millie Cookies
 
 export async function petShopCommand(message) {
   const embed = new EmbedBuilder()

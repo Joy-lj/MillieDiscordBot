@@ -83,7 +83,7 @@ Pets
 - Can pick out of three 
     - Dog (Increases chances to get better work) ✅
     - Cat (Increases daily) ✅
-    - Bird (Lower fish cooldown)
+    - Bird (Lower fish cooldown) ✅
 - Pet shop
     - Buy food to feed pet to evolve it ✅
 

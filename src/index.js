@@ -188,9 +188,9 @@ client.on(Events.MessageCreate, async (message) => {
         if (xpResult.newLevel === 5) {
           roleIdToAssign = "1565118264793628692";
         } else if (xpResult.newLevel === 10) {
-          roleIdToAssign = "YOUR_LEVEL_10_ROLE_ID";
+          roleIdToAssign = "1565503488681836554";
         } else if (xpResult.newLevel === 15) {
-          roleIdToAssign = "YOUR_LEVEL_15_ROLE_ID";
+          roleIdToAssign = "1565503667723837470";
         }
         // You can add more thresholds or map every multiple of 5 dynamically!
 
