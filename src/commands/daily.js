@@ -5,20 +5,18 @@ export async function dailyCommand(message) {
   if (!message.inGuild()) return;
 
   const result = claimDaily(message.guildId, message.author.id);
+  const { currencyName, currencyEmoji } = economyConfig;
 
   if (!result.success) {
-    // Discord timestamps use seconds, rather than milliseconds.
     const timestamp = Math.ceil(result.nextClaimAt / 1000);
-
-    await message.reply(
-      `⏳ You've already claimed your daily reward! Try again <t:${timestamp}:R>.`
-    );
-
-    return;
+    return message.reply(`⏳ You already claimed your daily reward! Claim again <t:${timestamp}:R>.`);
   }
 
-  await message.reply(
-    `🎁 You claimed **${result.reward} ${economyConfig.currencyName}**!\n` +
-    `${economyConfig.currencyEmoji} Your balance is now **${result.balance.toLocaleString("en-US")} ${economyConfig.currencyName}**.`
-  );
+  let replyText = `🎁 You claimed your daily reward and received **${result.reward} ${currencyName}**!`;
+  if (result.dogMultiplierMessage) {
+    replyText += result.dogMultiplierMessage;
+  }
+  replyText += `\nYour balance is now **${result.balance.toLocaleString("en-US")} ${currencyName}** ${currencyEmoji}.`;
+
+  await message.reply(replyText);
 }

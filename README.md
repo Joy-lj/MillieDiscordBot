@@ -37,7 +37,7 @@ Duels ✅
 - Inventory ✅
 - Equip item ✅
 
-Brawl
+Brawl (maybe)
 - Enter brawl for cookies
 - Can accept or deny
 
@@ -69,16 +69,33 @@ Level System
 - Show level
 
 
+Fishing
+- Every few minutes
+- 2% chance to get big fish reward
+
+Trivia
+- Every other hour
+- All users can answer, first one that answers right wins the prize
+
+Pets
+- Everyone can claim a pet
+- Evolves by feeding it
+- Can pick out of three 
+    - Dog (Increases chances to get better work)
+    - Cat (Increases daily)
+    - Bird (Increases fishing somehow)
+- Pet shop
+    - Buy food to feed pet to evolve it
+
+
 Bugs to fix
 - adminxp is not working
 - still need to figure out assigning roles based on level
 
 
 🏆 Server Economy Leaderboard
-🥇 @gxld — 1,932 Millie Cookies
-🥈 @joy — 565 Millie Cookies
-🥉 @vic — 42 Millie Cookies
-4. @asiandudethatlifts — 0 Millie Cookies
+🥇 @joy — 2,595 Millie Cookies
+🥈 @gxld — 2,109 Millie Cookies
+🥉 @asiandudethatlifts — 2,000 Millie Cookies
+4. @vic — 2,000 Millie Cookies
 
-
- --no-fund --no-audit; fi && exec node ${STARTUP_FILE}

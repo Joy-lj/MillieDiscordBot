@@ -1,4 +1,6 @@
 import db from "./connection.js";
+import { economyConfig } from "../config/economy.js";
+import { workConfig } from "../config/work.js";
 
 export function getBalance(guildId, userId) {
   // Create the account if it doesn't exist.
@@ -18,8 +20,8 @@ export function getBalance(guildId, userId) {
 }
 
 export function claimDaily(guildId, userId) {
-  const reward = 100;
-  const cooldown = 24 * 60 * 60 * 1000;
+  const baseReward = economyConfig.dailyReward;
+  const cooldown = economyConfig.dailyCooldown;
 
   const claim = db.transaction(() => {
     const now = Date.now();
@@ -47,6 +49,23 @@ export function claimDaily(guildId, userId) {
       };
     }
 
+    const pet = db.prepare(`
+      SELECT pet_type, stage FROM pets WHERE guild_id = ? AND user_id = ?
+    `).get(guildId, userId);
+
+    let reward = baseReward;
+    let dogMultiplierMessage = "";
+
+    if (pet && pet.pet_type === "dog") {
+      if (pet.stage === 2) {
+        reward = Math.floor(baseReward * 1.5);
+        dogMultiplierMessage = " (🐶 Dog Stage 2 Bonus: +50%)";
+      } else if (pet.stage === 3) {
+        reward = baseReward * 2;
+        dogMultiplierMessage = " (🐶 Loyal Hound Max Bonus: +100%)";
+      }
+    }
+
     // Award coins and save the claim time together.
     db.prepare(
       `UPDATE accounts
@@ -58,6 +77,7 @@ export function claimDaily(guildId, userId) {
       success: true,
       reward,
       balance: account.balance + reward,
+      dogMultiplierMessage,
     };
   });
 
@@ -107,40 +127,8 @@ export function giveCoins(guildId, userId, amount) {
 }
 
 export function claimWork(guildId, userId) {
-  const cooldown = 2 * 60 * 60 * 1000;
-
-  const outcomes = [
-    {
-      weight: 50,
-      min: 10,
-      max: 40,
-      message: "You scanned tickets at the festival entrance.",
-    },
-    {
-      weight: 25,
-      min: 40,
-      max: 70,
-      message: "You scooped Millie's litterbox and cleaned the cat tree.",
-    },
-    {
-      weight: 15,
-      min: 70,
-      max: 120,
-      message: "You caught a large Bluefin Tuna!",
-    },
-    {
-      weight: 5,
-      min: 150,
-      max: 250,
-      message: "You saved a cat from a tree and became a local hero!",
-    },
-    {
-      weight: 5,
-      min: 0,
-      max: 0,
-      message: "You failed to find any work today. Better luck next time!",
-    }
-  ];
+  const outcomes = workConfig.outcomes;
+  const cooldown = workConfig.workCooldown;
 
   const work = db.transaction(() => {
     const now = Date.now();
@@ -162,6 +150,27 @@ export function claimWork(guildId, userId) {
 
     if (account.last_work_at !== 0 && now < nextWorkAt) {
       return { success: false, reason: "cooldown", nextWorkAt };
+    }
+
+    let outcomes = JSON.parse(JSON.stringify(workConfig.outcomes));
+
+    // Check cat pet evolution stage for work luck bonuses
+    const pet = db.prepare(`
+      SELECT pet_type, stage FROM pets WHERE guild_id = ? AND user_id = ?
+    `).get(guildId, userId);
+
+    let catLuckMessage = "";
+    if (pet && pet.pet_type === "cat") {
+      if (pet.stage === 2) {
+        outcomes[0].weight = 40;
+        outcomes[4].weight = 2;
+        catLuckMessage = " 🐱 *(Stage 2 Cat sharpens your instincts!)*";
+      } else if (pet.stage === 3) {
+        outcomes[0].weight = 25;
+        outcomes[1].weight = 35;
+        outcomes[4].weight = 0;
+        catLuckMessage = " 🐱 *(Max Stage Cat grants absolute work mastery - no fails!)*";
+      }
     }
 
     // Choose an outcome using its weight.

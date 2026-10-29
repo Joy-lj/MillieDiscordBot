@@ -26,6 +26,18 @@ import { addXp } from "./database/accounts.js";
 import { adminXpCommand } from "./commands/adminXp.js"; 
 import { cardShopCommand, packsCommand, cardsCommand, handleCardShopInteraction } from "./commands/cardShop.js";
 import {rpsCommand} from "./commands/rps.js";
+import { initializeFishing } from "./database/fishing.js";
+import {
+  fishCommand,
+  fishBagCommand,
+  handleFishingInteraction,
+} from "./commands/fishing.js";
+import { initializePets } from "./database/pets.js";
+import { claimPetCommand } from "./commands/claimpet.js";
+import { petCommand } from "./commands/pet.js";
+import { petShopCommand, buyFoodCommand } from "./commands/petshop.js";
+import { feedPetCommand } from "./commands/feedpet.js";
+
 
 // Choose which Discord events the bot can receive.
 const client = new Client({
@@ -37,6 +49,7 @@ const client = new Client({
 });
 
 // Runs once the bot successfully connects.
+// MESSAGE CREATE
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot || !message.inGuild()) return;
 
@@ -45,6 +58,13 @@ client.on(Events.MessageCreate, async (message) => {
     .trim()
     .split(/\s+/)[0]
     .toLowerCase();
+
+  const fishingCommand = message.content.trim().split(/\s+/)[0].toLowerCase();
+    if (fishingCommand === "!fish") {
+      await fishCommand(message);
+    } else if (fishingCommand === "!fishbag") {
+      await fishBagCommand(message);
+    }
 
   if (cardCommand === "!cardshop") {
     await cardShopCommand(message);
@@ -187,16 +207,34 @@ client.on(Events.MessageCreate, async (message) => {
       message.channel.send(levelUpText).catch(() => {});
     }
 
+    if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!claimpet") {
+      await claimPetCommand(message);
+    }
+    if (["!pet", "!mypet"].includes(message.content.trim().split(/\s+/)[0].toLowerCase())) {
+      await petCommand(message);
+    }
+    if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!petshop") {
+      await petShopCommand(message);
+    }
+    if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!buyfood") {
+      await buyFoodCommand(message);
+    }
+    if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!feedpet") {
+      await feedPetCommand(message);
+    }
+
   } catch (error) {
     console.error("Command failed:", error);
   }
-});
+}); // END OF MESSAGE CREATE BLOCK
 
 // Log in using the token from .env.
 async function startBot() {
   initializeDatabase();
+  initializeFishing();
   initializeBetting();
   initializeCardShop();
+  initializePets(); 
   await client.login(process.env.TOKEN);
 }
 
@@ -206,7 +244,7 @@ startBot().catch(console.error);
 client.on("interactionCreate", async (interaction) => {
   // If an interaction isn't handled by any active message component collector,
   // ensure it doesn't leave Discord waiting indefinitely.
+  if (await handleFishingInteraction(interaction)) return;
   if (await handleCardShopInteraction(interaction)) return;
   if (!interaction.isButton() || !interaction.isStringSelectMenu()) return;
-  
 });
