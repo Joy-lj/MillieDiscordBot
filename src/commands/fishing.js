@@ -4,6 +4,7 @@ import {
 import { fishing } from "../database/fishing.js";
 import { FishingError } from "../../services/fishingStore.js";
 import { economyConfig } from "../config/economy.js";
+import db from "../database/connection.js"
 
 const quiet={parse:[],repliedUser:false};
 const money=(n)=>`${n.toLocaleString("en-US")} ${economyConfig.currencyName}`;
