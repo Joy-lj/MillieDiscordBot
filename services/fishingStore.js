@@ -83,7 +83,21 @@ export function createFishingStore(db,config=fishingConfig,{rng=randomInt,clock=
       if(existing?.quantity>=1_000_000) fail("That fish stack is full. Sell some fish first.");
       db.prepare(`INSERT INTO fishing_bag(guild_id,user_id,item_key,payload,quantity) VALUES(?,?,?,?,1)
         ON CONFLICT(guild_id,user_id,item_key) DO UPDATE SET quantity=quantity+1`).run(guild,user,itemKey,payload);
-      const nextCastAt=now+config.cooldownMs;
+      
+      let effectiveCooldownMs = config.cooldownMs;
+      const pet = db.prepare(`
+        SELECT pet_type, stage FROM pets WHERE guild_id = ? AND user_id = ?
+      `).get(guild, user);
+
+      if (pet && pet.pet_type === "bird") {
+        if (pet.stage === 2) {
+          effectiveCooldownMs -= 30 * 1000; 
+        } else if (pet.stage === 3) {
+          effectiveCooldownMs -= 60 * 1000; 
+        }
+      }
+      
+      const nextCastAt=now+effectiveCooldownMs;
       db.prepare(`INSERT INTO fishing_cooldowns(guild_id,user_id,next_cast_at) VALUES(?,?,?)
         ON CONFLICT(guild_id,user_id) DO UPDATE SET next_cast_at=excluded.next_cast_at`).run(guild,user,nextCastAt);
       return {caught:true,fish,itemKey,nextCastAt};

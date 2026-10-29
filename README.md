@@ -66,36 +66,30 @@ Level System
 - Keeping track of xp through player id account ✅
 - Reward milestones every 5 levels ✅
     - For now currency ✅
-- Show level
+- Roles based on level
 
 
 Fishing
-- Every few minutes
-- 2% chance to get big fish reward
+- Every few minutes ✅
+- 2% chance to get big fish reward ✅
 
 Trivia
 - Every other hour
 - All users can answer, first one that answers right wins the prize
 
 Pets
-- Everyone can claim a pet
-- Evolves by feeding it
+- Everyone can claim a pet ✅
+- Evolves by feeding it ✅
 - Can pick out of three 
-    - Dog (Increases chances to get better work)
-    - Cat (Increases daily)
-    - Bird (Increases fishing somehow)
+    - Dog (Increases chances to get better work) ✅
+    - Cat (Increases daily) ✅
+    - Bird (Lower fish cooldown)
 - Pet shop
-    - Buy food to feed pet to evolve it
+    - Buy food to feed pet to evolve it ✅
 
 
 Bugs to fix
 - adminxp is not working
-- still need to figure out assigning roles based on level
+- need to create more roles
 
-
-🏆 Server Economy Leaderboard
-🥇 @joy — 2,595 Millie Cookies
-🥈 @gxld — 2,109 Millie Cookies
-🥉 @asiandudethatlifts — 2,000 Millie Cookies
-4. @vic — 2,000 Millie Cookies
 

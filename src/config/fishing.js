@@ -44,7 +44,7 @@ export const fishingConfig = {
       emoji: "🐠",
       rarity: "Rare",
       weight: 800, // 8%
-      sellValue: 1500,
+      sellValue: 1000,
     },
     {
       id: "trout",
@@ -52,7 +52,7 @@ export const fishingConfig = {
       emoji: "🐟",
       rarity: "Rare",
       weight: 500, // 5%
-      sellValue: 2000,
+      sellValue: 1500,
     },
     {
       id: "salmon",
@@ -60,7 +60,7 @@ export const fishingConfig = {
       emoji: "🎏",
       rarity: "Epic",
       weight: 350, // 3.5%
-      sellValue: 3500,
+      sellValue: 2500,
     },
     {
       id: "koi",
@@ -68,7 +68,7 @@ export const fishingConfig = {
       emoji: "🐟",
       rarity: "Epic",
       weight: 220, // 2.2%
-      sellValue: 7500,
+      sellValue: 4500,
     },
     {
       id: "swordfish",
@@ -76,7 +76,7 @@ export const fishingConfig = {
       emoji: "🐠",
       rarity: "Epic",
       weight: 130, // 1.3%
-      sellValue: 15000,
+      sellValue: 10000,
     },
     {
       id: "golden",
@@ -84,7 +84,7 @@ export const fishingConfig = {
       emoji: "✨",
       rarity: "Legendary",
       weight: 70, // 0.7%
-      sellValue: 25000,
+      sellValue: 20000,
     },
     {
       id: "moonray",
@@ -92,14 +92,22 @@ export const fishingConfig = {
       emoji: "🌙",
       rarity: "Legendary",
       weight: 20, // 0.2%
-      sellValue: 60000,
+      sellValue: 30000,
+    },
+    {
+      id: "shark",
+      name: "Kraken Shark",
+      emoji: 🦈,
+      rarity: "Legendary",
+      weight: 7, // 0.07%
+      sellValue: 45000,
     },
     {
       id: "dragon",
       name: "Ancient Dragonfish",
       emoji: "🐉",
       rarity: "Mythic",
-      weight: 10, // 0.1%
+      weight: 3, // 0.03%
       sellValue: 100000,
     },
   ],

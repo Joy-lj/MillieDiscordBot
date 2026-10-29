@@ -13,20 +13,52 @@ const btn=(owner,label,action,target="-",page=0,style=ButtonStyle.Secondary,disa
 const row=(...items)=>new ActionRowBuilder().addComponents(items);
 const panel=(embed,components=[])=>({embeds:[embed],components,allowedMentions:quiet});
 
-function castView(guild,user,requestId) {
-  const result=fishing.cast(guild,user,requestId);
-  const time=Math.ceil(result.nextCastAt/1000);
-  if(!result.caught) return panel(new EmbedBuilder().setTitle("🎣 Let the water settle").setColor(0x7f8c8d)
-    .setDescription(`You can fish again <t:${time}:R>.\nYour fish are waiting in \`!fishbag\`.`),
-    [row(btn(user,"Cast again","cast"),btn(user,"Fish bag","bag"))]);
-  const fish=result.fish;
-  const embed=new EmbedBuilder().setTitle(`${fish.emoji} You caught a ${fish.name}!`)
-    .setColor({Common:0x95a5a6,Uncommon:0x2ecc71,Rare:0x3498db,Epic:0x9b59b6,Legendary:0xf1c40f,Mythic:0xe74c3c}[fish.rarity]??0x3498db)
-    .setDescription(`Rarity: **${fish.rarity}**\nSale value: **${money(fish.sellValue)}**\n\n`+
-      `Added to your fish bag. Sell it to receive currency.\nNext cast: <t:${time}:R>.`)
-    .setFooter({text:"One fish per cast • Catching is free • Cooldown is saved across restarts"});
-  return panel(embed,[row(btn(user,"Cast again","cast"),btn(user,"Fish bag","bag"),
-    btn(user,`Sell 1 · ${fish.sellValue.toLocaleString("en-US")}`,"sellone",result.itemKey,0,ButtonStyle.Success))]);
+function castView(guild, user, requestId) {
+  const result = fishing.cast(guild, user, requestId);
+  const time = Math.ceil(result.nextCastAt / 1000);
+
+  if (!result.caught) {
+    let birdNotice = "";
+    
+    // Check if user has a bird pet to show a custom cooldown reduction message
+    const pet = db.prepare(`
+      SELECT pet_type, stage FROM pets WHERE guild_id = ? AND user_id = ?
+    `).get(guild, user);
+
+    if (pet && pet.pet_type === "bird") {
+      if (pet.stage === 2) {
+        birdNotice = "\n*(🐦 Stage 2 Bird reduced your fishing cooldown by 30 seconds!)*";
+      } else if (pet.stage === 3) {
+        birdNotice = "\n*(🐦 Max Stage Bird reduced your fishing cooldown by a full minute!)*";
+      }
+    }
+
+    return panel(
+      new EmbedBuilder()
+        .setTitle("🎣 Let the water settle")
+        .setColor(0x7f8c8d)
+        .setDescription(`You can fish again <t:${time}:R>.\nYour fish are waiting in \`!fishbag\`.${birdNotice}`),
+      [row(btn(user, "Cast again", "cast"), btn(user, "Fish bag", "bag"))]
+    );
+  }
+
+  const fish = result.fish;
+  const embed = new EmbedBuilder()
+    .setTitle(`${fish.emoji} You caught a ${fish.name}!`)
+    .setColor({ Common: 0x95a5a6, Uncommon: 0x2ecc71, Rare: 0x3498db, Epic: 0x9b59b6, Legendary: 0xf1c40f, Mythic: 0xe74c3c }[fish.rarity] ?? 0x3498db)
+    .setDescription(
+      `Rarity: **${fish.rarity}**\nSale value: **${money(fish.sellValue)}**\n\n` +
+      `Added to your fish bag. Sell it to receive currency.\nNext cast: <t:${time}:R>.`
+    )
+    .setFooter({ text: "One fish per cast • Catching is free • Cooldown is saved across restarts" });
+
+  return panel(embed, [
+    row(
+      btn(user, "Cast again", "cast"),
+      btn(user, "Fish bag", "bag"),
+      btn(user, `Sell 1 · ${fish.sellValue.toLocaleString("en-US")}`, "sellone", result.itemKey, 0, ButtonStyle.Success)
+    ),
+  ]);
 }
 
 function bagView(guild,user,page=0) {
