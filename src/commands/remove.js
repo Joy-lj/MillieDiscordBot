@@ -3,7 +3,7 @@ import { removeCoins } from "../database/accounts.js";
 import { economyConfig } from "../config/economy.js";
 
 export async function removeCommand(message) {
-  if (!message.inGuild()) return;
+  if (!message.inGuild() || message.author.bot) return;
 
   if (!message.member?.permissions.has(PermissionFlagsBits.Administrator)) {
     await message.reply("❌ Only administrators can use this command.");
@@ -34,12 +34,26 @@ export async function removeCommand(message) {
   }
 
   if (!Number.isSafeInteger(amount) || amount <= 0) {
-    await message.reply("❌ Enter a positive whole number within the safe limit.");
+    await message.reply(
+      "❌ Enter a positive whole number within the safe limit."
+    );
+    return;
+  }
+
+  let result;
+
+  try {
+    result = await removeCoins(message.guildId, target.id, amount);
+  } catch (error) {
+    console.error("Failed to remove coins:", error);
+
+    await message.reply(
+      "❌ Couldn't confirm the balance update. Check the balance and bot log before trying again."
+    );
     return;
   }
 
   const { currencyName, currencyEmoji } = economyConfig;
-  const result = removeCoins(message.guildId, target.id, amount);
 
   if (!result.success) {
     await message.reply(
@@ -48,10 +62,13 @@ export async function removeCommand(message) {
     return;
   }
 
+  const money = (value) =>
+    `${value.toLocaleString("en-US")} ${currencyName}`;
+
   await message.reply({
     content:
-      `✅ Removed **${amount.toLocaleString("en-US")} ${currencyName}** from <@${target.id}>.\n` +
-      `${currencyEmoji} Their balance is now **${result.balance.toLocaleString("en-US")} ${currencyName}**.`,
+      `✅ Removed **${money(amount)}** from <@${target.id}>.\n` +
+      `${currencyEmoji ?? ""} Their balance is now **${money(result.balance)}**.`,
     allowedMentions: { parse: [], repliedUser: false },
   });
 }
