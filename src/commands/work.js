@@ -4,7 +4,7 @@ import { economyConfig } from "../config/economy.js";
 export async function workCommand(message) {
   if (!message.inGuild()) return;
 
-  const result = claimWork(message.guildId, message.author.id);
+  const result = await claimWork(message.guildId, message.author.id);
   const { currencyName, currencyEmoji } = economyConfig;
 
   if (!result.success) {

@@ -23,9 +23,9 @@ import { hotColdCommand } from "./commands/hc.js";
 import { levelCommand } from "./commands/level.js";
 import { initializeCardShop } from "./database/cardShop.js";
 import { addXp } from "./database/accounts.js";
-import { adminXpCommand } from "./commands/adminXp.js"; 
+import { adminXpCommand } from "./commands/adminXp.js";
 import { cardShopCommand, packsCommand, cardsCommand, handleCardShopInteraction } from "./commands/cardShop.js";
-import {rpsCommand} from "./commands/rps.js";
+import { rpsCommand } from "./commands/rps.js";
 import { initializeFishing } from "./database/fishing.js";
 import {
   fishCommand,
@@ -55,24 +55,24 @@ client.on(Events.MessageCreate, async (message) => {
 
   try {
     const cardCommand = message.content
-    .trim()
-    .split(/\s+/)[0]
-    .toLowerCase();
+      .trim()
+      .split(/\s+/)[0]
+      .toLowerCase();
 
-  const fishingCommand = message.content.trim().split(/\s+/)[0].toLowerCase();
+    const fishingCommand = message.content.trim().split(/\s+/)[0].toLowerCase();
     if (fishingCommand === "!fish") {
       await fishCommand(message);
     } else if (fishingCommand === "!fishbag") {
       await fishBagCommand(message);
     }
 
-  if (cardCommand === "!cardshop") {
-    await cardShopCommand(message);
-  } else if (cardCommand === "!packs") {
-  await packsCommand(message);
-  } else if (cardCommand === "!cards") {
-    await cardsCommand(message);
-  }
+    if (cardCommand === "!cardshop") {
+      await cardShopCommand(message);
+    } else if (cardCommand === "!packs") {
+      await packsCommand(message);
+    } else if (cardCommand === "!cards") {
+      await cardsCommand(message);
+    }
     if (message.content.trim().toLowerCase() === "!balance" || message.content.trim().toLowerCase() === "!bal") {
       await balanceCommand(message);
     }
@@ -123,8 +123,8 @@ client.on(Events.MessageCreate, async (message) => {
       ["!fp", "!flowerpoker"].includes(
         message.content.trim().split(/\s+/)[0].toLowerCase()
       )
-      ) {
-        await flowerPokerCommand(message);
+    ) {
+      await flowerPokerCommand(message);
     }
     if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!equip") {
       await equipCommand(message);
@@ -164,8 +164,8 @@ client.on(Events.MessageCreate, async (message) => {
 
     if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!rps") {
       await rpsCommand(message);
-    } 
-  
+    }
+
 
     const xpGained = Math.floor(Math.random() * 11) + 15; // Random 15-25 XP
     const xpResult = addXp(message.guild.id, message.author.id, xpGained);
@@ -176,15 +176,15 @@ client.on(Events.MessageCreate, async (message) => {
       if (xpResult.rewardGiven > 0) {
         levelUpText += ` 💰 Milestone reward: **${xpResult.rewardGiven} cookies**!`;
       }
-      
+
       // --- AUTOMATIC ROLE ASSIGNMENT ---
       try {
         const member = message.member; // Get the guild member object
-        
+
         // Example: Assign a specific role ID based on their level milestone
         // Make sure to replace these placeholder strings with your actual Discord Role IDs!
         let roleIdToAssign = null;
-        
+
         if (xpResult.newLevel === 5) {
           roleIdToAssign = "1565118264793628692";
         } else if (xpResult.newLevel === 10) {
@@ -204,7 +204,7 @@ client.on(Events.MessageCreate, async (message) => {
 
       const primaryCommand = message.content.trim().split(/\s+/)[0].toLowerCase();
 
-      message.channel.send(levelUpText).catch(() => {});
+      message.channel.send(levelUpText).catch(() => { });
     }
 
     if (message.content.trim().split(/\s+/)[0].toLowerCase() === "!claimpet") {
@@ -230,11 +230,11 @@ client.on(Events.MessageCreate, async (message) => {
 
 // Log in using the token from .env.
 async function startBot() {
-  initializeDatabase();
-  initializeFishing();
-  initializeBetting();
-  initializeCardShop();
-  initializePets(); 
+  await initializeDatabase();
+  await initializeFishing();
+  await initializeBetting();
+  await initializeCardShop();
+  await initializePets();
   await client.login(process.env.TOKEN);
 }
 

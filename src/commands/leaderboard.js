@@ -6,7 +6,7 @@ import { economyConfig } from "../config/economy.js";
 export async function leaderboardCommand(message) {
   if (!message.inGuild()) return;
 
-  const accounts = getLeaderboard(message.guildId);
+  const accounts = await getLeaderboard(message.guildId);
 
   if (accounts.length === 0) {
     await message.reply(

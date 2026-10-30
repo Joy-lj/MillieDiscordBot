@@ -122,7 +122,7 @@ export async function flowerPokerCommand(message) {
     await Promise.all([message.author.id, opponent.id].map((id) =>
       message.guild.members.fetch({ user: id, force: true })));
     // BOTH deductions and BOTH wager records are one SQLite transaction.
-    match = reserveMatch(message.guildId, message.author.id, opponent.id, wager, message.id);
+    match = await Match(message.guildId, message.author.id, opponent.id, wager, message.id);
 
     const planted = new Set();
     const deadline = Date.now() + flowerPokerConfig.plantingMs;
@@ -163,7 +163,7 @@ export async function flowerPokerCommand(message) {
     const secondHand = plantHand();
     const comparison = compareHands(firstHand, secondHand);
     const winner = comparison === 0 ? null : comparison > 0 ? 0 : 1;
-    const result = settleMatch(match, winner);
+    const result = await settleMatch(match, winner);
     if (!result) throw new Error("This match was already settled.");
     settled = true;
 
@@ -178,19 +178,21 @@ export async function flowerPokerCommand(message) {
       .addFields(
         { name: names[0], value: showHand(message.guild, firstHand), inline: true },
         { name: names[1], value: showHand(message.guild, secondHand), inline: true },
-        { name: "Balances", value: match.players.map((id, i) =>
-          `<@${id}>: **${money(result.balances[i])}**`).join("\n") }
+        {
+          name: "Balances", value: match.players.map((id, i) =>
+            `<@${id}>: **${money(result.balances[i])}**`).join("\n")
+        }
       )
       .setFooter({
-  text: "Black or white = auto-loss • Both auto-lose = refund • Equal ranks tie",
-});
+        text: "Black or white = auto-loss • Both auto-lose = refund • Equal ranks tie",
+      });
     await prompt.edit({ content: "", embeds: [embed], components: [], allowedMentions: quiet });
   } catch (error) {
     console.error("Flower poker error:", error);
     let text;
     if (match && !settled) {
       try {
-        const refund = settleMatch(match, null);
+        const refund = await settleMatch(match, null);
         settled = true;
         text = refund ? "The game was interrupted. Both wagers were refunded."
           : "The game was already settled. Check your balance.";

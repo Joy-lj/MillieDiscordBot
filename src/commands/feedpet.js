@@ -1,7 +1,7 @@
 import { feedUserPet } from "../database/pets.js";
 
 export async function feedPetCommand(message) {
-  const result = feedUserPet(message.guild.id, message.author.id);
+  const result = await feedUserPet(message.guild.id, message.author.id);
 
   if (!result.success) {
     if (result.reason === "no_pet") {
@@ -17,7 +17,7 @@ export async function feedPetCommand(message) {
   }
 
   let replyText = `🍖 You fed your **${result.petType}**! (+25 XP, Total XP: ${result.xp}). Remaining food: ${result.remainingFood}`;
-  
+
   if (result.evolved) {
     replyText += `\n\n✨ **CONGRATULATIONS!** Your pet evolved to **Stage ${result.stage}**! 🎉`;
   }

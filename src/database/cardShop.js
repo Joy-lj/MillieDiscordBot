@@ -1,5 +1,14 @@
+// import db from "./connection.js";
+// import { createCardShopStore } from "../../services/cardShopStore.js";
+
+// export const cardShop = createCardShopStore(db);
+// export const initializeCardShop = () => cardShop.initialize();
+
 import db from "./connection.js";
 import { createCardShopStore } from "../../services/cardShopStore.js";
 
 export const cardShop = createCardShopStore(db);
-export const initializeCardShop = () => cardShop.initialize();
+
+export async function initializeCardShop() {
+    await cardShop.initialize();
+}

@@ -6,7 +6,7 @@ export async function inventoryCommand(message) {
   const userId = message.author.id;
 
   const stats = getUserCombatStats(guildId, userId);
-  const inventory = getUserInventory(guildId, userId);
+  const inventory = await getUserInventory(guildId, userId);
 
   const embed = new EmbedBuilder()
     .setColor(0x00ae86)
@@ -34,7 +34,7 @@ export async function inventoryCommand(message) {
         if (!item) return null;
         const statLabel = item.type === "weapon" ? "STR" : "DEF";
         const isEquipped = stats.equippedWeaponInstanceId === row.id || stats.equippedArmorInstanceId === row.id;
-        
+
         return `• **${item.name} #${row.serial_number}** (+${item.stat} ${statLabel}) ${isEquipped ? "✅ [Equipped]" : ""} — \`${row.item_id}\``;
       })
       .filter(Boolean)

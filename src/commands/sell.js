@@ -11,7 +11,7 @@ export async function sellCommand(message) {
     );
   }
 
-  const result = sellItemBySerial(
+  const result = await sellItemBySerial(
     message.guild.id,
     message.author.id,
     itemId,

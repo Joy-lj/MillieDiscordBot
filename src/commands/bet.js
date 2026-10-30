@@ -27,7 +27,7 @@ export async function betCommand(message) {
     return;
   }
 
-  const bet = startBet(
+  const bet = await startBet(
     message.guildId,
     message.author.id,
     Number(amountText)
@@ -44,7 +44,7 @@ export async function betCommand(message) {
     console.error("Bet game failed:", error);
 
     // Refund only if the game hasn't already settled.
-    const refundedBalance = settleBet(bet.id, bet.wager);
+    const refundedBalance = await settleBet(bet.id, bet.wager);
 
     if (refundedBalance !== null) {
       await message.reply(

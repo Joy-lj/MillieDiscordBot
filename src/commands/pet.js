@@ -14,8 +14,8 @@ const PET_EMOJIS = {
 };
 
 export async function petCommand(message) {
-  const pet = getPet(message.guild.id, message.author.id);
-  const foodCount = getPetFood(message.guild.id, message.author.id);
+  const pet = await getPet(message.guild.id, message.author.id);
+  const foodCount = await getPetFood(message.guild.id, message.author.id);
 
   const embed = new EmbedBuilder()
     .setColor(0x00aaff)
@@ -26,7 +26,7 @@ export async function petCommand(message) {
     embed.setDescription("You don't have a pet yet! Use `!claimpet <dog|cat|bird>` to adopt one.");
   } else {
     const timeSinceFed = pet.last_fed_at === 0 ? "Never" : `<t:${Math.floor(pet.last_fed_at / 1000)}:R>`;
-    
+
     embed.setDescription(
       `**Pet Type:** ${PET_EMOJIS[pet.pet_type]} ${pet.pet_type.toUpperCase()}\n` +
       `**Evolution Stage:** ${STAGE_NAMES[pet.stage] || "Stage " + pet.stage}\n` +

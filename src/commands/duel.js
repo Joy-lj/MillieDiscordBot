@@ -38,12 +38,12 @@ export async function duelCommand(message) {
   const challengerId = message.author.id;
   const opponentId = targetUser.id;
 
-  const challengerStats = getUserCombatStats(guildId, challengerId);
+  const challengerStats = await getUserCombatStats(guildId, challengerId);
   if (challengerStats.balance < betAmount) {
     return message.reply(`You don't have enough cookies! Balance: **${challengerStats.balance}** cookies.`);
   }
 
-  const opponentStats = getUserCombatStats(guildId, opponentId);
+  const opponentStats = await getUserCombatStats(guildId, opponentId);
   if (opponentStats.balance < betAmount) {
     return message.reply(`${targetUser.username} doesn't have enough cookies to match that bet!`);
   }
@@ -97,7 +97,7 @@ export async function duelCommand(message) {
         .setColor(0x999999)
         .setTitle("⚔️ Duel Challenge Expired")
         .setDescription("The duel challenge timed out because the opponent did not respond within 60 seconds.");
-      await duelMessage.edit({ embeds: [expiredEmbed], components: [] }).catch(() => {});
+      await duelMessage.edit({ embeds: [expiredEmbed], components: [] }).catch(() => { });
     }
   });
 }
@@ -106,9 +106,9 @@ async function startLobbyPhase(duelMessage, guildId, challenger, opponent, betAm
   let challengerReady = false;
   let opponentReady = false;
 
-  const buildLobbyEmbed = () => {
-    const cStats = getUserCombatStats(guildId, challenger.id);
-    const oStats = getUserCombatStats(guildId, opponent.id);
+  const buildLobbyEmbed = async () => {
+    const cStats = await getUserCombatStats(guildId, challenger.id);
+    const oStats = await getUserCombatStats(guildId, opponent.id);
 
     return new EmbedBuilder()
       .setColor(0xffaa00)
@@ -129,9 +129,9 @@ async function startLobbyPhase(duelMessage, guildId, challenger, opponent, betAm
       .setTimestamp();
   };
 
-  const buildGearSelect = (userId, customId, placeholder) => {
-    const userInv = getUserInventory(guildId, userId);
-    const cStats = getUserCombatStats(guildId, userId);
+  const buildGearSelect = async (userId, customId, placeholder) => {
+    const userInv = await getUserInventory(guildId, userId);
+    const cStats = await getUserCombatStats(guildId, userId);
     const options = [];
 
     if (cStats.equippedWeaponInstanceId) {
@@ -195,7 +195,7 @@ async function startLobbyPhase(duelMessage, guildId, challenger, opponent, betAm
   };
 
   await duelMessage.edit({
-    embeds: [buildLobbyEmbed()],
+    embeds: [await buildLobbyEmbed()],
     components: buildComponents(),
   });
 
@@ -229,7 +229,7 @@ async function startLobbyPhase(duelMessage, guildId, challenger, opponent, betAm
       }
 
       return duelMessage.edit({
-        embeds: [buildLobbyEmbed()],
+        embeds: [await buildLobbyEmbed()],
         components: buildComponents(),
       });
     }
@@ -246,7 +246,7 @@ async function startLobbyPhase(duelMessage, guildId, challenger, opponent, betAm
       }
 
       return duelMessage.edit({
-        embeds: [buildLobbyEmbed()],
+        embeds: [await buildLobbyEmbed()],
         components: buildComponents(),
       });
     }
@@ -258,7 +258,7 @@ async function startLobbyPhase(duelMessage, guildId, challenger, opponent, betAm
         .setColor(0x999999)
         .setTitle("⚔️ Duel Cancelled")
         .setDescription("The lobby timed out before both players readied up.");
-      await duelMessage.edit({ embeds: [expiredEmbed], components: [] }).catch(() => {});
+      await duelMessage.edit({ embeds: [expiredEmbed], components: [] }).catch(() => { });
     }
   });
 }

@@ -4,7 +4,7 @@ import { economyConfig } from "../config/economy.js";
 export async function dailyCommand(message) {
   if (!message.inGuild()) return;
 
-  const result = claimDaily(message.guildId, message.author.id);
+  const result = await claimDaily(message.guildId, message.author.id);
   const { currencyName, currencyEmoji } = economyConfig;
 
   if (!result.success) {

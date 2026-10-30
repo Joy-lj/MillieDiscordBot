@@ -1,7 +1,7 @@
 import { randomInt } from "node:crypto";
 import { flowers } from "../src/config/flowerPoker.js";
 
-const totalWeight = flowers.reduce((sum, flower) => sum + 1 / flower.denominator, 0);
+const totalWeight = await flowers.reduce((sum, flower) => sum + 1 / flower.denominator, 0);
 export const flowerProbabilities = flowers.map((flower) => ({
   id: flower.id,
   probability: (1 / flower.denominator) / totalWeight,

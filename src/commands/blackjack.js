@@ -119,8 +119,8 @@ export async function blackjackGame(message, bet) {
         components: [buttons],
       });
     }
-  }  
-// Dealer only draws if the player hasn't busted
+  }
+  // Dealer only draws if the player hasn't busted
   // and neither opening hand was a natural blackjack.
   if (!natural && score(player) <= 21) {
     while (score(dealer) < 17) {
@@ -136,7 +136,7 @@ export async function blackjackGame(message, bet) {
   if (playerScore > 21) {
     result = "❌ You busted!";
   } else if (natural) {
-    if (playerScore === 21 && dealerScore === 21) {   
+    if (playerScore === 21 && dealerScore === 21) {
       payout = bet.wager;
       result = "🤝 Both have blackjack! Your wager was refunded.";
     } else if (playerScore === 21) {
@@ -155,7 +155,7 @@ export async function blackjackGame(message, bet) {
     result = "❌ Dealer wins!";
   }
 
-  const balance = settleBet(bet.id, payout);
+  const balance = await settleBet(bet.id, payout);
 
   await gameMessage.edit({
     content:
