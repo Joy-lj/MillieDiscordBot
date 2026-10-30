@@ -7,7 +7,7 @@ export async function diceGame(message, bet) {
   const won = roll >= 55;
   const payout = won ? bet.wager * 2 : 0;
 
-  const balance = settleBet(bet.id, payout);
+  const balance = await settleBet(bet.id, payout);
   const { currencyName, currencyEmoji } = economyConfig;
 
   await message.reply({
@@ -16,10 +16,10 @@ export async function diceGame(message, bet) {
       (
         won
           ? `✅ Won! Returned **${payout.toLocaleString("en-US")} ${currencyName}** ` +
-            `(**+${bet.wager.toLocaleString("en-US")}** profit).\n`
+          `(**+${bet.wager.toLocaleString("en-US")}** profit).\n`
           : `❌ Lost **${bet.wager.toLocaleString("en-US")} ${currencyName}**.\n`
       ) +
       `${currencyEmoji} Balance: **${balance.toLocaleString("en-US")} ${currencyName}**`,
     allowedMentions: { parse: [], repliedUser: false },
   });
-}
+} 
