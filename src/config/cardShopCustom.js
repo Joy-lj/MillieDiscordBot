@@ -25,12 +25,6 @@ export const packDefinitions = [
     description: "Five Twilight Masquerade pulls with a guaranteed Rare.",
     slots: [{ common: 1 }, { common: 1 }, { uncommon: 1 }, { uncommon: 70, rare: 30 }, { rare: 1 }],
   },
-  {
-    id: "twilight", name: "Twilight Masquerade", setIds: ["sv06"], price: 1500,
-    sellPrice: 750, version: 1, color: 0x39c995,
-    description: "Five Twilight Masquerade pulls with a guaranteed Rare.",
-    slots: [{ common: 1 }, { common: 1 }, { uncommon: 1 }, { uncommon: 70, rare: 30 }, { rare: 1 }],
-  },
 ];
 
 export const groupLabels = { common: "Common", uncommon: "Uncommon", rare: "Rare", special: "Special" };
