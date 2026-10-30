@@ -1,4 +1,4 @@
-export const CURRENCY_PER_USD = 10;
+export const CURRENCY_PER_USD = 100;
 export const SELL_BACK_RATIO = 0.5;
 
 // Optional manual USD prices for sets without an unambiguous loose booster.
