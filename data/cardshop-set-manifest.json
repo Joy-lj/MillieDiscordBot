@@ -1,0 +1,1752 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-30T03:36:42.676Z",
+  "sets": [
+    {
+      "id": "miscp",
+      "name": "Miscellaneous Promos",
+      "importedGroups": null
+    },
+    {
+      "id": "base1",
+      "name": "Base Set",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "base2",
+      "name": "Jungle",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "basep",
+      "name": "Wizards Black Star Promos",
+      "importedGroups": [
+        "common"
+      ]
+    },
+    {
+      "id": "wp",
+      "name": "W Promotional",
+      "importedGroups": null
+    },
+    {
+      "id": "base3",
+      "name": "Fossil",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "jumbo",
+      "name": "Jumbo cards",
+      "importedGroups": null
+    },
+    {
+      "id": "base4",
+      "name": "Base Set 2",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "base5",
+      "name": "Team Rocket",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "gym1",
+      "name": "Gym Heroes",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "gym2",
+      "name": "Gym Challenge",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "neo1",
+      "name": "Neo Genesis",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "neo2",
+      "name": "Neo Discovery",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "si1",
+      "name": "Southern Islands",
+      "importedGroups": [
+        "common"
+      ]
+    },
+    {
+      "id": "neo3",
+      "name": "Neo Revelation",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "neo4",
+      "name": "Neo Destiny",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "lc",
+      "name": "Legendary Collection",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sp",
+      "name": "Sample",
+      "importedGroups": null
+    },
+    {
+      "id": "ecard1",
+      "name": "Expedition Base Set",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "bog",
+      "name": "Best of game",
+      "importedGroups": null
+    },
+    {
+      "id": "ecard2",
+      "name": "Aquapolis",
+      "importedGroups": null
+    },
+    {
+      "id": "ecard3",
+      "name": "Skyridge",
+      "importedGroups": null
+    },
+    {
+      "id": "ex1",
+      "name": "Ruby & Sapphire",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ex2",
+      "name": "Sandstorm",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "np",
+      "name": "Nintendo Black Star Promos",
+      "importedGroups": [
+        "common"
+      ]
+    },
+    {
+      "id": "ex3",
+      "name": "Dragon",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ex4",
+      "name": "Team Magma vs Team Aqua",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ex5",
+      "name": "Hidden Legends",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "tk-ex-latia",
+      "name": "EX trainer Kit (Latias)",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-ex-latio",
+      "name": "EX trainer Kit (Latios)",
+      "importedGroups": null
+    },
+    {
+      "id": "ex5.5",
+      "name": "Poké Card Creator Pack",
+      "importedGroups": null
+    },
+    {
+      "id": "ex6",
+      "name": "FireRed & LeafGreen",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "pop1",
+      "name": "POP Series 1",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ex7",
+      "name": "Team Rocket Returns",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ex8",
+      "name": "Deoxys",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ex9",
+      "name": "Emerald",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "pop2",
+      "name": "POP Series 2",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ex10",
+      "name": "Unseen Forces",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "exu",
+      "name": "Unseen Forces Unown Collection",
+      "importedGroups": null
+    },
+    {
+      "id": "ex11",
+      "name": "Delta Species",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ex12",
+      "name": "Legend Maker",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "tk-ex-m",
+      "name": "EX trainer Kit 2 (Minun)",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-ex-p",
+      "name": "EX trainer Kit 2 (Plusle)",
+      "importedGroups": null
+    },
+    {
+      "id": "pop3",
+      "name": "POP Series 3",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ex13",
+      "name": "Holon Phantoms",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "pop4",
+      "name": "POP Series 4",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ex14",
+      "name": "Crystal Guardians",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ex15",
+      "name": "Dragon Frontiers",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ex16",
+      "name": "Power Keepers",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "pop5",
+      "name": "POP Series 5",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "dpp",
+      "name": "DP Black Star Promos",
+      "importedGroups": [
+        "common"
+      ]
+    },
+    {
+      "id": "dp1",
+      "name": "Diamond & Pearl",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "dp2",
+      "name": "Mysterious Treasures",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "tk-dp-l",
+      "name": "DP trainer Kit (Lucario)",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-dp-m",
+      "name": "DP trainer Kit (Manaphy)",
+      "importedGroups": null
+    },
+    {
+      "id": "pop6",
+      "name": "POP Series 6",
+      "importedGroups": null
+    },
+    {
+      "id": "dp3",
+      "name": "Secret Wonders",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "dp4",
+      "name": "Great Encounters",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "pop7",
+      "name": "POP Series 7",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "dp5",
+      "name": "Majestic Dawn",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "dp6",
+      "name": "Legends Awakened",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "pop8",
+      "name": "POP Series 8",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "dp7",
+      "name": "Stormfront",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "pl1",
+      "name": "Platinum",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "pop9",
+      "name": "POP Series 9",
+      "importedGroups": [
+        "common",
+        "rare",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "pl2",
+      "name": "Rising Rivals",
+      "importedGroups": null
+    },
+    {
+      "id": "pl3",
+      "name": "Supreme Victors",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "pl4",
+      "name": "Arceus",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "ru1",
+      "name": "Pokémon Rumble",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "hgss1",
+      "name": "HeartGold SoulSilver",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "hgssp",
+      "name": "HGSS Black Star Promos",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-hs-r",
+      "name": "HS trainer Kit (Raichu)",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-hs-g",
+      "name": "HS trainer Kit (Gyarados)",
+      "importedGroups": null
+    },
+    {
+      "id": "hgss2",
+      "name": "Unleashed",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "hgss3",
+      "name": "Undaunted",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "hgss4",
+      "name": "Triumphant",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "col1",
+      "name": "Call of Legends",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "bw1",
+      "name": "Black & White",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "bwp",
+      "name": "BW Black Star Promos",
+      "importedGroups": null
+    },
+    {
+      "id": "2011bw",
+      "name": "McDonald's Collection 2011",
+      "importedGroups": null
+    },
+    {
+      "id": "bw2",
+      "name": "Emerging Powers",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "tk-bw-e",
+      "name": "BW trainer Kit (Excadrill)",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-bw-z",
+      "name": "BW trainer Kit (Zoroark)",
+      "importedGroups": null
+    },
+    {
+      "id": "bw3",
+      "name": "Noble Victories",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "bw4",
+      "name": "Next Destinies",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "bw5",
+      "name": "Dark Explorers",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "2012bw",
+      "name": "McDonald's Collection 2012",
+      "importedGroups": null
+    },
+    {
+      "id": "bw6",
+      "name": "Dragons Exalted",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "dv1",
+      "name": "Dragon Vault",
+      "importedGroups": [
+        "common",
+        "rare"
+      ]
+    },
+    {
+      "id": "bw7",
+      "name": "Boundaries Crossed",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "bw8",
+      "name": "Plasma Storm",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "bw9",
+      "name": "Plasma Freeze",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "bw10",
+      "name": "Plasma Blast",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "xyp",
+      "name": "XY Black Star Promos",
+      "importedGroups": null
+    },
+    {
+      "id": "rc",
+      "name": "Radiant Collection",
+      "importedGroups": null
+    },
+    {
+      "id": "bw11",
+      "name": "Legendary Treasures",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "xy0",
+      "name": "Kalos Starter Set",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "xy1",
+      "name": "XY",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "xya",
+      "name": "Yellow A Alternate",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-xy-n",
+      "name": "XY trainer Kit (Noivern)",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-xy-sy",
+      "name": "XY trainer Kit (Sylveon)",
+      "importedGroups": null
+    },
+    {
+      "id": "xy2",
+      "name": "Flashfire",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "2014xy",
+      "name": "McDonald's Collection 2014",
+      "importedGroups": null
+    },
+    {
+      "id": "xy3",
+      "name": "Furious Fists",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "tk-xy-b",
+      "name": "XY trainer Kit (Bisharp)",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-xy-w",
+      "name": "XY trainer Kit (Wigglytuff)",
+      "importedGroups": null
+    },
+    {
+      "id": "xy4",
+      "name": "Phantom Forces",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "xy5",
+      "name": "Primal Clash",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "dc1",
+      "name": "Double Crisis",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "tk-xy-latio",
+      "name": "XY trainer Kit (Latios)",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-xy-latia",
+      "name": "XY trainer Kit (Latias)",
+      "importedGroups": null
+    },
+    {
+      "id": "xy6",
+      "name": "Roaring Skies",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "xy7",
+      "name": "Ancient Origins",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "xy8",
+      "name": "BREAKthrough",
+      "importedGroups": null
+    },
+    {
+      "id": "2015xy",
+      "name": "McDonald's Collection 2015",
+      "importedGroups": null
+    },
+    {
+      "id": "xy9",
+      "name": "BREAKpoint",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "g1",
+      "name": "Generations",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "tk-xy-p",
+      "name": "XY trainer Kit (Pikachu Libre)",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-xy-su",
+      "name": "XY trainer Kit (Suicune)",
+      "importedGroups": null
+    },
+    {
+      "id": "xy10",
+      "name": "Fates Collide",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "xy11",
+      "name": "Steam Siege",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "2016xy",
+      "name": "McDonald's Collection 2016",
+      "importedGroups": null
+    },
+    {
+      "id": "xy12",
+      "name": "Evolutions",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sm1",
+      "name": "Sun & Moon",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "smp",
+      "name": "SM Black Star Promos",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-sm-r",
+      "name": "SM trainer Kit (Alolan Raichu)",
+      "importedGroups": null
+    },
+    {
+      "id": "tk-sm-l",
+      "name": "SM trainer Kit (Lycanroc)",
+      "importedGroups": null
+    },
+    {
+      "id": "sm2",
+      "name": "Guardians Rising",
+      "importedGroups": null
+    },
+    {
+      "id": "2017sm",
+      "name": "McDonald's Collection 2017",
+      "importedGroups": null
+    },
+    {
+      "id": "sm3",
+      "name": "Burning Shadows",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sm3.5",
+      "name": "Shining Legends",
+      "importedGroups": null
+    },
+    {
+      "id": "sm4",
+      "name": "Crimson Invasion",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sm5",
+      "name": "Ultra Prism",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sm6",
+      "name": "Forbidden Light",
+      "importedGroups": null
+    },
+    {
+      "id": "sm7",
+      "name": "Celestial Storm",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sm7.5",
+      "name": "Dragon Majesty",
+      "importedGroups": null
+    },
+    {
+      "id": "2018sm",
+      "name": "McDonald's Collection 2018",
+      "importedGroups": null
+    },
+    {
+      "id": "sm8",
+      "name": "Lost Thunder",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sm9",
+      "name": "Team Up",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "det1",
+      "name": "Detective Pikachu",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special"
+      ]
+    },
+    {
+      "id": "sm10",
+      "name": "Unbroken Bonds",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sm11",
+      "name": "Unified Minds",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sma",
+      "name": "Hidden Fates Shiny Vault",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "sm115",
+      "name": "Hidden Fates",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "2019sm",
+      "name": "McDonald's Collection 2019",
+      "importedGroups": null
+    },
+    {
+      "id": "sm12",
+      "name": "Cosmic Eclipse",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swshp",
+      "name": "SWSH Black Star Promos",
+      "importedGroups": null
+    },
+    {
+      "id": "swsh1",
+      "name": "Sword & Shield",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swsh2",
+      "name": "Rebel Clash",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swsh3",
+      "name": "Darkness Ablaze",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "fut2020",
+      "name": "Pokémon Futsal 2020",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "swsh3.5",
+      "name": "Champion's Path",
+      "importedGroups": [
+        "common",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swsh4",
+      "name": "Vivid Voltage",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "2021swsh",
+      "name": "McDonald's Collection 2021",
+      "importedGroups": null
+    },
+    {
+      "id": "swsh4.5",
+      "name": "Shining Fates",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swsh4.5sv",
+      "name": "Shining Fates Shiny Vault",
+      "importedGroups": null
+    },
+    {
+      "id": "swsh5",
+      "name": "Battle Styles",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swsh6",
+      "name": "Chilling Reign",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swsh7",
+      "name": "Evolving Skies",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "cel25cc",
+      "name": "Celebrations Classic Collection",
+      "importedGroups": null
+    },
+    {
+      "id": "cel25",
+      "name": "Celebrations",
+      "importedGroups": null
+    },
+    {
+      "id": "swsh8",
+      "name": "Fusion Strike",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swsh9tg",
+      "name": "Brilliant Stars Trainer Gallery",
+      "importedGroups": null
+    },
+    {
+      "id": "swsh9",
+      "name": "Brilliant Stars",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swsh10",
+      "name": "Astral Radiance",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swsh10tg",
+      "name": "Astral Radiance Trainer Gallery",
+      "importedGroups": null
+    },
+    {
+      "id": "swsh10.5",
+      "name": "Pokémon GO",
+      "importedGroups": [
+        "common",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "2022swsh",
+      "name": "McDonald's Collection 2022",
+      "importedGroups": null
+    },
+    {
+      "id": "swsh11",
+      "name": "Lost Origin",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swsh11tg",
+      "name": "Lost Origin Trainer Gallery",
+      "importedGroups": null
+    },
+    {
+      "id": "swsh12",
+      "name": "Silver Tempest",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swsh12tg",
+      "name": "Silver Tempest Trainer Gallery",
+      "importedGroups": null
+    },
+    {
+      "id": "swsh12.5",
+      "name": "Crown Zenith",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "swsh12.5gg",
+      "name": "Crown Zenith Galarian Gallery",
+      "importedGroups": null
+    },
+    {
+      "id": "sv01",
+      "name": "Scarlet & Violet",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sve",
+      "name": "Scarlet & Violet Energy",
+      "importedGroups": null
+    },
+    {
+      "id": "svp",
+      "name": "SVP Black Star Promos",
+      "importedGroups": null
+    },
+    {
+      "id": "sv02",
+      "name": "Paldea Evolved",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "2023sv",
+      "name": "McDonald's Collection 2023",
+      "importedGroups": null
+    },
+    {
+      "id": "sv03",
+      "name": "Obsidian Flames",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sv03.5",
+      "name": "151",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "mfb",
+      "name": "My First Battle",
+      "importedGroups": null
+    },
+    {
+      "id": "sv04",
+      "name": "Paradox Rift",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sv04.5",
+      "name": "Paldean Fates",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sv05",
+      "name": "Temporal Forces",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sv06",
+      "name": "Twilight Masquerade",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sv06.5",
+      "name": "Shrouded Fable",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sv07",
+      "name": "Stellar Crown",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "P-A",
+      "name": "Promos-A",
+      "importedGroups": null
+    },
+    {
+      "id": "A1",
+      "name": "Genetic Apex",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "sv08",
+      "name": "Surging Sparks",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "2024sv",
+      "name": "McDonald's Collection 2024",
+      "importedGroups": null
+    },
+    {
+      "id": "A1a",
+      "name": "Mythical Island",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "sv08.5",
+      "name": "Prismatic Evolutions",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "A2",
+      "name": "Space-Time Smackdown",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "A2a",
+      "name": "Triumphant Light",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "A2b",
+      "name": "Shining Revelry",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "sv09",
+      "name": "Journey Together",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "A3",
+      "name": "Celestial Guardians",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "A3a",
+      "name": "Extradimensional Crisis",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "sv10",
+      "name": "Destined Rivals",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "A3b",
+      "name": "Eevee Grove",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "sv10.5b",
+      "name": "Black Bolt",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "sv10.5w",
+      "name": "White Flare",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "A4",
+      "name": "Wisdom of Sea and Sky",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "A4a",
+      "name": "Secluded Springs",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "mee",
+      "name": "Mega Evolution Energy",
+      "importedGroups": null
+    },
+    {
+      "id": "me01",
+      "name": "Mega Evolution",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "mep",
+      "name": "MEP Black Star Promos",
+      "importedGroups": null
+    },
+    {
+      "id": "B1",
+      "name": "Mega Rising",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "me02",
+      "name": "Phantasmal Flames",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "B1a",
+      "name": "Crimson Blaze",
+      "importedGroups": null
+    },
+    {
+      "id": "B2",
+      "name": "Fantastical Parade",
+      "importedGroups": [
+        "special"
+      ]
+    },
+    {
+      "id": "me02.5",
+      "name": "Ascended Heroes",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "B2a",
+      "name": "Paldean Wonders",
+      "importedGroups": null
+    },
+    {
+      "id": "me03",
+      "name": "Perfect Order",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "me04",
+      "name": "Chaos Rising",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "me05",
+      "name": "Pitch Black",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "30th",
+      "name": "30th Celebration",
+      "importedGroups": [
+        "common",
+        "rare",
+        "special"
+      ]
+    },
+    {
+      "id": "30th-c",
+      "name": "30th Classic Collection",
+      "importedGroups": null
+    }
+  ]
+}

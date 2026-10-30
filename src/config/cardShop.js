@@ -1,38 +1,46 @@
-// These are custom virtual packs, NOT official Pokémon booster collation.
-// Slot weights roll a group first; each eligible card in that group is equally likely.
-export const packDefinitions = [
-  {
-    id: "classic", name: "Classic Garden", setIds: ["base1"], price: 2500,
-    sellPrice: 1250, version: 1, color: 0x39c995,
-    description: "Five Base Set pulls with a guaranteed Rare.",
-    slots: [{ common: 1 }, { common: 1 }, { uncommon: 1 }, { uncommon: 70, rare: 30 }, { rare: 1 }],
-  },
-  {
-    id: "night", name: "Midnight Bloom", setIds: ["swsh3"], price: 500,
-    sellPrice: 250, version: 1, color: 0x9775fa,
-    description: "Five Darkness Ablaze pulls. Final slot: 80% Rare, 20% Special.",
-    slots: [{ common: 1 }, { common: 1 }, { uncommon: 1 }, { uncommon: 60, rare: 40 }, { rare: 80, special: 20 }],
-  },
-  {
-    id: "prism", name: "Prismatic Vault", setIds: ["swsh3"], price: 1500,
-    sellPrice: 750, version: 1, color: 0xf4bd51,
-    description: "Five Darkness Ablaze pulls with a guaranteed Special.",
-    slots: [{ uncommon: 1 }, { rare: 1 }, { rare: 80, special: 20 }, { rare: 60, special: 40 }, { special: 1 }],
-  },
-  {
-    id: "twilight", name: "Twilight Masquerade", setIds: ["sv06"], price: 1500,
-    sellPrice: 750, version: 1, color: 0x39c995,
-    description: "Five Twilight Masquerade pulls with a guaranteed Rare.",
-    slots: [{ common: 1 }, { common: 1 }, { uncommon: 1 }, { uncommon: 70, rare: 30 }, { rare: 1 }],
-  },
-];
+import { readFileSync } from "node:fs";
+import { manifestPacks } from "../../services/cardSetPacks.js";
 
-export const groupLabels = { common: "Common", uncommon: "Uncommon", rare: "Rare", special: "Special" };
+// FIRST rename your existing config/cardShop.js to config/cardShopCustom.js.
+// It preserves all your current packs, prices, odds, and rarity mapping.
+import {
+  packDefinitions as customPacks,
+  groupLabels,
+  rarityGroup,
+} from "./cardShopCustom.js";
 
-// Keep exact TCGdex rarity on the card. These are pack-selection groups only.
-// Every nonempty API rarity besides Common/Uncommon/Rare goes into Special.
-export function rarityGroup(rarity) {
-  if (typeof rarity !== "string" || !rarity.trim()) throw new Error("Card rarity is missing.");
-  const value = rarity.trim().toLowerCase();
-  return ["common", "uncommon", "rare"].includes(value) ? value : "special";
+export { groupLabels, rarityGroup };
+
+// Prices are in your bot's currency, not real money.
+const DEFAULT_SET_PRICE = 2500;
+const DEFAULT_SET_SELL_PRICE = 1250;
+
+// Optional changes keyed by the ORIGINAL TCGdex set ID.
+// Sell prices must be <= buy prices.
+const SET_OVERRIDES = {
+  base1: { price: 50000, sellPrice: 25000 },
+  swsh3: { price: 2000, sellPrice: 1000 },
+  sv06: { price: 2000, sellPrice: 1000 },
+};
+
+const manifestPath = new URL("../../data/cardshop-set-manifest.json", import.meta.url);
+let manifest;
+try {
+  manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+} catch (error) {
+  if (error.code !== "ENOENT") throw error;
+  console.warn("All-set packs are not generated yet. Run scripts/sync-all-card-sets.js.");
 }
+
+const generated = manifest ? manifestPacks(manifest) : [];
+const existingIds = new Set(customPacks.map((pack) => pack.id));
+
+export const packDefinitions = [
+  ...customPacks,
+  ...generated.filter((pack) => !existingIds.has(pack.id)).map((pack) => ({
+    ...pack,
+    price: DEFAULT_SET_PRICE,
+    sellPrice: DEFAULT_SET_SELL_PRICE,
+    ...SET_OVERRIDES[pack.setIds[0]],
+  })),
+];

@@ -2,7 +2,7 @@ import { donateCoins } from "../database/accounts.js";
 import { economyConfig } from "../config/economy.js";
 
 export async function donateCommand(message) {
-  if (!message.inGuild()) return;
+  if (!message.inGuild() || message.author.bot) return;
 
   const args = message.content.trim().split(/\s+/);
   const mention = args[1]?.match(/^<@!?(\d+)>$/);
@@ -38,10 +38,13 @@ export async function donateCommand(message) {
   }
 
   if (!Number.isSafeInteger(amount) || amount <= 0) {
-    await message.reply("❌ Enter a positive whole number within the safe limit.");
+    await message.reply(
+      "❌ Enter a positive whole number within the safe limit."
+    );
     return;
   }
-  // Verify the recipient belongs to this server.
+
+  // Verify membership before changing either balance.
   try {
     await message.guild.members.fetch(target.id);
   } catch (error) {
@@ -53,14 +56,25 @@ export async function donateCommand(message) {
     return;
   }
 
-  const { currencyName, currencyEmoji } = economyConfig;
+  let result;
 
-  const result = donateCoins(
-    message.guildId,
-    message.author.id,
-    target.id,
-    amount
-  );
+  try {
+    result = await donateCoins(
+      message.guildId,
+      message.author.id,
+      target.id,
+      amount
+    );
+  } catch (error) {
+    console.error("Donation transaction failed:", error);
+
+    await message.reply(
+      "❌ Couldn't confirm the donation. Check both balances before trying again."
+    );
+    return;
+  }
+
+  const { currencyName, currencyEmoji } = economyConfig;
 
   if (!result.success) {
     const errors = {
@@ -70,14 +84,16 @@ export async function donateCommand(message) {
       invalid_amount: "❌ Enter a valid positive whole number.",
     };
 
-    await message.reply(errors[result.reason] ?? "❌ Donation failed.");
+    await message.reply(
+      errors[result.reason] ?? "❌ Donation failed."
+    );
     return;
   }
 
   await message.reply({
     content:
       `🎁 You donated **${amount.toLocaleString("en-US")} ${currencyName}** to <@${target.id}>!\n` +
-      `${currencyEmoji} Your balance is now **${result.senderBalance.toLocaleString("en-US")} ${currencyName}**.`,
+      `${currencyEmoji ?? ""} Your balance is now **${result.senderBalance.toLocaleString("en-US")} ${currencyName}**.`,
     allowedMentions: { parse: [], repliedUser: false },
   });
 }
