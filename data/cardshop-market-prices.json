@@ -1,0 +1,325 @@
+{
+  "schemaVersion": 1,
+  "sets": {
+    "base1": {
+      "usd": 914.23,
+      "productId": 138130,
+      "productName": "Base Set Booster Pack [Revised Unlimited Edition]",
+      "groupId": 604,
+      "groupName": "Base Set",
+      "source": "https://www.tcgplayer.com/product/138130/pokemon-base-set-base-set-booster-pack-revised-unlimited-edition",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:55:59.567Z"
+    },
+    "base2": {
+      "usd": 330.45,
+      "productId": 138129,
+      "productName": "Jungle Booster Pack [Unlimited Edition]",
+      "groupId": 635,
+      "groupName": "Jungle",
+      "source": "https://www.tcgplayer.com/product/138129/pokemon-jungle-jungle-booster-pack-unlimited-edition",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:00.316Z"
+    },
+    "base3": {
+      "usd": 340.31,
+      "productId": 138134,
+      "productName": "Fossil Booster Pack [Unlimited Edition]",
+      "groupId": 630,
+      "groupName": "Fossil",
+      "source": "https://www.tcgplayer.com/product/138134/pokemon-fossil-fossil-booster-pack-unlimited-edition",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:01.065Z"
+    },
+    "base4": {
+      "usd": 459.26,
+      "productId": 138149,
+      "productName": "Base Set 2 Booster Pack",
+      "groupId": 605,
+      "groupName": "Base Set 2",
+      "source": "https://www.tcgplayer.com/product/138149/pokemon-base-set-2-base-set-2-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:02.564Z"
+    },
+    "base5": {
+      "usd": 329.64,
+      "productId": 138135,
+      "productName": "Team Rocket Booster Pack [Unlimited Edition]",
+      "groupId": 1373,
+      "groupName": "Team Rocket",
+      "source": "https://www.tcgplayer.com/product/138135/pokemon-team-rocket-team-rocket-booster-pack-unlimited-edition",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:03.314Z"
+    },
+    "gym1": {
+      "usd": 269.72,
+      "productId": 138138,
+      "productName": "Gym Heroes Booster Pack [Unlimited Edition]",
+      "groupId": 1441,
+      "groupName": "Gym Heroes",
+      "source": "https://www.tcgplayer.com/product/138138/pokemon-gym-heroes-gym-heroes-booster-pack-unlimited-edition",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:04.064Z"
+    },
+    "gym2": {
+      "usd": 419.99,
+      "productId": 138139,
+      "productName": "Gym Challenge Booster Pack [Unlimited Edition]",
+      "groupId": 1440,
+      "groupName": "Gym Challenge",
+      "source": "https://www.tcgplayer.com/product/138139/pokemon-gym-challenge-gym-challenge-booster-pack-unlimited-edition",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:04.809Z"
+    },
+    "ecard2": {
+      "usd": 1999.99,
+      "productId": 138152,
+      "productName": "Aquapolis Booster Pack",
+      "groupId": 1397,
+      "groupName": "Aquapolis",
+      "source": "https://www.tcgplayer.com/product/138152/pokemon-aquapolis-aquapolis-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:10.803Z"
+    },
+    "ex1": {
+      "usd": 799.99,
+      "productId": 98558,
+      "productName": "Ruby and Sapphire Booster Pack",
+      "groupId": 1393,
+      "groupName": "EX Ruby and Sapphire",
+      "source": "https://www.tcgplayer.com/product/98558/pokemon-ex-ruby-and-sapphire-ruby-and-sapphire-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:12.298Z"
+    },
+    "ex3": {
+      "usd": 1125,
+      "productId": 98519,
+      "productName": "EX Dragon Booster Pack",
+      "groupId": 1376,
+      "groupName": "EX Dragon",
+      "source": "https://www.tcgplayer.com/product/98519/pokemon-ex-dragon-ex-dragon-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:13.795Z"
+    },
+    "ex5": {
+      "usd": 800,
+      "productId": 98595,
+      "productName": "Hidden Legends Booster Pack",
+      "groupId": 1416,
+      "groupName": "EX Hidden Legends",
+      "source": "https://www.tcgplayer.com/product/98595/pokemon-ex-hidden-legends-hidden-legends-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:15.289Z"
+    },
+    "ex6": {
+      "usd": 1013.3,
+      "productId": 98946,
+      "productName": "FireRed & LeafGreen Booster Pack",
+      "groupId": 1419,
+      "groupName": "EX FireRed & LeafGreen",
+      "source": "https://www.tcgplayer.com/product/98946/pokemon-ex-firered-and-leafgreen-firered-and-leafgreen-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:16.047Z"
+    },
+    "ex12": {
+      "usd": 1600,
+      "productId": 98557,
+      "productName": "Legend Maker Booster Pack",
+      "groupId": 1378,
+      "groupName": "EX Legend Maker",
+      "source": "https://www.tcgplayer.com/product/98557/pokemon-ex-legend-maker-legend-maker-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:22.042Z"
+    },
+    "ex13": {
+      "usd": 1901.99,
+      "productId": 98522,
+      "productName": "Holon Phantoms Booster Pack",
+      "groupId": 1379,
+      "groupName": "EX Holon Phantoms",
+      "source": "https://www.tcgplayer.com/product/98522/pokemon-ex-holon-phantoms-holon-phantoms-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:23.538Z"
+    },
+    "ex14": {
+      "usd": 1299.99,
+      "productId": 98566,
+      "productName": "Crystal Guardians Booster Pack",
+      "groupId": 1395,
+      "groupName": "EX Crystal Guardians",
+      "source": "https://www.tcgplayer.com/product/98566/pokemon-ex-crystal-guardians-crystal-guardians-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:25.032Z"
+    },
+    "ex16": {
+      "usd": 999.99,
+      "productId": 98529,
+      "productName": "Power Keepers Booster Pack",
+      "groupId": 1383,
+      "groupName": "EX Power Keepers",
+      "source": "https://www.tcgplayer.com/product/98529/pokemon-ex-power-keepers-power-keepers-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:26.531Z"
+    },
+    "dp1": {
+      "usd": 304.17,
+      "productId": 98525,
+      "productName": "Diamond and Pearl Booster Pack",
+      "groupId": 1430,
+      "groupName": "Diamond and Pearl",
+      "source": "https://www.tcgplayer.com/product/98525/pokemon-diamond-and-pearl-diamond-and-pearl-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:28.030Z"
+    },
+    "dp2": {
+      "usd": 339.83,
+      "productId": 98561,
+      "productName": "Mysterious Treasures Booster Pack",
+      "groupId": 1368,
+      "groupName": "Mysterious Treasures",
+      "source": "https://www.tcgplayer.com/product/98561/pokemon-mysterious-treasures-mysterious-treasures-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:28.777Z"
+    },
+    "dp3": {
+      "usd": 628.19,
+      "productId": 98569,
+      "productName": "Secret Wonders Booster Pack",
+      "groupId": 1380,
+      "groupName": "Secret Wonders",
+      "source": "https://www.tcgplayer.com/product/98569/pokemon-secret-wonders-secret-wonders-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:30.272Z"
+    },
+    "dp4": {
+      "usd": 347.35,
+      "productId": 98545,
+      "productName": "Great Encounters Booster Pack",
+      "groupId": 1405,
+      "groupName": "Great Encounters",
+      "source": "https://www.tcgplayer.com/product/98545/pokemon-great-encounters-great-encounters-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:31.022Z"
+    },
+    "dp7": {
+      "usd": 596.55,
+      "productId": 98589,
+      "productName": "Stormfront Booster Pack",
+      "groupId": 1369,
+      "groupName": "Stormfront",
+      "source": "https://www.tcgplayer.com/product/98589/pokemon-stormfront-stormfront-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:34.767Z"
+    },
+    "pl1": {
+      "usd": 389.74,
+      "productId": 98591,
+      "productName": "Platinum Booster Pack",
+      "groupId": 1406,
+      "groupName": "Platinum",
+      "source": "https://www.tcgplayer.com/product/98591/pokemon-platinum-platinum-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:35.520Z"
+    },
+    "pl2": {
+      "usd": 999.99,
+      "productId": 98542,
+      "productName": "Rising Rivals Booster Pack",
+      "groupId": 1367,
+      "groupName": "Rising Rivals",
+      "source": "https://www.tcgplayer.com/product/98542/pokemon-rising-rivals-rising-rivals-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:37.019Z"
+    },
+    "pl3": {
+      "usd": 737.49,
+      "productId": 98574,
+      "productName": "Supreme Victors Booster Pack",
+      "groupId": 1384,
+      "groupName": "Supreme Victors",
+      "source": "https://www.tcgplayer.com/product/98574/pokemon-supreme-victors-supreme-victors-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:37.772Z"
+    },
+    "pl4": {
+      "usd": 568.06,
+      "productId": 98594,
+      "productName": "Arceus Booster Pack",
+      "groupId": 1391,
+      "groupName": "Arceus",
+      "source": "https://www.tcgplayer.com/product/98594/pokemon-arceus-arceus-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:38.517Z"
+    },
+    "hgss1": {
+      "usd": 449.99,
+      "productId": 98530,
+      "productName": "HeartGold SoulSilver Booster Pack",
+      "groupId": 1402,
+      "groupName": "HeartGold SoulSilver",
+      "source": "https://www.tcgplayer.com/product/98530/pokemon-heartgold-soulsilver-heartgold-soulsilver-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:39.265Z"
+    },
+    "hgss2": {
+      "usd": 433.32,
+      "productId": 98582,
+      "productName": "Unleashed Booster Pack",
+      "groupId": 1399,
+      "groupName": "Unleashed",
+      "source": "https://www.tcgplayer.com/product/98582/pokemon-unleashed-unleashed-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:40.015Z"
+    },
+    "col1": {
+      "usd": 1114.85,
+      "productId": 98515,
+      "productName": "Call of Legends Booster Pack",
+      "groupId": 1415,
+      "groupName": "Call of Legends",
+      "source": "https://www.tcgplayer.com/product/98515/pokemon-call-of-legends-call-of-legends-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:42.259Z"
+    },
+    "dc1": {
+      "usd": 428.88,
+      "productId": 229226,
+      "productName": "Double Crisis Booster Pack",
+      "groupId": 1525,
+      "groupName": "Double Crisis",
+      "source": "https://www.tcgplayer.com/product/229226/pokemon-double-crisis-double-crisis-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:54.231Z"
+    },
+    "g1": {
+      "usd": 312.43,
+      "productId": 187238,
+      "productName": "Generations Booster Pack",
+      "groupId": 1728,
+      "groupName": "Generations",
+      "source": "https://www.tcgplayer.com/product/187238/pokemon-generations-generations-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:56:54.975Z"
+    },
+    "swsh3": {
+      "usd": 10.05,
+      "productId": 216852,
+      "productName": "Darkness Ablaze Booster Pack",
+      "groupId": 2675,
+      "groupName": "SWSH03: Darkness Ablaze",
+      "source": "https://www.tcgplayer.com/product/216852/pokemon-swsh03-darkness-ablaze-darkness-ablaze-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:57:00.977Z"
+    },
+    "sv06": {
+      "usd": 9.47,
+      "productId": 543843,
+      "productName": "Twilight Masquerade Booster Pack",
+      "groupId": 23473,
+      "groupName": "SV06: Twilight Masquerade",
+      "source": "https://www.tcgplayer.com/product/543843/pokemon-sv06-twilight-masquerade-twilight-masquerade-booster-pack",
+      "feed": "TCGCSV mirror of TCGplayer marketPrice",
+      "retrievedAt": "2026-10-30T03:57:21.981Z"
+    }
+  }
+}

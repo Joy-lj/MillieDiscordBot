@@ -1,0 +1,2383 @@
+[
+  {
+    "setId": "miscp",
+    "setName": "Miscellaneous Promos",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "basep",
+    "setName": "Wizards Black Star Promos",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "wp",
+    "setName": "W Promotional",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "jumbo",
+    "setName": "Jumbo cards",
+    "groupId": 1528,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "neo1",
+    "setName": "Neo Genesis",
+    "groupId": 1396,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 138141,
+        "name": "Neo Genesis Booster Pack [1st Edition]",
+        "url": "https://www.tcgplayer.com/product/138141/pokemon-neo-genesis-neo-genesis-booster-pack-1st-edition"
+      },
+      {
+        "productId": 138142,
+        "name": "Neo Genesis Booster Pack [Unlimited Edition]",
+        "url": "https://www.tcgplayer.com/product/138142/pokemon-neo-genesis-neo-genesis-booster-pack-unlimited-edition"
+      }
+    ]
+  },
+  {
+    "setId": "neo2",
+    "setName": "Neo Discovery",
+    "groupId": 1434,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 138143,
+        "name": "Neo Discovery Booster Pack [Unlimited Edition]",
+        "url": "https://www.tcgplayer.com/product/138143/pokemon-neo-discovery-neo-discovery-booster-pack-unlimited-edition"
+      },
+      {
+        "productId": 138144,
+        "name": "Neo Discovery Booster Pack [1st Edition]",
+        "url": "https://www.tcgplayer.com/product/138144/pokemon-neo-discovery-neo-discovery-booster-pack-1st-edition"
+      }
+    ]
+  },
+  {
+    "setId": "si1",
+    "setName": "Southern Islands",
+    "groupId": 648,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "neo3",
+    "setName": "Neo Revelation",
+    "groupId": 1389,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 138145,
+        "name": "Neo Revelation Booster Pack [1st Edition]",
+        "url": "https://www.tcgplayer.com/product/138145/pokemon-neo-revelation-neo-revelation-booster-pack-1st-edition"
+      },
+      {
+        "productId": 138146,
+        "name": "Neo Revelation Booster Pack [Unlimited Edition]",
+        "url": "https://www.tcgplayer.com/product/138146/pokemon-neo-revelation-neo-revelation-booster-pack-unlimited-edition"
+      }
+    ]
+  },
+  {
+    "setId": "neo4",
+    "setName": "Neo Destiny",
+    "groupId": 1444,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 138147,
+        "name": "Neo Destiny Booster Pack [Unlimited Edition]",
+        "url": "https://www.tcgplayer.com/product/138147/pokemon-neo-destiny-neo-destiny-booster-pack-unlimited-edition"
+      },
+      {
+        "productId": 138148,
+        "name": "Neo Destiny Booster Pack [1st Edition]",
+        "url": "https://www.tcgplayer.com/product/138148/pokemon-neo-destiny-neo-destiny-booster-pack-1st-edition"
+      }
+    ]
+  },
+  {
+    "setId": "lc",
+    "setName": "Legendary Collection",
+    "groupId": 1374,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 138150,
+        "name": "Legendary Collection Booster Pack",
+        "url": "https://www.tcgplayer.com/product/138150/pokemon-legendary-collection-legendary-collection-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "sp",
+    "setName": "Sample",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "ecard1",
+    "setName": "Expedition Base Set",
+    "groupId": 1375,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 138151,
+        "name": "Expedition Booster Pack",
+        "url": "https://www.tcgplayer.com/product/138151/pokemon-expedition-expedition-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "bog",
+    "setName": "Best of game",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "ecard3",
+    "setName": "Skyridge",
+    "groupId": 1372,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 138153,
+        "name": "Skyridge Booster Pack",
+        "url": "https://www.tcgplayer.com/product/138153/pokemon-skyridge-skyridge-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "ex2",
+    "setName": "Sandstorm",
+    "groupId": 1392,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98565,
+        "name": "Sandstorm Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98565/pokemon-ex-sandstorm-sandstorm-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "np",
+    "setName": "Nintendo Black Star Promos",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "ex4",
+    "setName": "Team Magma vs Team Aqua",
+    "groupId": 1377,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98550,
+        "name": "Team Magma vs Team Aqua Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98550/pokemon-ex-team-magma-vs-team-aqua-team-magma-vs-team-aqua-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "tk-ex-latia",
+    "setName": "EX trainer Kit (Latias)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-ex-latio",
+    "setName": "EX trainer Kit (Latios)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "ex5.5",
+    "setName": "Poké Card Creator Pack",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "pop1",
+    "setName": "POP Series 1",
+    "groupId": 1422,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "ex7",
+    "setName": "Team Rocket Returns",
+    "groupId": 1428,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98578,
+        "name": "Team Rocket Returns Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98578/pokemon-ex-team-rocket-returns-team-rocket-returns-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "ex8",
+    "setName": "Deoxys",
+    "groupId": 1404,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98562,
+        "name": "Deoxys Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98562/pokemon-ex-deoxys-deoxys-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "ex9",
+    "setName": "Emerald",
+    "groupId": 1410,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98546,
+        "name": "Emerald Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98546/pokemon-ex-emerald-emerald-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "pop2",
+    "setName": "POP Series 2",
+    "groupId": 1447,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "ex10",
+    "setName": "Unseen Forces",
+    "groupId": 1398,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98577,
+        "name": "Unseen Forces Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98577/pokemon-ex-unseen-forces-unseen-forces-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "exu",
+    "setName": "Unseen Forces Unown Collection",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "ex11",
+    "setName": "Delta Species",
+    "groupId": 1429,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98944,
+        "name": "Delta Species Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98944/pokemon-ex-delta-species-delta-species-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "tk-ex-m",
+    "setName": "EX trainer Kit 2 (Minun)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-ex-p",
+    "setName": "EX trainer Kit 2 (Plusle)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "pop3",
+    "setName": "POP Series 3",
+    "groupId": 1442,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "pop4",
+    "setName": "POP Series 4",
+    "groupId": 1452,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "ex15",
+    "setName": "Dragon Frontiers",
+    "groupId": 1411,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98533,
+        "name": "Dragon Frontiers Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98533/pokemon-ex-dragon-frontiers-dragon-frontiers-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "pop5",
+    "setName": "POP Series 5",
+    "groupId": 1439,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "dpp",
+    "setName": "DP Black Star Promos",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-dp-l",
+    "setName": "DP trainer Kit (Lucario)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-dp-m",
+    "setName": "DP trainer Kit (Manaphy)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "pop6",
+    "setName": "POP Series 6",
+    "groupId": 1432,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "pop7",
+    "setName": "POP Series 7",
+    "groupId": 1414,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "dp5",
+    "setName": "Majestic Dawn",
+    "groupId": 1390,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98585,
+        "name": "Majestic Dawn Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98585/pokemon-majestic-dawn-majestic-dawn-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "dp6",
+    "setName": "Legends Awakened",
+    "groupId": 1417,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98537,
+        "name": "Legends Awakened Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98537/pokemon-legends-awakened-legends-awakened-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "pop8",
+    "setName": "POP Series 8",
+    "groupId": 1450,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "pop9",
+    "setName": "POP Series 9",
+    "groupId": 1446,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "ru1",
+    "setName": "Pokémon Rumble",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "hgssp",
+    "setName": "HGSS Black Star Promos",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-hs-r",
+    "setName": "HS trainer Kit (Raichu)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-hs-g",
+    "setName": "HS trainer Kit (Gyarados)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "hgss3",
+    "setName": "Undaunted",
+    "groupId": 1403,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98586,
+        "name": "Undaunted Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98586/pokemon-undaunted-undaunted-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "hgss4",
+    "setName": "Triumphant",
+    "groupId": 1381,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98534,
+        "name": "Triumphant Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98534/pokemon-triumphant-triumphant-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "bw1",
+    "setName": "Black & White",
+    "groupId": 1400,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98553,
+        "name": "Black and White Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98553/pokemon-black-and-white-black-and-white-booster-pack"
+      },
+      {
+        "productId": 280521,
+        "name": "Code Card - Black and White Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280521/pokemon-black-and-white-code-card-black-and-white-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "bwp",
+    "setName": "BW Black Star Promos",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "2011bw",
+    "setName": "McDonald's Collection 2011",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "bw2",
+    "setName": "Emerging Powers",
+    "groupId": 1424,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98549,
+        "name": "Emerging Powers Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98549/pokemon-emerging-powers-emerging-powers-booster-pack"
+      },
+      {
+        "productId": 280526,
+        "name": "Code Card - Emerging Powers Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280526/pokemon-emerging-powers-code-card-emerging-powers-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "tk-bw-e",
+    "setName": "BW trainer Kit (Excadrill)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-bw-z",
+    "setName": "BW trainer Kit (Zoroark)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "bw3",
+    "setName": "Noble Victories",
+    "groupId": 1385,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98570,
+        "name": "Noble Victories Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98570/pokemon-noble-victories-noble-victories-booster-pack"
+      },
+      {
+        "productId": 280535,
+        "name": "Code Card - Noble Victories Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280535/pokemon-noble-victories-code-card-noble-victories-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "bw4",
+    "setName": "Next Destinies",
+    "groupId": 1412,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98538,
+        "name": "Next Destinies Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98538/pokemon-next-destinies-next-destinies-booster-pack"
+      },
+      {
+        "productId": 280549,
+        "name": "Code Card - Next Destinies Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280549/pokemon-next-destinies-code-card-next-destinies-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "bw5",
+    "setName": "Dark Explorers",
+    "groupId": 1386,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98521,
+        "name": "Dark Explorers Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98521/pokemon-dark-explorers-dark-explorers-booster-pack"
+      },
+      {
+        "productId": 280552,
+        "name": "Code Card - Dark Explorers Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280552/pokemon-dark-explorers-code-card-dark-explorers-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "2012bw",
+    "setName": "McDonald's Collection 2012",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "bw6",
+    "setName": "Dragons Exalted",
+    "groupId": 1394,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98541,
+        "name": "Dragons Exalted Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98541/pokemon-dragons-exalted-dragons-exalted-booster-pack"
+      },
+      {
+        "productId": 280553,
+        "name": "Code Card - Dragons Exalted Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280553/pokemon-dragons-exalted-code-card-dragons-exalted-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "dv1",
+    "setName": "Dragon Vault",
+    "groupId": 1426,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98948,
+        "name": "Dragon Vault Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98948/pokemon-dragon-vault-dragon-vault-booster-pack"
+      },
+      {
+        "productId": 280554,
+        "name": "Code Card - Dragon Vault Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280554/pokemon-dragon-vault-code-card-dragon-vault-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "bw7",
+    "setName": "Boundaries Crossed",
+    "groupId": 1408,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98554,
+        "name": "Boundaries Crossed Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98554/pokemon-boundaries-crossed-boundaries-crossed-booster-pack"
+      },
+      {
+        "productId": 280555,
+        "name": "Code Card - Boundaries Crossed Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280555/pokemon-boundaries-crossed-code-card-boundaries-crossed-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "bw8",
+    "setName": "Plasma Storm",
+    "groupId": 1413,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98526,
+        "name": "Plasma Storm Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98526/pokemon-plasma-storm-plasma-storm-booster-pack"
+      },
+      {
+        "productId": 276601,
+        "name": "Plasma Storm Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/276601/pokemon-plasma-storm-plasma-storm-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 280566,
+        "name": "Code Card - Plasma Storm Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280566/pokemon-plasma-storm-code-card-plasma-storm-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "bw9",
+    "setName": "Plasma Freeze",
+    "groupId": 1382,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98517,
+        "name": "Plasma Freeze Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98517/pokemon-plasma-freeze-plasma-freeze-booster-pack"
+      },
+      {
+        "productId": 276602,
+        "name": "Plasma Freeze Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/276602/pokemon-plasma-freeze-plasma-freeze-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 280563,
+        "name": "Code Card - Plasma Freeze Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280563/pokemon-plasma-freeze-code-card-plasma-freeze-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "bw10",
+    "setName": "Plasma Blast",
+    "groupId": 1370,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98573,
+        "name": "Plasma Blast Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98573/pokemon-plasma-blast-plasma-blast-booster-pack"
+      },
+      {
+        "productId": 276604,
+        "name": "Plasma Blast Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/276604/pokemon-plasma-blast-plasma-blast-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 280558,
+        "name": "Code Card - Plasma Blast Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280558/pokemon-plasma-blast-code-card-plasma-blast-booster-pack"
+      },
+      {
+        "productId": 701595,
+        "name": "Plasma Blast Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/701595/pokemon-plasma-blast-plasma-blast-sleeved-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "xyp",
+    "setName": "XY Black Star Promos",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "rc",
+    "setName": "Radiant Collection",
+    "groupId": 1729,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "bw11",
+    "setName": "Legendary Treasures",
+    "groupId": 1409,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 98581,
+        "name": "Legendary Treasures Booster Pack",
+        "url": "https://www.tcgplayer.com/product/98581/pokemon-legendary-treasures-legendary-treasures-booster-pack"
+      },
+      {
+        "productId": 276608,
+        "name": "Legendary Treasures Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/276608/pokemon-legendary-treasures-legendary-treasures-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 280567,
+        "name": "Code Card - Legendary Treasures Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280567/pokemon-legendary-treasures-code-card-legendary-treasures-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "xy0",
+    "setName": "Kalos Starter Set",
+    "groupId": 1522,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "xy1",
+    "setName": "XY",
+    "groupId": 1387,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 91602,
+        "name": "XY Booster Pack",
+        "url": "https://www.tcgplayer.com/product/91602/pokemon-xy-base-set-xy-booster-pack"
+      },
+      {
+        "productId": 276589,
+        "name": "XY Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/276589/pokemon-xy-base-set-xy-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 280504,
+        "name": "Code Card - XY Booster Pack",
+        "url": "https://www.tcgplayer.com/product/280504/pokemon-xy-base-set-code-card-xy-booster-pack"
+      },
+      {
+        "productId": 562107,
+        "name": "XY Base Set Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/562107/pokemon-xy-base-set-xy-base-set-sleeved-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "xya",
+    "setName": "Yellow A Alternate",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-xy-n",
+    "setName": "XY trainer Kit (Noivern)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-xy-sy",
+    "setName": "XY trainer Kit (Sylveon)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "xy2",
+    "setName": "Flashfire",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "2014xy",
+    "setName": "McDonald's Collection 2014",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "xy3",
+    "setName": "Furious Fists",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-xy-b",
+    "setName": "XY trainer Kit (Bisharp)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-xy-w",
+    "setName": "XY trainer Kit (Wigglytuff)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "xy4",
+    "setName": "Phantom Forces",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "xy5",
+    "setName": "Primal Clash",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-xy-latio",
+    "setName": "XY trainer Kit (Latios)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-xy-latia",
+    "setName": "XY trainer Kit (Latias)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "xy6",
+    "setName": "Roaring Skies",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "xy7",
+    "setName": "Ancient Origins",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "xy8",
+    "setName": "BREAKthrough",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "2015xy",
+    "setName": "McDonald's Collection 2015",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "xy9",
+    "setName": "BREAKpoint",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-xy-p",
+    "setName": "XY trainer Kit (Pikachu Libre)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-xy-su",
+    "setName": "XY trainer Kit (Suicune)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "xy10",
+    "setName": "Fates Collide",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "xy11",
+    "setName": "Steam Siege",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "2016xy",
+    "setName": "McDonald's Collection 2016",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "xy12",
+    "setName": "Evolutions",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sm1",
+    "setName": "Sun & Moon",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "smp",
+    "setName": "SM Black Star Promos",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-sm-r",
+    "setName": "SM trainer Kit (Alolan Raichu)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "tk-sm-l",
+    "setName": "SM trainer Kit (Lycanroc)",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sm2",
+    "setName": "Guardians Rising",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "2017sm",
+    "setName": "McDonald's Collection 2017",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sm3",
+    "setName": "Burning Shadows",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sm3.5",
+    "setName": "Shining Legends",
+    "groupId": 2054,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 155880,
+        "name": "Shining Legends Booster Pack",
+        "url": "https://www.tcgplayer.com/product/155880/pokemon-shining-legends-shining-legends-booster-pack"
+      },
+      {
+        "productId": 252423,
+        "name": "Code Card - Shining Legends Booster Pack",
+        "url": "https://www.tcgplayer.com/product/252423/pokemon-shining-legends-code-card-shining-legends-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "sm4",
+    "setName": "Crimson Invasion",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sm5",
+    "setName": "Ultra Prism",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sm6",
+    "setName": "Forbidden Light",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sm7",
+    "setName": "Celestial Storm",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sm7.5",
+    "setName": "Dragon Majesty",
+    "groupId": 2295,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 173392,
+        "name": "Dragon Majesty Booster Pack",
+        "url": "https://www.tcgplayer.com/product/173392/pokemon-dragon-majesty-dragon-majesty-booster-pack"
+      },
+      {
+        "productId": 267728,
+        "name": "Code Card - Dragon Majesty Booster Pack",
+        "url": "https://www.tcgplayer.com/product/267728/pokemon-dragon-majesty-code-card-dragon-majesty-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "2018sm",
+    "setName": "McDonald's Collection 2018",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sm8",
+    "setName": "Lost Thunder",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sm9",
+    "setName": "Team Up",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "det1",
+    "setName": "Detective Pikachu",
+    "groupId": 2409,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 187239,
+        "name": "Detective Pikachu Booster Pack",
+        "url": "https://www.tcgplayer.com/product/187239/pokemon-detective-pikachu-detective-pikachu-booster-pack"
+      },
+      {
+        "productId": 189810,
+        "name": "Detective Pikachu Special Promo Booster Pack",
+        "url": "https://www.tcgplayer.com/product/189810/pokemon-detective-pikachu-detective-pikachu-special-promo-booster-pack"
+      },
+      {
+        "productId": 267727,
+        "name": "Code Card - Detective Pikachu 4 Card Booster Pack",
+        "url": "https://www.tcgplayer.com/product/267727/pokemon-detective-pikachu-code-card-detective-pikachu-4-card-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "sm10",
+    "setName": "Unbroken Bonds",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sm11",
+    "setName": "Unified Minds",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sma",
+    "setName": "Hidden Fates Shiny Vault",
+    "groupId": 2594,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "sm115",
+    "setName": "Hidden Fates",
+    "groupId": 2480,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 198634,
+        "name": "Hidden Fates Booster Pack",
+        "url": "https://www.tcgplayer.com/product/198634/pokemon-hidden-fates-hidden-fates-booster-pack"
+      },
+      {
+        "productId": 257517,
+        "name": "Code Card - Hidden Fates Booster Pack",
+        "url": "https://www.tcgplayer.com/product/257517/pokemon-hidden-fates-code-card-hidden-fates-booster-pack"
+      },
+      {
+        "productId": 545766,
+        "name": "Hidden Fates Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/545766/pokemon-hidden-fates-hidden-fates-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "2019sm",
+    "setName": "McDonald's Collection 2019",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sm12",
+    "setName": "Cosmic Eclipse",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "swshp",
+    "setName": "SWSH Black Star Promos",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "swsh1",
+    "setName": "Sword & Shield",
+    "groupId": 2585,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 206028,
+        "name": "Sword & Shield Booster Pack",
+        "url": "https://www.tcgplayer.com/product/206028/pokemon-swsh01-sword-and-shield-base-set-sword-and-shield-booster-pack"
+      },
+      {
+        "productId": 256471,
+        "name": "Code Card - Sword & Shield Booster Pack",
+        "url": "https://www.tcgplayer.com/product/256471/pokemon-swsh01-sword-and-shield-base-set-code-card-sword-and-shield-booster-pack"
+      },
+      {
+        "productId": 263544,
+        "name": "Sword and Shield Base Set Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/263544/pokemon-swsh01-sword-and-shield-base-set-sword-and-shield-base-set-sleeved-booster-pack"
+      },
+      {
+        "productId": 265314,
+        "name": "Sword and Shield Base Set Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/265314/pokemon-swsh01-sword-and-shield-base-set-sword-and-shield-base-set-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 487795,
+        "name": "Sword And Shield Base Set Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/487795/pokemon-swsh01-sword-and-shield-base-set-sword-and-shield-base-set-sleeved-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "swsh2",
+    "setName": "Rebel Clash",
+    "groupId": 2626,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 210562,
+        "name": "Rebel Clash Booster Pack",
+        "url": "https://www.tcgplayer.com/product/210562/pokemon-swsh02-rebel-clash-rebel-clash-booster-pack"
+      },
+      {
+        "productId": 251493,
+        "name": "Code Card - Rebel Clash Booster Pack",
+        "url": "https://www.tcgplayer.com/product/251493/pokemon-swsh02-rebel-clash-code-card-rebel-clash-booster-pack"
+      },
+      {
+        "productId": 264421,
+        "name": "Rebel Clash Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/264421/pokemon-swsh02-rebel-clash-rebel-clash-sleeved-booster-pack"
+      },
+      {
+        "productId": 265316,
+        "name": "Rebel Clash Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/265316/pokemon-swsh02-rebel-clash-rebel-clash-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 487796,
+        "name": "Rebel Clash Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/487796/pokemon-swsh02-rebel-clash-rebel-clash-sleeved-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "fut2020",
+    "setName": "Pokémon Futsal 2020",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "swsh3.5",
+    "setName": "Champion's Path",
+    "groupId": 2685,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 218789,
+        "name": "Champion's Path Booster Pack",
+        "url": "https://www.tcgplayer.com/product/218789/pokemon-champions-path-champions-path-booster-pack"
+      },
+      {
+        "productId": 251544,
+        "name": "Code Card - Champion's Path Booster Pack",
+        "url": "https://www.tcgplayer.com/product/251544/pokemon-champions-path-code-card-champions-path-booster-pack"
+      },
+      {
+        "productId": 265318,
+        "name": "Champion's Path Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/265318/pokemon-champions-path-champions-path-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "swsh4",
+    "setName": "Vivid Voltage",
+    "groupId": 2701,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 221312,
+        "name": "Vivid Voltage Booster Pack",
+        "url": "https://www.tcgplayer.com/product/221312/pokemon-swsh04-vivid-voltage-vivid-voltage-booster-pack"
+      },
+      {
+        "productId": 245143,
+        "name": "Vivid Voltage Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/245143/pokemon-swsh04-vivid-voltage-vivid-voltage-sleeved-booster-pack"
+      },
+      {
+        "productId": 251574,
+        "name": "Code Card - Vivid Voltage Booster Pack",
+        "url": "https://www.tcgplayer.com/product/251574/pokemon-swsh04-vivid-voltage-code-card-vivid-voltage-booster-pack"
+      },
+      {
+        "productId": 265319,
+        "name": "Vivid Voltage Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/265319/pokemon-swsh04-vivid-voltage-vivid-voltage-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 487798,
+        "name": "Vivid Voltage Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/487798/pokemon-swsh04-vivid-voltage-vivid-voltage-sleeved-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "2021swsh",
+    "setName": "McDonald's Collection 2021",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "swsh4.5",
+    "setName": "Shining Fates",
+    "groupId": 2754,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 232636,
+        "name": "Shining Fates Booster Pack",
+        "url": "https://www.tcgplayer.com/product/232636/pokemon-shining-fates-shining-fates-booster-pack"
+      },
+      {
+        "productId": 256776,
+        "name": "Code Card - Shining Fates Booster Pack",
+        "url": "https://www.tcgplayer.com/product/256776/pokemon-shining-fates-code-card-shining-fates-booster-pack"
+      },
+      {
+        "productId": 265320,
+        "name": "Shining Fates Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/265320/pokemon-shining-fates-shining-fates-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "swsh4.5sv",
+    "setName": "Shining Fates Shiny Vault",
+    "groupId": 2781,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "swsh5",
+    "setName": "Battle Styles",
+    "groupId": 2765,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 229276,
+        "name": "Battle Styles Booster Pack",
+        "url": "https://www.tcgplayer.com/product/229276/pokemon-swsh05-battle-styles-battle-styles-booster-pack"
+      },
+      {
+        "productId": 251482,
+        "name": "Code Card - Battle Styles Booster Pack",
+        "url": "https://www.tcgplayer.com/product/251482/pokemon-swsh05-battle-styles-code-card-battle-styles-booster-pack"
+      },
+      {
+        "productId": 251879,
+        "name": "Battle Styles Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/251879/pokemon-swsh05-battle-styles-battle-styles-sleeved-booster-pack"
+      },
+      {
+        "productId": 265321,
+        "name": "Battle Styles Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/265321/pokemon-swsh05-battle-styles-battle-styles-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 487794,
+        "name": "Battle Styles Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/487794/pokemon-swsh05-battle-styles-battle-styles-sleeved-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "swsh6",
+    "setName": "Chilling Reign",
+    "groupId": 2807,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 236257,
+        "name": "Chilling Reign Booster Pack",
+        "url": "https://www.tcgplayer.com/product/236257/pokemon-swsh06-chilling-reign-chilling-reign-booster-pack"
+      },
+      {
+        "productId": 242013,
+        "name": "Chilling Reign Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/242013/pokemon-swsh06-chilling-reign-chilling-reign-sleeved-booster-pack"
+      },
+      {
+        "productId": 251445,
+        "name": "Code Card - Chilling Reign Booster Pack",
+        "url": "https://www.tcgplayer.com/product/251445/pokemon-swsh06-chilling-reign-code-card-chilling-reign-booster-pack"
+      },
+      {
+        "productId": 256274,
+        "name": "Chilling Reign Sleeved Booster Pack Art Bundle [Set of 5]",
+        "url": "https://www.tcgplayer.com/product/256274/pokemon-swsh06-chilling-reign-chilling-reign-sleeved-booster-pack-art-bundle-set-of-5"
+      },
+      {
+        "productId": 256275,
+        "name": "Chilling Reign Sleeved Booster Pack Bundle [Set of 10]",
+        "url": "https://www.tcgplayer.com/product/256275/pokemon-swsh06-chilling-reign-chilling-reign-sleeved-booster-pack-bundle-set-of-10"
+      },
+      {
+        "productId": 492290,
+        "name": "Chilling Reign Booster Pack Art Bundle [Set of 5]",
+        "url": "https://www.tcgplayer.com/product/492290/pokemon-swsh06-chilling-reign-chilling-reign-booster-pack-art-bundle-set-of-5"
+      }
+    ]
+  },
+  {
+    "setId": "swsh7",
+    "setName": "Evolving Skies",
+    "groupId": 2848,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 242438,
+        "name": "Evolving Skies Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/242438/pokemon-swsh07-evolving-skies-evolving-skies-sleeved-booster-pack"
+      },
+      {
+        "productId": 244337,
+        "name": "Evolving Skies Booster Pack",
+        "url": "https://www.tcgplayer.com/product/244337/pokemon-swsh07-evolving-skies-evolving-skies-booster-pack"
+      },
+      {
+        "productId": 246274,
+        "name": "Evolving Skies Sleeved Booster Pack Bundle [Set of 8]",
+        "url": "https://www.tcgplayer.com/product/246274/pokemon-swsh07-evolving-skies-evolving-skies-sleeved-booster-pack-bundle-set-of-8"
+      },
+      {
+        "productId": 247497,
+        "name": "Evolving Skies Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/247497/pokemon-swsh07-evolving-skies-evolving-skies-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 247498,
+        "name": "Evolving Skies Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/247498/pokemon-swsh07-evolving-skies-evolving-skies-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 248026,
+        "name": "Code Card - Evolving Skies Booster Pack",
+        "url": "https://www.tcgplayer.com/product/248026/pokemon-swsh07-evolving-skies-code-card-evolving-skies-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "cel25cc",
+    "setName": "Celebrations Classic Collection",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "cel25",
+    "setName": "Celebrations",
+    "groupId": 2867,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 248577,
+        "name": "Celebrations Booster Pack",
+        "url": "https://www.tcgplayer.com/product/248577/pokemon-celebrations-celebrations-booster-pack"
+      },
+      {
+        "productId": 251049,
+        "name": "Code Card - Celebrations Booster Pack",
+        "url": "https://www.tcgplayer.com/product/251049/pokemon-celebrations-code-card-celebrations-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "swsh8",
+    "setName": "Fusion Strike",
+    "groupId": 2906,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 247646,
+        "name": "Fusion Strike Booster Pack",
+        "url": "https://www.tcgplayer.com/product/247646/pokemon-swsh08-fusion-strike-fusion-strike-booster-pack"
+      },
+      {
+        "productId": 247651,
+        "name": "Fusion Strike Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/247651/pokemon-swsh08-fusion-strike-fusion-strike-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 247656,
+        "name": "Fusion Strike Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/247656/pokemon-swsh08-fusion-strike-fusion-strike-sleeved-booster-pack"
+      },
+      {
+        "productId": 247657,
+        "name": "Fusion Strike Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/247657/pokemon-swsh08-fusion-strike-fusion-strike-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 247658,
+        "name": "Fusion Strike Sleeved Booster Pack Bundle [Set of 8]",
+        "url": "https://www.tcgplayer.com/product/247658/pokemon-swsh08-fusion-strike-fusion-strike-sleeved-booster-pack-bundle-set-of-8"
+      },
+      {
+        "productId": 256131,
+        "name": "Code Card - Fusion Strike Booster Pack",
+        "url": "https://www.tcgplayer.com/product/256131/pokemon-swsh08-fusion-strike-code-card-fusion-strike-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "swsh9tg",
+    "setName": "Brilliant Stars Trainer Gallery",
+    "groupId": 3020,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "swsh9",
+    "setName": "Brilliant Stars",
+    "groupId": 2948,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 256124,
+        "name": "Brilliant Stars Booster Pack",
+        "url": "https://www.tcgplayer.com/product/256124/pokemon-swsh09-brilliant-stars-brilliant-stars-booster-pack"
+      },
+      {
+        "productId": 256125,
+        "name": "Brilliant Stars Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/256125/pokemon-swsh09-brilliant-stars-brilliant-stars-sleeved-booster-pack"
+      },
+      {
+        "productId": 256134,
+        "name": "Brilliant Stars Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/256134/pokemon-swsh09-brilliant-stars-brilliant-stars-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 256135,
+        "name": "Brilliant Stars Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/256135/pokemon-swsh09-brilliant-stars-brilliant-stars-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 256136,
+        "name": "Brilliant Stars Sleeved Booster Pack Bundle [Set of 8]",
+        "url": "https://www.tcgplayer.com/product/256136/pokemon-swsh09-brilliant-stars-brilliant-stars-sleeved-booster-pack-bundle-set-of-8"
+      },
+      {
+        "productId": 264551,
+        "name": "Code Card - Brilliant Stars Booster Pack",
+        "url": "https://www.tcgplayer.com/product/264551/pokemon-swsh09-brilliant-stars-code-card-brilliant-stars-booster-pack"
+      },
+      {
+        "productId": 599964,
+        "name": "Brilliant Stars Sleeved Booster Pack Case",
+        "url": "https://www.tcgplayer.com/product/599964/pokemon-swsh09-brilliant-stars-brilliant-stars-sleeved-booster-pack-case"
+      }
+    ]
+  },
+  {
+    "setId": "swsh10",
+    "setName": "Astral Radiance",
+    "groupId": 3040,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 265521,
+        "name": "Astral Radiance Booster Pack",
+        "url": "https://www.tcgplayer.com/product/265521/pokemon-swsh10-astral-radiance-astral-radiance-booster-pack"
+      },
+      {
+        "productId": 265526,
+        "name": "Astral Radiance Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/265526/pokemon-swsh10-astral-radiance-astral-radiance-sleeved-booster-pack"
+      },
+      {
+        "productId": 265542,
+        "name": "Astral Radiance Booster Pack Art Bundle [Set of 5]",
+        "url": "https://www.tcgplayer.com/product/265542/pokemon-swsh10-astral-radiance-astral-radiance-booster-pack-art-bundle-set-of-5"
+      },
+      {
+        "productId": 265543,
+        "name": "Astral Radiance Sleeved Booster Pack Art Bundle [Set of 5]",
+        "url": "https://www.tcgplayer.com/product/265543/pokemon-swsh10-astral-radiance-astral-radiance-sleeved-booster-pack-art-bundle-set-of-5"
+      },
+      {
+        "productId": 265544,
+        "name": "Astral Radiance Sleeved Booster Pack Bundle [Set of 8]",
+        "url": "https://www.tcgplayer.com/product/265544/pokemon-swsh10-astral-radiance-astral-radiance-sleeved-booster-pack-bundle-set-of-8"
+      },
+      {
+        "productId": 273445,
+        "name": "Code Card - Astral Radiance Booster Pack",
+        "url": "https://www.tcgplayer.com/product/273445/pokemon-swsh10-astral-radiance-code-card-astral-radiance-booster-pack"
+      },
+      {
+        "productId": 496130,
+        "name": "Astral Radiance Sleeved Booster Pack Case",
+        "url": "https://www.tcgplayer.com/product/496130/pokemon-swsh10-astral-radiance-astral-radiance-sleeved-booster-pack-case"
+      }
+    ]
+  },
+  {
+    "setId": "swsh10tg",
+    "setName": "Astral Radiance Trainer Gallery",
+    "groupId": 3068,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "swsh10.5",
+    "setName": "Pokémon GO",
+    "groupId": 3064,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 274421,
+        "name": "Pokemon GO Booster Pack",
+        "url": "https://www.tcgplayer.com/product/274421/pokemon-pokemon-go-pokemon-go-booster-pack"
+      },
+      {
+        "productId": 277884,
+        "name": "Code Card - Pokemon Go Booster Pack",
+        "url": "https://www.tcgplayer.com/product/277884/pokemon-pokemon-go-code-card-pokemon-go-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "2022swsh",
+    "setName": "McDonald's Collection 2022",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "swsh11",
+    "setName": "Lost Origin",
+    "groupId": 3118,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 277325,
+        "name": "Lost Origin Booster Pack",
+        "url": "https://www.tcgplayer.com/product/277325/pokemon-swsh11-lost-origin-lost-origin-booster-pack"
+      },
+      {
+        "productId": 277326,
+        "name": "Lost Origin Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/277326/pokemon-swsh11-lost-origin-lost-origin-sleeved-booster-pack"
+      },
+      {
+        "productId": 277674,
+        "name": "Code Card - Lost Origin Booster Pack",
+        "url": "https://www.tcgplayer.com/product/277674/pokemon-swsh11-lost-origin-code-card-lost-origin-booster-pack"
+      },
+      {
+        "productId": 278794,
+        "name": "Lost Origin Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/278794/pokemon-swsh11-lost-origin-lost-origin-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 278801,
+        "name": "Lost Origin Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/278801/pokemon-swsh11-lost-origin-lost-origin-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 278804,
+        "name": "Lost Origin Sleeved Booster Pack Bundle [Set of 8]",
+        "url": "https://www.tcgplayer.com/product/278804/pokemon-swsh11-lost-origin-lost-origin-sleeved-booster-pack-bundle-set-of-8"
+      },
+      {
+        "productId": 496131,
+        "name": "Lost Origin Sleeved Booster Pack Case",
+        "url": "https://www.tcgplayer.com/product/496131/pokemon-swsh11-lost-origin-lost-origin-sleeved-booster-pack-case"
+      }
+    ]
+  },
+  {
+    "setId": "swsh11tg",
+    "setName": "Lost Origin Trainer Gallery",
+    "groupId": 3172,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "swsh12",
+    "setName": "Silver Tempest",
+    "groupId": 3170,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 283388,
+        "name": "Silver Tempest Booster Pack",
+        "url": "https://www.tcgplayer.com/product/283388/pokemon-swsh12-silver-tempest-silver-tempest-booster-pack"
+      },
+      {
+        "productId": 283397,
+        "name": "Silver Tempest Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/283397/pokemon-swsh12-silver-tempest-silver-tempest-sleeved-booster-pack"
+      },
+      {
+        "productId": 283400,
+        "name": "Silver Tempest Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/283400/pokemon-swsh12-silver-tempest-silver-tempest-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 285778,
+        "name": "Silver Tempest Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/285778/pokemon-swsh12-silver-tempest-silver-tempest-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 453523,
+        "name": "Code Card - Silver Tempest Booster Pack",
+        "url": "https://www.tcgplayer.com/product/453523/pokemon-swsh12-silver-tempest-code-card-silver-tempest-booster-pack"
+      },
+      {
+        "productId": 454484,
+        "name": "Silver Tempest Sleeved Booster Pack Bundle [Set of 8]",
+        "url": "https://www.tcgplayer.com/product/454484/pokemon-swsh12-silver-tempest-silver-tempest-sleeved-booster-pack-bundle-set-of-8"
+      },
+      {
+        "productId": 550837,
+        "name": "Silver Tempest Sleeved Booster Pack Case",
+        "url": "https://www.tcgplayer.com/product/550837/pokemon-swsh12-silver-tempest-silver-tempest-sleeved-booster-pack-case"
+      }
+    ]
+  },
+  {
+    "setId": "swsh12tg",
+    "setName": "Silver Tempest Trainer Gallery",
+    "groupId": 17674,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "swsh12.5",
+    "setName": "Crown Zenith",
+    "groupId": 17688,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 453466,
+        "name": "Crown Zenith Booster Pack",
+        "url": "https://www.tcgplayer.com/product/453466/pokemon-swsh-crown-zenith-crown-zenith-booster-pack"
+      },
+      {
+        "productId": 478787,
+        "name": "Code Card - Crown Zenith Booster Pack",
+        "url": "https://www.tcgplayer.com/product/478787/pokemon-swsh-crown-zenith-code-card-crown-zenith-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "swsh12.5gg",
+    "setName": "Crown Zenith Galarian Gallery",
+    "groupId": 17689,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "sv01",
+    "setName": "Scarlet & Violet",
+    "groupId": 22873,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 476451,
+        "name": "Scarlet & Violet Booster Pack",
+        "url": "https://www.tcgplayer.com/product/476451/pokemon-sv01-scarlet-and-violet-base-set-scarlet-and-violet-booster-pack"
+      },
+      {
+        "productId": 478273,
+        "name": "Scarlet & Violet Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/478273/pokemon-sv01-scarlet-and-violet-base-set-scarlet-and-violet-sleeved-booster-pack"
+      },
+      {
+        "productId": 478274,
+        "name": "Scarlet & Violet Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/478274/pokemon-sv01-scarlet-and-violet-base-set-scarlet-and-violet-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 478275,
+        "name": "Scarlet & Violet Sleeved Booster Pack Bundle [Set of 8]",
+        "url": "https://www.tcgplayer.com/product/478275/pokemon-sv01-scarlet-and-violet-base-set-scarlet-and-violet-sleeved-booster-pack-bundle-set-of-8"
+      },
+      {
+        "productId": 478759,
+        "name": "Scarlet & Violet Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/478759/pokemon-sv01-scarlet-and-violet-base-set-scarlet-and-violet-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 489924,
+        "name": "Code Card - Scarlet & Violet Booster Pack",
+        "url": "https://www.tcgplayer.com/product/489924/pokemon-sv01-scarlet-and-violet-base-set-code-card-scarlet-and-violet-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "sve",
+    "setName": "Scarlet & Violet Energy",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "svp",
+    "setName": "SVP Black Star Promos",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sv02",
+    "setName": "Paldea Evolved",
+    "groupId": 23120,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 493976,
+        "name": "Paldea Evolved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/493976/pokemon-sv02-paldea-evolved-paldea-evolved-booster-pack"
+      },
+      {
+        "productId": 496913,
+        "name": "Paldea Evolved Booster Pack Art Bundle [Set of 5]",
+        "url": "https://www.tcgplayer.com/product/496913/pokemon-sv02-paldea-evolved-paldea-evolved-booster-pack-art-bundle-set-of-5"
+      },
+      {
+        "productId": 496927,
+        "name": "Paldea Evolved Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/496927/pokemon-sv02-paldea-evolved-paldea-evolved-sleeved-booster-pack"
+      },
+      {
+        "productId": 498831,
+        "name": "Code Card - Paldea Evolved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/498831/pokemon-sv02-paldea-evolved-code-card-paldea-evolved-booster-pack"
+      },
+      {
+        "productId": 502480,
+        "name": "Paldea Evolved Sleeved Booster Pack Art Bundle [Set of 5]",
+        "url": "https://www.tcgplayer.com/product/502480/pokemon-sv02-paldea-evolved-paldea-evolved-sleeved-booster-pack-art-bundle-set-of-5"
+      }
+    ]
+  },
+  {
+    "setId": "2023sv",
+    "setName": "McDonald's Collection 2023",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sv03",
+    "setName": "Obsidian Flames",
+    "groupId": 23228,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 501256,
+        "name": "Obsidian Flames Booster Pack",
+        "url": "https://www.tcgplayer.com/product/501256/pokemon-sv03-obsidian-flames-obsidian-flames-booster-pack"
+      },
+      {
+        "productId": 510902,
+        "name": "Code Card - Obsidian Flames Booster Pack",
+        "url": "https://www.tcgplayer.com/product/510902/pokemon-sv03-obsidian-flames-code-card-obsidian-flames-booster-pack"
+      },
+      {
+        "productId": 513422,
+        "name": "Obsidian Flames Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/513422/pokemon-sv03-obsidian-flames-obsidian-flames-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 515079,
+        "name": "Obsidian Flames Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/515079/pokemon-sv03-obsidian-flames-obsidian-flames-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 534087,
+        "name": "Obsidian Flames Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/534087/pokemon-sv03-obsidian-flames-obsidian-flames-sleeved-booster-pack"
+      },
+      {
+        "productId": 606743,
+        "name": "Obsidian Flames Sleeved Booster Pack Case",
+        "url": "https://www.tcgplayer.com/product/606743/pokemon-sv03-obsidian-flames-obsidian-flames-sleeved-booster-pack-case"
+      }
+    ]
+  },
+  {
+    "setId": "sv03.5",
+    "setName": "151",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "mfb",
+    "setName": "My First Battle",
+    "groupId": 23330,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": []
+  },
+  {
+    "setId": "sv04",
+    "setName": "Paradox Rift",
+    "groupId": 23286,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 512822,
+        "name": "Paradox Rift Booster Pack",
+        "url": "https://www.tcgplayer.com/product/512822/pokemon-sv04-paradox-rift-paradox-rift-booster-pack"
+      },
+      {
+        "productId": 512831,
+        "name": "Paradox Rift Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/512831/pokemon-sv04-paradox-rift-paradox-rift-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 517210,
+        "name": "Paradox Rift Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/517210/pokemon-sv04-paradox-rift-paradox-rift-sleeved-booster-pack"
+      },
+      {
+        "productId": 525635,
+        "name": "Code Card - Paradox Rift Booster Pack",
+        "url": "https://www.tcgplayer.com/product/525635/pokemon-sv04-paradox-rift-code-card-paradox-rift-booster-pack"
+      },
+      {
+        "productId": 526674,
+        "name": "Paradox Rift Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/526674/pokemon-sv04-paradox-rift-paradox-rift-sleeved-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "sv04.5",
+    "setName": "Paldean Fates",
+    "groupId": 23353,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 528038,
+        "name": "Paldean Fates Booster Pack",
+        "url": "https://www.tcgplayer.com/product/528038/pokemon-sv-paldean-fates-paldean-fates-booster-pack"
+      },
+      {
+        "productId": 536240,
+        "name": "Code Card - Paldean Fates Booster Pack",
+        "url": "https://www.tcgplayer.com/product/536240/pokemon-sv-paldean-fates-code-card-paldean-fates-booster-pack"
+      },
+      {
+        "productId": 668624,
+        "name": "Paldean Fates Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/668624/pokemon-sv-paldean-fates-paldean-fates-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "sv05",
+    "setName": "Temporal Forces",
+    "groupId": 23381,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 532841,
+        "name": "Temporal Forces Booster Pack",
+        "url": "https://www.tcgplayer.com/product/532841/pokemon-sv05-temporal-forces-temporal-forces-booster-pack"
+      },
+      {
+        "productId": 538786,
+        "name": "Temporal Forces Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/538786/pokemon-sv05-temporal-forces-temporal-forces-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 538787,
+        "name": "Temporal Forces Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/538787/pokemon-sv05-temporal-forces-temporal-forces-sleeved-booster-pack"
+      },
+      {
+        "productId": 538789,
+        "name": "Temporal Forces Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/538789/pokemon-sv05-temporal-forces-temporal-forces-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 538807,
+        "name": "Temporal Forces Sleeved Booster Pack Bundle [Set of 8]",
+        "url": "https://www.tcgplayer.com/product/538807/pokemon-sv05-temporal-forces-temporal-forces-sleeved-booster-pack-bundle-set-of-8"
+      },
+      {
+        "productId": 543577,
+        "name": "Code Card - SV05: Temporal Forces Booster Pack",
+        "url": "https://www.tcgplayer.com/product/543577/pokemon-sv05-temporal-forces-code-card-sv05-temporal-forces-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "sv06.5",
+    "setName": "Shrouded Fable",
+    "groupId": 23529,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 552997,
+        "name": "Shrouded Fable Booster Pack",
+        "url": "https://www.tcgplayer.com/product/552997/pokemon-sv-shrouded-fable-shrouded-fable-booster-pack"
+      },
+      {
+        "productId": 562361,
+        "name": "Code Card - Shrouded Fable Booster Pack",
+        "url": "https://www.tcgplayer.com/product/562361/pokemon-sv-shrouded-fable-code-card-shrouded-fable-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "sv07",
+    "setName": "Stellar Crown",
+    "groupId": 23537,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 557331,
+        "name": "Stellar Crown Booster Pack",
+        "url": "https://www.tcgplayer.com/product/557331/pokemon-sv07-stellar-crown-stellar-crown-booster-pack"
+      },
+      {
+        "productId": 557352,
+        "name": "Stellar Crown Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/557352/pokemon-sv07-stellar-crown-stellar-crown-sleeved-booster-pack"
+      },
+      {
+        "productId": 557357,
+        "name": "Stellar Crown Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/557357/pokemon-sv07-stellar-crown-stellar-crown-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 557361,
+        "name": "Stellar Crown Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/557361/pokemon-sv07-stellar-crown-stellar-crown-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 580328,
+        "name": "Code Card - Stellar Crown Booster Pack",
+        "url": "https://www.tcgplayer.com/product/580328/pokemon-sv07-stellar-crown-code-card-stellar-crown-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "P-A",
+    "setName": "Promos-A",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "A1",
+    "setName": "Genetic Apex",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sv08",
+    "setName": "Surging Sparks",
+    "groupId": 23651,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 565602,
+        "name": "Surging Sparks Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/565602/pokemon-sv08-surging-sparks-surging-sparks-sleeved-booster-pack"
+      },
+      {
+        "productId": 565603,
+        "name": "Surging Sparks Sleeved Booster Pack Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/565603/pokemon-sv08-surging-sparks-surging-sparks-sleeved-booster-pack-bundle-set-of-4"
+      },
+      {
+        "productId": 565604,
+        "name": "Surging Sparks Booster Pack",
+        "url": "https://www.tcgplayer.com/product/565604/pokemon-sv08-surging-sparks-surging-sparks-booster-pack"
+      },
+      {
+        "productId": 565605,
+        "name": "Surging Sparks Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/565605/pokemon-sv08-surging-sparks-surging-sparks-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 593687,
+        "name": "Surging Sparks Sleeved Booster Pack Case",
+        "url": "https://www.tcgplayer.com/product/593687/pokemon-sv08-surging-sparks-surging-sparks-sleeved-booster-pack-case"
+      },
+      {
+        "productId": 594248,
+        "name": "Code Card - Surging Sparks Booster Pack",
+        "url": "https://www.tcgplayer.com/product/594248/pokemon-sv08-surging-sparks-code-card-surging-sparks-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "2024sv",
+    "setName": "McDonald's Collection 2024",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "A1a",
+    "setName": "Mythical Island",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sv08.5",
+    "setName": "Prismatic Evolutions",
+    "groupId": 23821,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 593294,
+        "name": "Prismatic Evolutions Booster Pack",
+        "url": "https://www.tcgplayer.com/product/593294/pokemon-sv-prismatic-evolutions-prismatic-evolutions-booster-pack"
+      },
+      {
+        "productId": 614046,
+        "name": "Code Card - Prismatic Evolutions Booster Pack",
+        "url": "https://www.tcgplayer.com/product/614046/pokemon-sv-prismatic-evolutions-code-card-prismatic-evolutions-booster-pack"
+      },
+      {
+        "productId": 617807,
+        "name": "Prismatic Evolutions Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/617807/pokemon-sv-prismatic-evolutions-prismatic-evolutions-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 617823,
+        "name": "Prismatic Evolutions Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/617823/pokemon-sv-prismatic-evolutions-prismatic-evolutions-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "A2",
+    "setName": "Space-Time Smackdown",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "A2a",
+    "setName": "Triumphant Light",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "A2b",
+    "setName": "Shining Revelry",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sv09",
+    "setName": "Journey Together",
+    "groupId": 24073,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 610934,
+        "name": "Journey Together Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/610934/pokemon-sv09-journey-together-journey-together-sleeved-booster-pack"
+      },
+      {
+        "productId": 610935,
+        "name": "Journey Together Booster Pack",
+        "url": "https://www.tcgplayer.com/product/610935/pokemon-sv09-journey-together-journey-together-booster-pack"
+      },
+      {
+        "productId": 625974,
+        "name": "Code Card - Journey Together Booster Pack",
+        "url": "https://www.tcgplayer.com/product/625974/pokemon-sv09-journey-together-code-card-journey-together-booster-pack"
+      },
+      {
+        "productId": 626659,
+        "name": "Journey Together Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/626659/pokemon-sv09-journey-together-journey-together-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 626660,
+        "name": "Journey Together Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/626660/pokemon-sv09-journey-together-journey-together-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "A3",
+    "setName": "Celestial Guardians",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "A3a",
+    "setName": "Extradimensional Crisis",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sv10",
+    "setName": "Destined Rivals",
+    "groupId": 24269,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 624683,
+        "name": "Destined Rivals Booster Pack",
+        "url": "https://www.tcgplayer.com/product/624683/pokemon-sv10-destined-rivals-destined-rivals-booster-pack"
+      },
+      {
+        "productId": 624684,
+        "name": "Destined Rivals Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/624684/pokemon-sv10-destined-rivals-destined-rivals-sleeved-booster-pack"
+      },
+      {
+        "productId": 633169,
+        "name": "Code Card - Destined Rivals Booster Pack",
+        "url": "https://www.tcgplayer.com/product/633169/pokemon-sv10-destined-rivals-code-card-destined-rivals-booster-pack"
+      },
+      {
+        "productId": 635053,
+        "name": "Destined Rivals Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/635053/pokemon-sv10-destined-rivals-destined-rivals-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 649711,
+        "name": "Destined Rivals Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/649711/pokemon-sv10-destined-rivals-destined-rivals-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "A3b",
+    "setName": "Eevee Grove",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "sv10.5b",
+    "setName": "Black Bolt",
+    "groupId": 24325,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 630434,
+        "name": "Black Bolt Booster Pack",
+        "url": "https://www.tcgplayer.com/product/630434/pokemon-sv-black-bolt-black-bolt-booster-pack"
+      },
+      {
+        "productId": 646128,
+        "name": "Code Card - Black Bolt Booster Pack",
+        "url": "https://www.tcgplayer.com/product/646128/pokemon-sv-black-bolt-code-card-black-bolt-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "sv10.5w",
+    "setName": "White Flare",
+    "groupId": 24326,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 630699,
+        "name": "White Flare Booster Pack",
+        "url": "https://www.tcgplayer.com/product/630699/pokemon-sv-white-flare-white-flare-booster-pack"
+      },
+      {
+        "productId": 646130,
+        "name": "Code Card - White Flare Booster Pack",
+        "url": "https://www.tcgplayer.com/product/646130/pokemon-sv-white-flare-code-card-white-flare-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "A4",
+    "setName": "Wisdom of Sea and Sky",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "A4a",
+    "setName": "Secluded Springs",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "mee",
+    "setName": "Mega Evolution Energy",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "me01",
+    "setName": "Mega Evolution",
+    "groupId": 24380,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 644352,
+        "name": "Mega Evolution Booster Pack",
+        "url": "https://www.tcgplayer.com/product/644352/pokemon-me01-mega-evolution-mega-evolution-booster-pack"
+      },
+      {
+        "productId": 644354,
+        "name": "Mega Evolution Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/644354/pokemon-me01-mega-evolution-mega-evolution-sleeved-booster-pack"
+      },
+      {
+        "productId": 644355,
+        "name": "Mega Evolution Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/644355/pokemon-me01-mega-evolution-mega-evolution-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 656272,
+        "name": "Code Card - Mega Evolution Booster Pack",
+        "url": "https://www.tcgplayer.com/product/656272/pokemon-me01-mega-evolution-code-card-mega-evolution-booster-pack"
+      },
+      {
+        "productId": 657875,
+        "name": "Mega Evolution Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/657875/pokemon-me01-mega-evolution-mega-evolution-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "mep",
+    "setName": "MEP Black Star Promos",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "B1",
+    "setName": "Mega Rising",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "me02",
+    "setName": "Phantasmal Flames",
+    "groupId": 24448,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 654144,
+        "name": "Phantasmal Flames Booster Pack",
+        "url": "https://www.tcgplayer.com/product/654144/pokemon-me02-phantasmal-flames-phantasmal-flames-booster-pack"
+      },
+      {
+        "productId": 654145,
+        "name": "Phantasmal Flames Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/654145/pokemon-me02-phantasmal-flames-phantasmal-flames-sleeved-booster-pack"
+      },
+      {
+        "productId": 654174,
+        "name": "Phantasmal Flames Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/654174/pokemon-me02-phantasmal-flames-phantasmal-flames-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 664060,
+        "name": "Code Card - Phantasmal Flames Booster Pack",
+        "url": "https://www.tcgplayer.com/product/664060/pokemon-me02-phantasmal-flames-code-card-phantasmal-flames-booster-pack"
+      },
+      {
+        "productId": 664903,
+        "name": "Phantasmal Flames Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/664903/pokemon-me02-phantasmal-flames-phantasmal-flames-sleeved-booster-pack-art-bundle-set-of-4"
+      }
+    ]
+  },
+  {
+    "setId": "B1a",
+    "setName": "Crimson Blaze",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "B2",
+    "setName": "Fantastical Parade",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "me02.5",
+    "setName": "Ascended Heroes",
+    "groupId": 24541,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 672434,
+        "name": "Ascended Heroes Booster Pack",
+        "url": "https://www.tcgplayer.com/product/672434/pokemon-me-ascended-heroes-ascended-heroes-booster-pack"
+      },
+      {
+        "productId": 677186,
+        "name": "Code Card - Ascended Heroes Booster Pack",
+        "url": "https://www.tcgplayer.com/product/677186/pokemon-me-ascended-heroes-code-card-ascended-heroes-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "B2a",
+    "setName": "Paldean Wonders",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  },
+  {
+    "setId": "me03",
+    "setName": "Perfect Order",
+    "groupId": 24587,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 672398,
+        "name": "Perfect Order Booster Pack",
+        "url": "https://www.tcgplayer.com/product/672398/pokemon-me03-perfect-order-perfect-order-booster-pack"
+      },
+      {
+        "productId": 672399,
+        "name": "Perfect Order Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/672399/pokemon-me03-perfect-order-perfect-order-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 672412,
+        "name": "Perfect Order Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/672412/pokemon-me03-perfect-order-perfect-order-sleeved-booster-pack"
+      },
+      {
+        "productId": 672413,
+        "name": "Perfect Order Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/672413/pokemon-me03-perfect-order-perfect-order-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 672416,
+        "name": "Code Card - Perfect Order Booster Pack",
+        "url": "https://www.tcgplayer.com/product/672416/pokemon-me03-perfect-order-code-card-perfect-order-booster-pack"
+      },
+      {
+        "productId": 672421,
+        "name": "Code Card - Perfect Order Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/672421/pokemon-me03-perfect-order-code-card-perfect-order-sleeved-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "me04",
+    "setName": "Chaos Rising",
+    "groupId": 24655,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 684446,
+        "name": "Chaos Rising Booster Pack",
+        "url": "https://www.tcgplayer.com/product/684446/pokemon-me04-chaos-rising-chaos-rising-booster-pack"
+      },
+      {
+        "productId": 684447,
+        "name": "Chaos Rising Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/684447/pokemon-me04-chaos-rising-chaos-rising-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 684448,
+        "name": "Chaos Rising Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/684448/pokemon-me04-chaos-rising-chaos-rising-sleeved-booster-pack"
+      },
+      {
+        "productId": 684449,
+        "name": "Chaos Rising Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/684449/pokemon-me04-chaos-rising-chaos-rising-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 695313,
+        "name": "Code Card - Chaos Rising Booster Pack",
+        "url": "https://www.tcgplayer.com/product/695313/pokemon-me04-chaos-rising-code-card-chaos-rising-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "me05",
+    "setName": "Pitch Black",
+    "groupId": 24688,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 692944,
+        "name": "Pitch Black Booster Pack",
+        "url": "https://www.tcgplayer.com/product/692944/pokemon-me05-pitch-black-pitch-black-booster-pack"
+      },
+      {
+        "productId": 692945,
+        "name": "Pitch Black Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/692945/pokemon-me05-pitch-black-pitch-black-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 692957,
+        "name": "Pitch Black Sleeved Booster Pack",
+        "url": "https://www.tcgplayer.com/product/692957/pokemon-me05-pitch-black-pitch-black-sleeved-booster-pack"
+      },
+      {
+        "productId": 692958,
+        "name": "Pitch Black Sleeved Booster Pack Art Bundle [Set of 4]",
+        "url": "https://www.tcgplayer.com/product/692958/pokemon-me05-pitch-black-pitch-black-sleeved-booster-pack-art-bundle-set-of-4"
+      },
+      {
+        "productId": 705535,
+        "name": "Code Card - Pitch Black Booster Pack",
+        "url": "https://www.tcgplayer.com/product/705535/pokemon-me05-pitch-black-code-card-pitch-black-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "30th",
+    "setName": "30th Celebration",
+    "groupId": 24722,
+    "reason": "No unique ordinary loose booster with one positive market price. Set PRODUCT_OVERRIDES or USD_OVERRIDES.",
+    "candidates": [
+      {
+        "productId": 696613,
+        "name": "30th Celebration Booster Pack",
+        "url": "https://www.tcgplayer.com/product/696613/pokemon-me-30th-celebration-30th-celebration-booster-pack"
+      },
+      {
+        "productId": 717831,
+        "name": "Code Card - 30th Celebration Booster Pack",
+        "url": "https://www.tcgplayer.com/product/717831/pokemon-me-30th-celebration-code-card-30th-celebration-booster-pack"
+      }
+    ]
+  },
+  {
+    "setId": "30th-c",
+    "setName": "30th Classic Collection",
+    "reason": "No unique set-name match. Set GROUP_OVERRIDES or USD_OVERRIDES."
+  }
+]
