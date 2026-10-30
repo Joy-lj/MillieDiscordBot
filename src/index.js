@@ -24,7 +24,7 @@ import { levelCommand } from "./commands/level.js";
 import { initializeCardShop } from "./database/cardShop.js";
 import { addXp } from "./database/accounts.js";
 import { adminXpCommand } from "./commands/adminXp.js";
-import { cardShopCommand, packsCommand, cardsCommand, handleCardShopInteraction } from "./commands/cardShop.js";
+import { cardShopCommand, packsCommand, cardsCommand, handleCardShopInteraction } from "./commands/cardshop.js";
 import { rpsCommand } from "./commands/rps.js";
 import { initializeFishing } from "./database/fishing.js";
 import {
