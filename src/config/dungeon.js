@@ -1,7 +1,7 @@
 export const dungeonConfig = {
   inviteMs: 60_000,
   roundMs: 120_000,
-  cooldownMs: 2,
+  cooldownMs: 2 * 60 * 60 * 1000,
   maxRoundsPerRoom: 15,
   potionsPerPlayer: 2,
   potionHeal: 0.35,
