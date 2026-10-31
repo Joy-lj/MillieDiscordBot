@@ -1,4 +1,4 @@
-export const ITEMS = {
+export const BASE_ITEMS = {
   // Weapons (Strength stat)
   "foam-sword": {
     name: "Foam Sword",
@@ -67,3 +67,107 @@ export const ITEMS = {
     use: "Stops high-velocity impacts and heavy hits."
   }
 };
+
+const DUNGEON_STATS = {
+  // Weapons
+  "foam-sword": {
+    tier: 1,
+    rarity: "common",
+    speedBonus: 5,
+    critChance: 0.05,
+
+    ability: {
+      id: "distracting-bonk",
+      name: "Distracting Bonk",
+      description:
+        "Deal normal damage and reduce the enemy's next attack by 25%.",
+      cooldownTurns: 3,
+    },
+  },
+
+  "rusty-shank": {
+    tier: 2,
+    rarity: "uncommon",
+    speedBonus: 3,
+    critChance: 0.15,
+
+    ability: {
+      id: "dirty-cut",
+      name: "Dirty Cut",
+      description:
+        "Deal normal damage and apply bleeding for 2 rounds.",
+      cooldownTurns: 3,
+    },
+  },
+
+  "beer-bottle": {
+    tier: 3,
+    rarity: "rare",
+    speedBonus: 0,
+    critChance: 0.10,
+
+    ability: {
+      id: "bottle-smash",
+      name: "Bottle Smash",
+      description:
+        "Deal 150% damage and weaken enemy defense for 2 rounds.",
+      cooldownTurns: 3,
+    },
+  },
+
+  gun: {
+    tier: 4,
+    rarity: "epic",
+    speedBonus: -3,
+    critChance: 0.10,
+
+    ability: {
+      id: "cookie-barrage",
+      name: "Cookie Barrage",
+      description:
+        "Deal 175% damage to one enemy.",
+      cooldownTurns: 4,
+    },
+  },
+
+  // Armor
+  "bicycle-helmet": {
+    tier: 1,
+    rarity: "common",
+    healthBonus: 10,
+    speedBonus: 3,
+  },
+
+  "padded-pants": {
+    tier: 2,
+    rarity: "uncommon",
+    healthBonus: 25,
+    speedBonus: 1,
+  },
+
+  "chainmail-shirt": {
+    tier: 3,
+    rarity: "rare",
+    healthBonus: 45,
+    speedBonus: -2,
+  },
+
+  "bulletproof-vest": {
+    tier: 4,
+    rarity: "epic",
+    healthBonus: 70,
+    speedBonus: -5,
+  },
+};
+
+
+// Existing commands still import ITEMS normally.
+export const ITEMS = Object.fromEntries(
+  Object.entries(BASE_ITEMS).map(([id, item]) => [
+    id,
+    {
+      ...item,
+      dungeon: DUNGEON_STATS[id] ?? {},
+    },
+  ])
+);

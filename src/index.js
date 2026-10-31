@@ -37,6 +37,10 @@ import { claimPetCommand } from "./commands/claimpet.js";
 import { petCommand } from "./commands/pet.js";
 import { petShopCommand, buyFoodCommand } from "./commands/petshop.js";
 import { feedPetCommand } from "./commands/feedpet.js";
+import {
+  dungeonCommand,
+  handleDungeonInteraction,
+} from "./commands/dungeon.js";
 
 
 // Choose which Discord events the bot can receive.
@@ -64,6 +68,11 @@ client.on(Events.MessageCreate, async (message) => {
       await fishCommand(message);
     } else if (fishingCommand === "!fishbag") {
       await fishBagCommand(message);
+    }
+
+    if (command === "dungeon") {
+      await dungeonCommand(message);
+      return;
     }
 
     if (cardCommand === "!cardshop") {
@@ -246,5 +255,6 @@ client.on("interactionCreate", async (interaction) => {
   // ensure it doesn't leave Discord waiting indefinitely.
   if (await handleFishingInteraction(interaction)) return;
   if (await handleCardShopInteraction(interaction)) return;
+  if (await handleDungeonInteraction(interaction)) return;
   if (!interaction.isButton() || !interaction.isStringSelectMenu()) return;
 });
