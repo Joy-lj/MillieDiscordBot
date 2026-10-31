@@ -5,7 +5,7 @@ export async function inventoryCommand(message) {
   const guildId = message.guild.id;
   const userId = message.author.id;
 
-  const stats = getUserCombatStats(guildId, userId);
+  const stats = await getUserCombatStats(guildId, userId);
   const inventory = await getUserInventory(guildId, userId);
 
   const embed = new EmbedBuilder()
@@ -28,7 +28,7 @@ export async function inventoryCommand(message) {
       inline: false,
     });
   } else {
-    const itemList = inventory
+    const itemList = await inventory
       .map((row) => {
         const item = ITEMS[row.item_id];
         if (!item) return null;

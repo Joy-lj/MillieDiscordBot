@@ -7,7 +7,7 @@ export async function sellCommand(message) {
 
   if (!itemId || isNaN(serialNumber)) {
     return message.reply(
-      "Please specify both the item and its serial number to sell!\nExample: `!sell foam-sword 1` or `!sell rusty-shank 2`"
+      "Please specify both the item and its serial number to sell!\nExample: `!sell cookie-cannon 1` or `!sell rusty-claw 2`"
     );
   }
 

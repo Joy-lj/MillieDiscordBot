@@ -1,12 +1,18 @@
 import { createHash, randomInt, randomUUID } from "node:crypto";
-import { DungeonError, makePlayer, resolveRound, startState, validateChoice, validateConfig } from "./dungeonLogic.js";
+import { DungeonError, dungeonForParty, makePlayer, resolveRound, startState, validateChoice, validateConfig } from "./dungeonLogic.js";
 export { DungeonError } from "./dungeonLogic.js";
 const fail = (message) => { throw new DungeonError(message); };
 const MAX_BALANCE = Number.MAX_SAFE_INTEGER;
 
 function decode(row) {
   if (!row) fail("Dungeon not found. It may have been removed by an economy reset.");
-  return { ...row, state: typeof row.state === "string" ? JSON.parse(row.state) : row.state,
+  // The migration fills party_ids for old co-op runs. Fallback also supports
+  // pre-migration snapshots in fixtures without changing their saved rules.
+  const party = row.party_ids ?? [row.leader_id, row.partner_id].filter((user) => user != null);
+  if (!Array.isArray(party) || ![1, 2].includes(party.length) || new Set(party).size !== party.length ||
+      party.some((user) => typeof user !== "string" || !user) || party[0] !== row.leader_id ||
+      (party.length === 1 ? row.partner_id != null : party[1] !== row.partner_id)) fail("Invalid saved dungeon party.");
+  return { ...row, party_ids: party, state: typeof row.state === "string" ? JSON.parse(row.state) : row.state,
     expires_at: Number(row.expires_at), created_at: Number(row.created_at) };
 }
 
@@ -43,7 +49,7 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
            AND r.guild_id = a.guild_id AND r.user_id = a.user_id
          WHERE a.guild_id = $1 AND a.user_id = $2 FOR UPDATE OF a`, [guild, user]
       );
-      if (!rows[0]) fail("Both players need economy accounts. Run !balance first.");
+      if (!rows[0]) fail("Every participant needs an economy account. Run !balance first.");
       accounts.set(user, rows[0]);
     }
     return accounts;
@@ -88,8 +94,8 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
   async function mutate(guild, user, id, fn) {
     return transaction(guild, async (client) => {
       const candidate = await load(client, guild, id);
-      if (![candidate.leader_id, candidate.partner_id].includes(user)) fail("This dungeon belongs to another party.");
-      const accounts = await lockAccounts(client, guild, [candidate.leader_id, candidate.partner_id]);
+      if (!candidate.party_ids.includes(user)) fail("This dungeon belongs to another party.");
+      const accounts = await lockAccounts(client, guild, candidate.party_ids);
       const run = await load(client, guild, id, true);
       await expire(client, run);
       const receipt = await fn(client, run, accounts);
@@ -97,13 +103,16 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
     });
   }
 
-  async function create(guild, channel, leader, partner, difficulty = "easy") {
+  async function create(guild, channel, leader, partner = null, difficulty = "easy") {
+    if (typeof leader !== "string" || !leader || (partner != null && (typeof partner !== "string" || !partner))) fail("Invalid dungeon player.");
     if (leader === partner) fail("Choose another player.");
-    const dungeon = config.difficulties[difficulty];
-    if (!dungeon) fail("Choose easy, normal, or hard.");
+    if (!Object.hasOwn(config.difficulties, difficulty)) fail("Choose easy, normal, or hard.");
+    const party = partner == null ? [leader] : [leader, partner];
+    const mode = party.length === 1 ? "solo" : "coop";
+    const dungeon = dungeonForParty(config.difficulties[difficulty], party.length, config);
     return transaction(guild, async (client) => {
-      await lockAccounts(client, guild, [leader, partner]);
-      for (const user of [leader, partner].sort()) {
+      const accounts = await lockAccounts(client, guild, party);
+      for (const user of [...party].sort()) {
         await client.query(
           `INSERT INTO public.dungeon_members (guild_id, user_id) VALUES ($1, $2)
            ON CONFLICT (guild_id, user_id) DO NOTHING`, [guild, user]
@@ -123,18 +132,30 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
       }
       const now = clock();
       const run = {
-        id: randomUUID(), guild_id: guild, channel_id: channel, leader_id: leader, partner_id: partner,
-        status: "invited", created_at: now, expires_at: now + config.inviteMs,
-        state: { version: 1, status: "invited", round: 0, difficulty, dungeon: structuredClone(dungeon), rules: structuredClone(config), players: [], log: [] },
+        id: randomUUID(), guild_id: guild, channel_id: channel, leader_id: leader, partner_id: partner ?? null, party_ids: party,
+        status: mode === "solo" ? "active" : "invited", created_at: now,
+        expires_at: now + (mode === "solo" ? config.roundMs : config.inviteMs),
+        state: { version: 1, mode, status: "invited", round: 0, difficulty, dungeon: structuredClone(dungeon), rules: structuredClone(config), players: [], log: [] },
       };
+      if (mode === "solo") {
+        const account = accounts.get(leader);
+        run.state = startState(dungeon, [makePlayer(leader, account.weapon_item_id, account.armor_item_id, items, config)], config);
+        run.state.difficulty = difficulty;
+      }
       await client.query(
         `INSERT INTO public.dungeon_runs
-         (id, guild_id, channel_id, leader_id, partner_id, status, state, created_at, expires_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9)`,
-        [run.id, guild, channel, leader, partner, run.status, JSON.stringify(run.state), now, run.expires_at]
+         (id, guild_id, channel_id, leader_id, partner_id, status, state, created_at, expires_at, party_ids)
+         VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10::text[])`,
+        [run.id, guild, channel, leader, partner ?? null, run.status, JSON.stringify(run.state), now, run.expires_at, party]
       );
-      for (const user of [leader, partner]) {
+      for (const user of party) {
         await client.query("UPDATE public.dungeon_members SET run_id = $1 WHERE guild_id = $2 AND user_id = $3", [run.id, guild, user]);
+        if (mode === "solo") {
+          await client.query(
+            "UPDATE public.dungeon_members SET next_entry_at = $1 WHERE guild_id = $2 AND user_id = $3",
+            [now + config.cooldownMs, guild, user]
+          );
+        }
       }
       return present(client, run);
     });
@@ -173,7 +194,7 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
           await save(client, run); await releaseParty(client, run); return null;
         }
         if (action !== "accept" || user !== run.partner_id) fail("Only the invited player can accept.");
-        const users = [run.leader_id, run.partner_id];
+        const users = run.party_ids;
         for (const player of users) {
           const { rows } = await client.query(
             "SELECT run_id, next_entry_at FROM public.dungeon_members WHERE guild_id = $1 AND user_id = $2 FOR UPDATE", [guild, player]
@@ -211,7 +232,7 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
           if (run.status !== "active") {
             await releaseParty(client, run);
             if (run.status === "won") {
-              for (const recipient of [run.leader_id, run.partner_id]) {
+              for (const recipient of run.party_ids) {
                 await client.query(
                   `INSERT INTO public.dungeon_rewards (run_id, guild_id, user_id, amount)
                    VALUES ($1, $2, $3, $4) ON CONFLICT (run_id, user_id) DO NOTHING`,

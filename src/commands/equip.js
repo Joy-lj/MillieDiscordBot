@@ -1,26 +1,66 @@
 import { equipItemBySerial } from "../database/items.js";
 
 export async function equipCommand(message) {
+  if (!message.inGuild() || message.author.bot) return;
+
   const args = message.content.trim().split(/\s+/);
   const itemId = args[1]?.toLowerCase();
-  const serialNumber = parseInt(args[2], 10);
+  const serialText = args[2];
 
-  if (!itemId || isNaN(serialNumber)) {
-    return message.reply("Please specify both the item name and its serial number!\nExample: `!equip foam-sword 1`");
+  if (
+    args.length !== 3 ||
+    !itemId ||
+    !/^\d+$/.test(serialText ?? "")
+  ) {
+    return message.reply(
+      "Usage: `!equip <item-id> <serial-number>`\n" +
+      "Example: `!equip millies-wrath 1`"
+    );
   }
 
-  const result = equipItemBySerial(message.guild.id, message.author.id, itemId, serialNumber);
+  const serialNumber = Number(serialText);
+
+  if (!Number.isSafeInteger(serialNumber) || serialNumber < 1) {
+    return message.reply("Enter a valid positive whole-number serial.");
+  }
+
+  let result;
+
+  try {
+    result = await equipItemBySerial(
+      message.guildId,
+      message.author.id,
+      itemId,
+      serialNumber
+    );
+  } catch (error) {
+    console.error("Equip failed:", error);
+
+    return message.reply(
+      "Couldn't confirm the equipment change. Check your equipment before trying again."
+    );
+  }
 
   if (!result.success) {
-    if (result.reason === "invalid_item") {
-      return message.reply("That item doesn't exist! Check `!shop` for valid items.");
-    }
-    if (result.reason === "not_owned") {
-      return message.reply(`You don't own **${itemId} #${serialNumber}**! Check your \`!inventory\` to verify your serial numbers.`);
-    }
-    return message.reply("Failed to equip item.");
+    const errors = {
+      invalid_item: "That item doesn't exist! Check `!shop` for available items.",
+      not_owned: "You don't own that item and serial. Check `!inventory`.",
+      invalid_type: "That item cannot be equipped as a weapon or armor.",
+    };
+
+    return message.reply(
+      errors[result.reason] ?? "Failed to equip item."
+    );
   }
 
-  const statLabel = result.item.type === "weapon" ? "Strength" : "Defense";
-  await message.reply(`⚔️ You successfully equipped your **${result.item.name} #${result.serialNumber}**! (${statLabel}: +${result.item.stat})`);
+  const isWeapon = result.item.type === "weapon";
+  const statLabel = isWeapon ? "Strength" : "Defense";
+
+  await message.reply({
+    content:
+      `${isWeapon ? "⚔️" : "🛡️"} You equipped ` +
+      `**${result.item.name} #${result.serialNumber}**! ` +
+      `(${statLabel}: +${result.item.stat})`,
+    allowedMentions: { parse: [], repliedUser: false },
+  });
 }
