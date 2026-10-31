@@ -11,6 +11,24 @@ export const groupLabels = {
   uncommon: "Uncommon",
   rare: "Rare",
   special: "Other Rarities",
+
+  holo_rare: "Holo Rare",
+  double_rare: "Double Rare",
+  ultra_rare: "Ultra Rare",
+  illustration_rare: "Illustration Rare",
+  special_illustration_rare: "Special Illustration Rare",
+  hyper_rare: "Hyper Rare",
+  ace_spec_rare: "ACE SPEC Rare",
+
+  secret_rare: "Secret Rare",
+  radiant_rare: "Radiant Rare",
+  amazing_rare: "Amazing Rare",
+  shiny_rare: "Shiny Rare",
+  shiny_ultra_rare: "Shiny Ultra Rare",
+  holo_rare_v: "Holo Rare V",
+  holo_rare_vmax: "Holo Rare VMAX",
+  holo_rare_vstar: "Holo Rare VSTAR",
+  full_art_trainer: "Full Art Trainer",
 };
 
 export function rarityGroup(rarity) {

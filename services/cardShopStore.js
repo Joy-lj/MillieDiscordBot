@@ -1,12 +1,62 @@
 import { createHash, randomUUID } from "node:crypto";
-import { packDefinitions, rarityGroup } from "../src/config/cardShop.js";
-import { validateOffer, chooseCards } from "./cardPackLogic.js";
+import { packDefinitions } from "../src/config/cardShop.js";
+import {
+  CARD_GROUPS,
+  validateOffer,
+  chooseCards,
+} from "./cardPackLogic.js";
 
-export class CardShopError extends Error {}
+export class CardShopError extends Error { }
 const hash = (value) => createHash("sha256").update(value).digest("hex");
 const fail = (message) => { throw new CardShopError(message); };
 const MAX_BALANCE = Number.MAX_SAFE_INTEGER;
-const GROUPS = ["common", "uncommon", "rare", "special"];
+const GROUPS = CARD_GROUPS;
+
+// Preserve the existing four database bucket values.
+// Detailed pools are built from the separate rarity column.
+function legacyBucket(rarity) {
+  const value = String(rarity ?? "").trim().toLowerCase();
+
+  return ["common", "uncommon", "rare"].includes(value)
+    ? value
+    : "special";
+}
+
+const RARITY_POOLS = {
+  "common": "common",
+  "uncommon": "uncommon",
+  "rare": "rare",
+
+  "holo rare": "holo_rare",
+  "rare holo": "holo_rare",
+  "double rare": "double_rare",
+  "ultra rare": "ultra_rare",
+  "illustration rare": "illustration_rare",
+  "special illustration rare": "special_illustration_rare",
+  "hyper rare": "hyper_rare",
+  "ace spec rare": "ace_spec_rare",
+
+  "secret rare": "secret_rare",
+  "radiant rare": "radiant_rare",
+  "amazing rare": "amazing_rare",
+  "shiny rare": "shiny_rare",
+  "shiny ultra rare": "shiny_ultra_rare",
+  "holo rare v": "holo_rare_v",
+  "holo rare vmax": "holo_rare_vmax",
+  "holo rare vstar": "holo_rare_vstar",
+  "full art trainer": "full_art_trainer",
+};
+
+function poolForRarity(rarity) {
+  const value = String(rarity ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+
+  return Object.hasOwn(RARITY_POOLS, value)
+    ? RARITY_POOLS[value]
+    : "special";
+}
 
 function number(value, name) {
   const result = Number(value);
@@ -67,11 +117,11 @@ export function createCardShopStore(db, definitions = packDefinitions, rng) {
     }
     const prepared = cards.map((card) => {
       if (typeof card.id !== "string" || !card.id || !card.name ||
-          card.set?.id !== setId || !card.image || !card.rarity) {
+        card.set?.id !== setId || !card.image || !card.rarity) {
         fail(`Incomplete card: ${card.id ?? "unknown"}. No catalog changes made.`);
       }
       const payload = JSON.stringify(card);
-      const bucket = rarityGroup(card.rarity);
+      const bucket = legacyBucket(card.rarity);
       if (!GROUPS.includes(bucket)) fail("Invalid rarity group.");
       return { key: hash(payload), card, payload, bucket };
     });
@@ -97,7 +147,7 @@ export function createCardShopStore(db, definitions = packDefinitions, rng) {
     // One query sees one committed catalog revision across all source sets.
     const setIds = [...new Set(offer.setIds)];
     const { rows } = await client.query(
-      `SELECT card_key, set_id, bucket FROM public.card_catalog
+      `SELECT card_key, set_id, bucket, rarity FROM public.card_catalog
        WHERE set_id = ANY($1::text[]) AND active = 1
        ORDER BY api_id, card_key`, [setIds]
     );
@@ -115,22 +165,52 @@ export function createCardShopStore(db, definitions = packDefinitions, rng) {
 
   function snapshotFromCatalog(offer, index) {
     validateOffer(offer);
-    const pools = { common: [], uncommon: [], rare: [], special: [] };
+
+    const pools = Object.fromEntries(
+      GROUPS.map((group) => [group, []])
+    );
+
     for (const setId of new Set(offer.setIds)) {
       const sourceRows = index.get(setId) ?? [];
-      if (!sourceRows.length) fail(`${offer.name} unavailable: set ${setId} has not been imported.`);
-      for (const row of sourceRows) {
-        if (!GROUPS.includes(row.bucket)) fail("Invalid catalog rarity group.");
-        pools[row.bucket].push(row.card_key);
+
+      if (!sourceRows.length) {
+        fail(
+          `${offer.name} unavailable: set ${setId} has not been imported.`
+        );
       }
-    }
-    for (const slot of offer.slots) {
-      for (const group of Object.keys(slot)) {
-        if (!pools[group].length) {
-          fail(`${offer.name} unavailable: no ${group} cards. Run catalog sync or adjust slots.`);
+
+      for (const row of sourceRows) {
+        if (!GROUPS.includes(row.bucket)) {
+          fail("Invalid catalog rarity group.");
+        }
+
+        const group = row.rarity
+          ? poolForRarity(row.rarity)
+          : row.bucket;
+
+        pools[group].push(row.card_key);
+
+        // Preserve the aggregate pool used by older pack definitions.
+        // Unknown rarities already entered "special" above.
+        if (
+          !["common", "uncommon", "rare", "special"].includes(group)
+        ) {
+          pools.special.push(row.card_key);
         }
       }
     }
+
+    for (const slot of offer.slots) {
+      for (const group of Object.keys(slot)) {
+        if (!pools[group]?.length) {
+          fail(
+            `${offer.name} unavailable: no ${group} cards. ` +
+            "Run catalog sync or adjust slots."
+          );
+        }
+      }
+    }
+
     return { ...offer, pools };
   }
 
@@ -138,7 +218,7 @@ export function createCardShopStore(db, definitions = packDefinitions, rng) {
     // One catalog query for the whole shop, even with hundreds of offers.
     const setIds = [...new Set(definitions.flatMap((offer) => offer.setIds))];
     const { rows } = await db.query(
-      `SELECT card_key, set_id, bucket FROM public.card_catalog
+      `SELECT card_key, set_id, bucket, rarity FROM public.card_catalog
        WHERE set_id = ANY($1::text[]) AND active = 1 ORDER BY api_id, card_key`,
       [setIds]
     );

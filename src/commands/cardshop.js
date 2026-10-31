@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import {
   ActionRowBuilder,
   AttachmentBuilder,
@@ -278,13 +279,12 @@ async function shopView(user, page = 0, target = "-") {
 
 function purchaseDetails(target) {
   const parts = String(target).split("~");
-
-  const [offerId, quote, quantityText = "1"] = parts;
+  const [offerId, quote, quantityText = "1", token] = parts;
   const quantity = Number(quantityText);
 
   if (
     parts.length < 2 ||
-    parts.length > 3 ||
+    parts.length > 4 ||
     !offerId ||
     !quote ||
     quote === "unavailable" ||
@@ -295,7 +295,16 @@ function purchaseDetails(target) {
     );
   }
 
-  return { offerId, quote, quantity };
+  if (
+    token &&
+    !/^[a-z0-9]{8,12}\.[a-f0-9]{8}$/.test(token)
+  ) {
+    throw new CardShopError(
+      "Invalid confirmation. Refresh !cardshop."
+    );
+  }
+
+  return { offerId, quote, quantity, token };
 }
 
 async function purchaseView(user, target) {
@@ -317,6 +326,13 @@ async function purchaseView(user, target) {
     throw new CardShopError("Invalid purchase total.");
   }
 
+  // Unique to this purchase, even when reusing the same message.
+  const token =
+    `${Date.now().toString(36)}.${randomBytes(4).toString("hex")}`;
+
+  const confirmationTarget =
+    `${offerId}~${quote}~${quantity}~${token}`;
+
   const embed = new EmbedBuilder()
     .setTitle("Confirm Pack Purchase")
     .setColor(pack.color ?? 0x63acff)
@@ -325,7 +341,7 @@ async function purchaseView(user, target) {
       `Unit price: **${money(pack.price)}**\n` +
       `Total: **${money(total)}**\n` +
       `Cards: **${pack.slots.length * quantity}**\n\n` +
-      "Confirm within 5 minutes, or cancel to return to browsing."
+      "Confirm within 5 minutes, or cancel."
     );
 
   return payload(embed, [
@@ -334,7 +350,7 @@ async function purchaseView(user, target) {
         user,
         "Confirm purchase",
         "confirmbuy",
-        target,
+        confirmationTarget,
         0,
         ButtonStyle.Success
       ),
@@ -342,7 +358,7 @@ async function purchaseView(user, target) {
         user,
         "Cancel",
         "cancelbuy",
-        "-",
+        token,
         0,
         ButtonStyle.Danger
       )
@@ -776,28 +792,43 @@ export async function handleCardShopInteraction(interaction) {
       if (until <= now) consumedConfirmations.delete(key);
     }
 
-    const key = interaction.message.id;
+    const token = action === "confirmbuy"
+      ? String(target).split("~")[3]
+      : target === "-"
+        ? null
+        : target;
 
-    if (consumedConfirmations.has(key)) {
+    if (
+      token &&
+      !/^[a-z0-9]{8,12}\.[a-f0-9]{8}$/.test(token)
+    ) {
       await interaction.reply({
-        content:
-          "This confirmation was already handled. " +
-          "Check !packs for purchased packs.",
+        content: "Invalid confirmation. Refresh !cardshop.",
         flags: MessageFlags.Ephemeral,
       });
 
       return true;
     }
 
+    const key = token ?? interaction.message.id;
+
+    if (consumedConfirmations.has(key)) {
+      // Silently acknowledge repeated clicks.
+      await interaction.deferUpdate();
+      return true;
+    }
+
+    const createdAt = token
+      ? parseInt(token.split(".")[0], 36)
+      : interaction.message.createdTimestamp;
+
     if (
       action === "confirmbuy" &&
-      interaction.message.createdTimestamp &&
-      now - interaction.message.createdTimestamp > CONFIRM_MAX_AGE
+      createdAt &&
+      now - createdAt > CONFIRM_MAX_AGE
     ) {
       await interaction.update({
-        content:
-          "Purchase confirmation expired. " +
-          "Open !cardshop for a new quote.",
+        content: "Purchase confirmation expired. Open !cardshop again.",
         embeds: [],
         components: [],
         attachments: [],
@@ -810,25 +841,8 @@ export async function handleCardShopInteraction(interaction) {
     consumedConfirmations.set(key, now + 15 * 60 * 1000);
   }
 
-  const navigation = [
-    "shop",
-    "shopselect",
-    "packs",
-    "pick",
-    "cards",
-    "cardpick",
-    "reveal",
-    "confirmbuy",
-    "cancelbuy",
-  ].includes(action);
-
-  if (navigation) {
-    await interaction.deferUpdate();
-  } else {
-    await interaction.deferReply({
-      flags: MessageFlags.Ephemeral,
-    });
-  }
+  // All actions update the message containing the clicked control.
+  await interaction.deferUpdate();
 
   const guild = interaction.guildId;
   const user = interaction.user.id;
@@ -897,13 +911,11 @@ export async function handleCardShopInteraction(interaction) {
     } else if (action === "buy") {
       data = await purchaseView(user, target);
     } else if (action === "confirmbuy") {
-      const { offerId, quote, quantity } =
+      const { offerId, quote, quantity, token } =
         purchaseDetails(target);
 
-      // Repeated clicks on this confirmation share a request ID.
-      // The existing card_actions receipt prevents duplicate charges.
       const requestId =
-        `cardshop:purchase:${interaction.message.id}`;
+        `cardshop:purchase:${token ?? interaction.message.id}`;
 
       const receipt = await cardShop.buy(
         guild,
