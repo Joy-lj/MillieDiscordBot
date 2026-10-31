@@ -70,7 +70,7 @@ client.on(Events.MessageCreate, async (message) => {
       await fishBagCommand(message);
     }
 
-    if (command === "dungeon") {
+    if (/^!dungeon(?:\s|$)/i.test(message.content.trim())) {
       await dungeonCommand(message);
       return;
     }
