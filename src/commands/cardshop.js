@@ -1,5 +1,4 @@
 import { randomBytes } from "node:crypto";
-
 import {
   ActionRowBuilder,
   AttachmentBuilder,
@@ -16,6 +15,7 @@ import { groupLabels } from "../config/cardShop.js";
 import { CardShopError } from "../../services/cardShopStore.js";
 import { renderCard } from "../cards/renderCard.js";
 import { renderCardGrid } from "../cards/renderCardGrid.js";
+
 
 const quiet = { parse: [], repliedUser: false };
 

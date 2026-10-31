@@ -13,6 +13,7 @@ import {
 import { randomUUID } from "node:crypto";
 import { ITEMS, buyItem } from "../database/items.js";
 import { economyConfig } from "../config/economy.js";
+import { rarityEmoji } from "../utils/rarityEmojis.js";
 
 const quiet = { parse: [], repliedUser: false };
 
@@ -562,10 +563,7 @@ function shopView(state, prefix, expired = false) {
       },
       {
         name: "Rarity",
-        value: clean(
-          rarity[0].toUpperCase() + rarity.slice(1),
-          40
-        ),
+        value: `${rarityEmoji(rarity)} ${clean(rarity)}`,
         inline: true,
       },
       {
