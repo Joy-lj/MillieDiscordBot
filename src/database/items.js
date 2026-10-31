@@ -123,6 +123,9 @@ export async function buyItem(guildId, userId, itemId, quantity = 1) {
   if (qty === null) return { success: false, reason: "invalid_quantity" };
   const item = ITEMS[itemId];
   if (!item) return { success: false, reason: "invalid_item" };
+  if (item.purchasable === false || item.source === "dungeon") {
+    return { success: false, reason: "dungeon_only" };
+  }
   const totalPrice = itemPrice(item) * qty;
   if (!Number.isSafeInteger(totalPrice)) return { success: false, reason: "invalid_quantity" };
 

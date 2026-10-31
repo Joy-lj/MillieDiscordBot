@@ -27,6 +27,7 @@ function dungeonView(run) {
     embed.setDescription(
       `<@${run.leader_id}> invited <@${run.partner_id}> to a **${text(state.difficulty)}** dungeon!\n\n` +
       `Clear all three rooms to earn **${money(reward)} per player**.\n` +
+      (state.lootTable ? "Each player also gets one independent equipment drop roll.\n" : "") +
       `Free entry. Your entry cooldown starts on acceptance (**${Math.round(state.rules.cooldownMs / 60000)} minutes**).\n` +
       `Accept before <t:${Math.ceil(run.expires_at / 1000)}:R>.\n\n` +
       "Equip your gear before accepting. Both players need economy accounts."
@@ -48,6 +49,7 @@ function dungeonView(run) {
           `<@${player.userId}> • **${player.hp}/${player.maxHealth} HP**\n` +
           `ATK ${player.attack} • DEF ${player.defense} • SPD ${player.speed}\n` +
           `${text(player.weaponName)} / ${text(player.armorName)}\n` +
+          `Passive: ${text(player.passive?.name ?? "None")} • Shield: ${player.shield ?? 0}\n` +
           `Potions: ${player.potions} • Skill: ${skill ? `${skill.name} (${player.skillCooldown ? `${player.skillCooldown} turn cooldown` : "ready"})` : "none"}` +
           (run.status === "active" ? `\nAction: ${player.hp <= 0 ? "knocked out" : player.choice ? "🔒 locked" : "waiting"}` : ""), inline: false
       });
@@ -66,8 +68,10 @@ function dungeonView(run) {
   if (run.status === "won") {
     embed.addFields({
       name: "Clear rewards", value: run.rewards.map((entry) =>
-        `<@${entry.user_id}>: **${money(entry.amount)}** — ${entry.claimed_at == null ? "ready to claim" : "claimed"}`
-      ).join("\n") || "Rewards are being prepared."
+        `<@${entry.user_id}>: **${money(entry.amount)}** — ${entry.claimed_at == null ? "ready to claim" : "claimed"}` +
+        `\n${entry.loot?.length ? "🎁 " + entry.loot.map(drop => `${text(drop.name, 60)} × ${drop.quantity}`).join(", ") :
+          entry.loot_rolled ? "No equipment drop this time." : "Currency-only reward from an earlier run."}`
+      ).join("\n\n").slice(0, 1024) || "Rewards are being prepared."
     });
     components = [row(button(run, "claim", "Claim my reward", ButtonStyle.Success,
       run.rewards.length > 0 && run.rewards.every((entry) => entry.claimed_at != null)), button(run, "refresh", "Refresh"))];
@@ -141,124 +145,52 @@ export async function dungeonCommand(message) {
 }
 
 export async function handleDungeonInteraction(interaction) {
-  if (
-    !interaction.isButton() ||
-    !interaction.customId.startsWith("dg:")
-  ) {
-    return false;
-  }
-
+  if (!interaction.isButton() || !interaction.customId.startsWith("dg:")) return false;
   if (!interaction.inGuild()) {
-    await interaction.reply({
-      content: "Dungeons are available inside a server.",
-      flags: MessageFlags.Ephemeral,
-    });
-    return true;
+    await interaction.reply({ content: "Dungeons are available inside a server.", flags: MessageFlags.Ephemeral }); return true;
   }
-
   const parts = interaction.customId.split(":");
   const [, id, roundText, action] = parts;
-  const round = Number(roundText);
-
-  const validActions = [
-    "accept", "decline", "attack", "defend", "skill",
-    "heal", "refresh", "leave", "claim",
-  ];
-
-  if (
-    parts.length !== 4 ||
-    !/^[0-9a-f-]{36}$/.test(id ?? "") ||
-    !/^\d+$/.test(roundText ?? "") ||
-    !Number.isSafeInteger(round) ||
-    !validActions.includes(action)
-  ) {
-    await interaction.reply({
-      content: "Invalid dungeon control. Use !dungeon.",
-      flags: MessageFlags.Ephemeral,
-    });
-    return true;
+  if (parts.length !== 4 || !/^[0-9a-f-]{36}$/.test(id ?? "") || !/^\d+$/.test(roundText ?? "") ||
+    !["accept", "decline", "attack", "defend", "skill", "heal", "refresh", "leave", "claim"].includes(action)) {
+    await interaction.reply({ content: "Invalid dungeon control. Use !dungeon.", flags: MessageFlags.Ephemeral }); return true;
   }
+  const claiming = action === "claim";
 
-  const isClaim = action === "claim";
-
-  if (isClaim) {
-    await interaction.deferReply({
-      flags: MessageFlags.Ephemeral,
-    });
+  if (claiming) {
+    await interaction.deferReply();
   } else {
-    // Acknowledge the click without creating another message.
     await interaction.deferUpdate();
   }
-
-  async function privateMessage(content) {
-    const data = { content, allowedMentions: quiet };
-
-    if (isClaim) {
-      await interaction.editReply(data);
-    } else {
-      await interaction.followUp({
-        ...data,
-        flags: MessageFlags.Ephemeral,
-      });
-    }
-  }
-
   let result;
-
   try {
-    result = await dungeon.act(
-      interaction.guildId,
-      interaction.user.id,
-      id,
-      round,
-      action
-    );
+    result = await dungeon.act(interaction.guildId, interaction.user.id, id, Number(roundText), action);
   } catch (error) {
     console.error("Dungeon action failed:", error);
-
-    await privateMessage(
-      error instanceof DungeonError
-        ? error.message
-        : "Could not confirm the action. Use !dungeon or !dungeon rewards to check before retrying."
-    ).catch(console.error);
-
+    const data = {
+      content: error instanceof DungeonError ? error.message :
+        "Could not confirm the action. Use !dungeon or !dungeon rewards to check before retrying.", allowedMentions: quiet
+    };
+    if (claiming) await interaction.editReply(data).catch(console.error);
+    else await interaction.followUp({ ...data, flags: MessageFlags.Ephemeral }).catch(console.error);
     return true;
   }
-
-  let panelFailed = false;
-
-  try {
-    await refreshPanel(
-      interaction.message,
-      interaction.guildId,
-      interaction.user.id,
-      id
-    );
-  } catch (error) {
-    console.error("Dungeon saved but panel refresh failed:", error);
-    panelFailed = true;
-  }
-
-  if (isClaim) {
+  let content = "";
+  if (result.receipt) {
     const receipt = result.receipt;
-
-    const content = receipt?.alreadyClaimed
-      ? "You already claimed this run's reward."
-      : receipt
-        ? `Claimed **${money(receipt.amount)}**! Balance: **${money(receipt.balance)}**.`
-        : "No reward was claimed.";
-
-    await privateMessage(
-      content +
-      (panelFailed
-        ? " Use !dungeon rewards to refresh the display."
-        : "")
-    ).catch(console.error);
-  } else if (panelFailed) {
-    await privateMessage(
-      "Your action was saved, but the panel could not refresh. Use !dungeon to reopen it."
-    ).catch(console.error);
+    content = receipt.alreadyClaimed ? "You already claimed this run's reward." :
+      `Claimed **${money(receipt.amount)}**! Balance: **${money(receipt.balance)}**.`;
+    if (receipt.items?.length) content += "\n🎁 " + receipt.items.map(item =>
+      `**${text(item.name, 60)} #${item.serialNumber}** — equip with \`!equip ${item.itemId} ${item.serialNumber}\``
+    ).join("\n");
   }
-
+  try { await refreshPanel(interaction.message, interaction.guildId, interaction.user.id, id); }
+  catch (error) {
+    console.error("Dungeon state saved but panel refresh failed:", error);
+    const notice = "The action was saved, but the panel could not refresh. Use !dungeon to reopen it.";
+    if (claiming) content += "\n" + notice;
+    else await interaction.followUp({ content: notice, flags: MessageFlags.Ephemeral, allowedMentions: quiet }).catch(console.error);
+  }
+  if (claiming) await interaction.editReply({ content: content || "Reward checked.", allowedMentions: quiet }).catch(console.error);
   return true;
 }

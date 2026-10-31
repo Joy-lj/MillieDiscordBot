@@ -42,6 +42,8 @@ import {
   handleDungeonInteraction,
 } from "./commands/dungeon.js";
 
+import { resetDungeonCommand } from "./commands/resetDungeon.js";
+
 
 // Choose which Discord events the bot can receive.
 const client = new Client({
@@ -72,6 +74,13 @@ client.on(Events.MessageCreate, async (message) => {
 
     if (/^!dungeon(?:\s|$)/i.test(message.content.trim())) {
       await dungeonCommand(message);
+      return;
+    }
+
+    if (
+      message.content.trim().split(/\s+/)[0].toLowerCase() === "!resetdungeon"
+    ) {
+      await resetDungeonCommand(message);
       return;
     }
 

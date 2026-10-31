@@ -2,6 +2,7 @@ import { createHash, randomInt, randomUUID } from "node:crypto";
 import { DungeonError, dungeonForParty, makePlayer, resolveRound, startState, validateChoice, validateConfig } from "./dungeonLogic.js";
 export { DungeonError } from "./dungeonLogic.js";
 const fail = (message) => { throw new DungeonError(message); };
+import { snapshotLootTable, rollDungeonLoot, decodeLoot, grantDungeonLoot } from "./dungeonLootLogic.js";
 const MAX_BALANCE = Number.MAX_SAFE_INTEGER;
 
 function decode(row) {
@@ -16,8 +17,12 @@ function decode(row) {
     expires_at: Number(row.expires_at), created_at: Number(row.created_at) };
 }
 
-export function createDungeonStore(db, items, config, { rng = randomInt, clock = Date.now } = {}) {
+export function createDungeonStore(db, items, config, { rng = randomInt, lootRng = randomInt, clock = Date.now, lootTables = null } = {}) {
   validateConfig(config);
+  // Fail at startup for malformed/missing tables, not after a successful fight.
+  if (lootTables !== null) for (const difficulty of Object.keys(config.difficulties)) {
+    snapshotLootTable(lootTables[difficulty], items);
+  }
 
   async function transaction(guild, fn) {
     const client = await db.connect();
@@ -86,9 +91,9 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
 
   async function present(client, run) {
     const { rows } = await client.query(
-      "SELECT user_id, amount, claimed_at FROM public.dungeon_rewards WHERE run_id = $1 ORDER BY user_id", [run.id]
+      "SELECT user_id, amount, claimed_at, loot, loot_rolled FROM public.dungeon_rewards WHERE run_id = $1 ORDER BY user_id", [run.id]
     );
-    return { ...run, rewards: rows.map((row) => ({ ...row, amount: Number(row.amount), claimed_at: row.claimed_at == null ? null : Number(row.claimed_at) })) };
+    return { ...run, rewards: rows.map((row) => ({ ...row, loot: decodeLoot(row.loot), amount: Number(row.amount), claimed_at: row.claimed_at == null ? null : Number(row.claimed_at) })) };
   }
 
   async function mutate(guild, user, id, fn) {
@@ -109,6 +114,7 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
     if (!Object.hasOwn(config.difficulties, difficulty)) fail("Choose easy, normal, or hard.");
     const party = partner == null ? [leader] : [leader, partner];
     const mode = party.length === 1 ? "solo" : "coop";
+    const lootTable = lootTables === null ? null : snapshotLootTable(lootTables[difficulty], items);
     const dungeon = dungeonForParty(config.difficulties[difficulty], party.length, config);
     return transaction(guild, async (client) => {
       const accounts = await lockAccounts(client, guild, party);
@@ -142,6 +148,7 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
         run.state = startState(dungeon, [makePlayer(leader, account.weapon_item_id, account.armor_item_id, items, config)], config);
         run.state.difficulty = difficulty;
       }
+      run.state.lootTable = lootTable;
       await client.query(
         `INSERT INTO public.dungeon_runs
          (id, guild_id, channel_id, leader_id, partner_id, status, state, created_at, expires_at, party_ids)
@@ -167,11 +174,11 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
       if (action === "claim") {
         if (run.status !== "won") fail("This dungeon has no clear reward.");
         const { rows } = await client.query(
-          "SELECT amount, claimed_at, balance_after FROM public.dungeon_rewards WHERE run_id = $1 AND user_id = $2 FOR UPDATE", [id, user]
+          "SELECT amount, claimed_at, balance_after, loot, item_receipts, loot_rolled FROM public.dungeon_rewards WHERE run_id = $1 AND user_id = $2 FOR UPDATE", [id, user]
         );
         const reward = rows[0];
         if (!reward) fail("No reward belongs to this player.");
-        if (reward.claimed_at != null) return { alreadyClaimed: true, amount: Number(reward.amount), balance: Number(reward.balance_after) };
+        if (reward.claimed_at != null) return { alreadyClaimed: true, amount: Number(reward.amount), balance: Number(reward.balance_after), items: reward.item_receipts ?? [] };
         const amount = Number(reward.amount);
         const { rows: credited } = await client.query(
           `UPDATE public.accounts SET balance = balance + $1
@@ -181,10 +188,13 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
         if (!credited[0]) fail("Your balance is too high to claim. The reward remains saved.");
         const balance = Number(credited[0].balance);
         if (!Number.isSafeInteger(balance)) fail("Invalid account balance.");
+        const granted = await grantDungeonLoot(client, guild, user, reward.loot, items);
         await client.query(
-          "UPDATE public.dungeon_rewards SET claimed_at = $1, balance_after = $2 WHERE run_id = $3 AND user_id = $4", [clock(), balance, id, user]
+          `UPDATE public.dungeon_rewards SET claimed_at = $1, balance_after = $2,
+           item_receipts = $5::jsonb WHERE run_id = $3 AND user_id = $4`,
+          [clock(), balance, id, user, JSON.stringify(granted)]
         );
-        return { alreadyClaimed: false, amount, balance };
+        return { alreadyClaimed: false, amount, balance, items: granted };
       }
       if (!["invited", "active"].includes(run.status)) return null;
       if (round !== run.state.round) fail("That panel is from an older round. Press Refresh or use !dungeon.");
@@ -207,8 +217,10 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
           return makePlayer(player, account.weapon_item_id, account.armor_item_id, items, run.state.rules);
         });
         const difficulty = run.state.difficulty;
+        const lootTable = run.state.lootTable ?? null;
         run.state = startState(run.state.dungeon, players, run.state.rules);
         run.state.difficulty = difficulty;
+        run.state.lootTable = lootTable;
         run.status = "active";
         run.expires_at = clock() + run.state.rules.roundMs;
         for (const player of users) {
@@ -233,10 +245,11 @@ export function createDungeonStore(db, items, config, { rng = randomInt, clock =
             await releaseParty(client, run);
             if (run.status === "won") {
               for (const recipient of run.party_ids) {
+                const loot = rollDungeonLoot(run.state.lootTable, lootRng);
                 await client.query(
-                  `INSERT INTO public.dungeon_rewards (run_id, guild_id, user_id, amount)
-                   VALUES ($1, $2, $3, $4) ON CONFLICT (run_id, user_id) DO NOTHING`,
-                  [id, guild, recipient, run.state.dungeon.reward]
+                  `INSERT INTO public.dungeon_rewards (run_id, guild_id, user_id, amount, loot, loot_rolled)
+                   VALUES ($1, $2, $3, $4, $5::jsonb, $6) ON CONFLICT (run_id, user_id) DO NOTHING`,
+                  [id, guild, recipient, run.state.dungeon.reward, JSON.stringify(loot), run.state.lootTable != null]
                 );
               }
             }

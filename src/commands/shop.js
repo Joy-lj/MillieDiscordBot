@@ -15,6 +15,7 @@ const MODAL_TIMEOUT = 180_000;
 const money = (amount) => `${amount.toLocaleString("en-US")} ${economyConfig.currencyName}`;
 const clean = (value, max = 100) => String(value ?? "").slice(0, max).replace(/([\\`*_~|>])/g, "\\$1");
 const row = (...components) => new ActionRowBuilder().addComponents(components);
+const canBuy = (item) => item && item.purchasable !== false && item.source !== "dungeon";
 const ownItem = (id) => Object.hasOwn(ITEMS, id) ? ITEMS[id] : null;
 const button = (id, label, style = ButtonStyle.Secondary, disabled = false) =>
   new ButtonBuilder().setCustomId(id).setLabel(label.slice(0, 80)).setStyle(style).setDisabled(disabled);
@@ -43,7 +44,7 @@ function validateQuantity(quantity) {
 }
 
 function findItems(query) {
-  const entries = Object.entries(ITEMS);
+  const entries = Object.entries(ITEMS).filter(([, item]) => canBuy(item));
   const raw = query.trim().toLowerCase();
   const exactId = entries.find(([id]) => id.toLowerCase() === raw);
   if (exactId) return [exactId];
@@ -63,6 +64,7 @@ function itemDetails(item) {
   const d = item.dungeon ?? {};
   const primary = item.type === "weapon" ? `⚔️ Attack +${item.stat}` : `🛡️ Defense +${item.stat}`;
   const extras = [];
+  if (d.passive?.name) extras.push(d.passive.name);
   if (d.healthBonus != null) extras.push(`HP +${d.healthBonus}`);
   if (d.speedBonus != null) extras.push(`Speed ${d.speedBonus >= 0 ? "+" : ""}${d.speedBonus}`);
   if (d.critChance != null) extras.push(`Crit ${Math.round(d.critChance * 100)}%`);
@@ -90,6 +92,7 @@ async function notifyError(interaction, content) {
 
 function failureText(result) {
   if (result.reason === "insufficient_funds") return `❌ You need **${money(result.price)}** for this purchase.`;
+  if (result.reason === "dungeon_only") return "That equipment can only drop from dungeons.";
   if (result.reason === "invalid_item") return "That item is no longer available. Refresh !shop.";
   if (result.reason === "invalid_quantity") return "That quantity or purchase total exceeds the supported limit.";
   return "The purchase could not be completed.";
@@ -116,7 +119,7 @@ function receiptView(result) {
 async function purchasePreview({ guild, owner, itemId, quantity, send, edit }) {
   validateQuantity(quantity);
   const item = ownItem(itemId);
-  if (!item) throw new Error("That item is no longer available. Refresh !shop.");
+  if (!canBuy(item)) throw new Error("That item is unavailable in the shop; dungeon gear must be earned from clears.");
   const unitPrice = item.price;
   const total = unitPrice * quantity;
   if (!Number.isSafeInteger(total) || total < 1) throw new Error("Purchase total exceeds the supported limit.");
@@ -149,7 +152,7 @@ async function purchasePreview({ guild, owner, itemId, quantity, send, edit }) {
     return;
   }
   // Do not silently charge a new price if code was hot-reloaded or config mutated.
-  if (!ownItem(itemId) || ITEMS[itemId].price !== unitPrice) {
+  if (!canBuy(ownItem(itemId)) || ITEMS[itemId].price !== unitPrice) {
     await update({ content: "This item's price changed. Refresh !shop and review the new price.", embeds: [], components: [], allowedMentions: quiet }).catch(console.error);
     return;
   }
@@ -171,7 +174,7 @@ async function purchasePreview({ guild, owner, itemId, quantity, send, edit }) {
 
 async function quantityModal(interaction, itemId, guild, owner) {
   const item = ownItem(itemId);
-  if (!item) { await notifyError(interaction, "That item is no longer available. Refresh !shop."); return; }
+  if (!canBuy(item)) { await notifyError(interaction, "That item cannot be bought. Dungeon gear must be earned from clears."); return; }
   const modalId = `eqmodal:${interaction.id}`;
   const input = new TextInputBuilder().setCustomId("quantity").setLabel(`Quantity (1–${MAX_QUANTITY})`)
     .setStyle(TextInputStyle.Short).setRequired(true).setValue("1").setMaxLength(String(MAX_QUANTITY).length);
@@ -194,10 +197,8 @@ async function quantityModal(interaction, itemId, guild, owner) {
     if (!/^\d+$/.test(raw)) throw new Error(`Enter a whole-number quantity from 1 to ${MAX_QUANTITY}.`);
     const quantity = Number(raw);
     validateQuantity(quantity);
-    await purchasePreview({
-      guild, owner, itemId, quantity,
-      send: (data) => submitted.editReply(data), edit: (data) => submitted.editReply(data)
-    });
+    await purchasePreview({ guild, owner, itemId, quantity,
+      send: (data) => submitted.editReply(data), edit: (data) => submitted.editReply(data) });
   } catch (error) {
     console.error("Shop quantity/preview failed:", error);
     await submitted.editReply({ content: error.message, embeds: [], components: [], allowedMentions: quiet }).catch(console.error);
@@ -212,10 +213,8 @@ function shopView(entries, page, prefix, expired = false) {
       "Text shortcuts also work: `!buy feather` or `!buy wrath 2`." : "There are no items configured yet.")
     .setFooter({ text: `Page ${page + 1}/${pages} • Controls expire after 2 minutes` });
   for (const [, item] of shown) {
-    embed.addFields({
-      name: item.name, value: `${itemDetails(item)}\nPrice: **${money(item.price)}**\n` +
-        `${clean(item.description, 250)}${item.dungeon?.ability?.name ? `\nSkill: ${clean(item.dungeon.ability.name)}` : ""}`, inline: false
-    });
+    embed.addFields({ name: item.name, value: `${itemDetails(item)}\nPrice: **${money(item.price)}**\n` +
+      `${clean(item.description, 250)}${item.dungeon?.ability?.name ? `\nSkill: ${clean(item.dungeon.ability.name)}` : ""}`, inline: false });
   }
   const components = [];
   if (shown.length) components.push(row(...shown.map(([id, item]) => button(`${prefix}:buy:${id}`, `Buy ${item.name}`, ButtonStyle.Success, expired))));
@@ -228,7 +227,7 @@ function shopView(entries, page, prefix, expired = false) {
 
 export async function shopCommand(message) {
   if (!message.inGuild() || message.author.bot) return;
-  const entries = Object.entries(ITEMS);
+  const entries = Object.entries(ITEMS).filter(([, item]) => canBuy(item));
   const prefix = `eshop:${message.id}`;
   const reply = await message.reply(shopView(entries, 0, prefix));
   if (!entries.length) return;
@@ -278,10 +277,8 @@ async function matchingItems(message, matches, quantity) {
   function view(expired = false) {
     const shown = matches.slice(page * 25, (page + 1) * 25);
     const menu = new StringSelectMenuBuilder().setCustomId(selectId).setPlaceholder("Choose the exact item you meant").setDisabled(expired)
-      .addOptions(shown.map(([id, item]) => ({
-        label: item.name.slice(0, 100),
-        description: `${money(item.price)} each • ${item.type}`.slice(0, 100), value: id
-      })));
+      .addOptions(shown.map(([id, item]) => ({ label: item.name.slice(0, 100),
+        description: `${money(item.price)} each • ${item.type}`.slice(0, 100), value: id })));
     const components = [row(menu)];
     if (pages > 1) components.push(row(
       button(`${prefix}:previous`, "Previous matches", ButtonStyle.Secondary, expired || page === 0),
@@ -291,10 +288,8 @@ async function matchingItems(message, matches, quantity) {
   }
   const reply = await message.reply(view());
   let edits = Promise.resolve();
-  const collector = reply.createMessageComponentCollector({
-    time: SHOP_TIMEOUT,
-    filter: (i) => (i.isButton() || i.isStringSelectMenu()) && i.customId.startsWith(`${prefix}:`)
-  });
+  const collector = reply.createMessageComponentCollector({ time: SHOP_TIMEOUT,
+    filter: (i) => (i.isButton() || i.isStringSelectMenu()) && i.customId.startsWith(`${prefix}:`) });
   collector.on("collect", async (interaction) => {
     try {
       if (interaction.user.id !== message.author.id) { await notifyError(interaction, "Use !buy yourself to choose an item."); return; }
@@ -306,10 +301,8 @@ async function matchingItems(message, matches, quantity) {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         await edits;
         await reply.edit({ content: "Item selected. Review your private purchase confirmation.", components: [], allowedMentions: quiet }).catch(console.error);
-        await purchasePreview({
-          guild: message.guildId, owner: message.author.id, itemId, quantity,
-          send: (data) => interaction.editReply(data), edit: (data) => interaction.editReply(data)
-        });
+        await purchasePreview({ guild: message.guildId, owner: message.author.id, itemId, quantity,
+          send: (data) => interaction.editReply(data), edit: (data) => interaction.editReply(data) });
         return;
       }
       if (![`${prefix}:previous`, `${prefix}:next`].includes(interaction.customId)) return;
@@ -340,10 +333,8 @@ export async function buyCommand(message) {
   if (!matches.length) { await message.reply("No matching item found. Check !shop or try part of the item's name."); return; }
   if (matches.length > 1) { await matchingItems(message, matches, parsed.quantity); return; }
   try {
-    await purchasePreview({
-      guild: message.guildId, owner: message.author.id, itemId: matches[0][0],
-      quantity: parsed.quantity, send: (data) => message.reply(data)
-    });
+    await purchasePreview({ guild: message.guildId, owner: message.author.id, itemId: matches[0][0],
+      quantity: parsed.quantity, send: (data) => message.reply(data) });
   } catch (error) {
     console.error("Purchase preview failed:", error);
     await message.reply({ content: "Could not open the purchase confirmation. Check your inventory before trying again.", allowedMentions: quiet }).catch(console.error);

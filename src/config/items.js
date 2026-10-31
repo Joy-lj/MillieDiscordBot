@@ -4,6 +4,7 @@
 
 import { ABILITIES } from "../../services/dungeonAbilities.js";
 import { applyRecommendedAbilities } from "../../services/equipmentAbilityAssignments.js";
+import { withDungeonItems } from "./dungeonLoot.js";
 
 const WEAPONS = [
   {
@@ -269,11 +270,13 @@ export const DUNGEON_STATS = Object.fromEntries(catalog.map((item) => [item.id, 
   }),
 }]));
 
-export const ITEMS = applyRecommendedAbilities(
-  Object.fromEntries(
-    Object.entries(BASE_ITEMS).map(([id, item]) => [
-      id,
-      { ...item, dungeon: DUNGEON_STATS[id] ?? {} },
-    ])
+export const ITEMS = withDungeonItems(
+  applyRecommendedAbilities(
+    Object.fromEntries(
+      Object.entries(BASE_ITEMS).map(([id, item]) => [
+        id,
+        { ...item, dungeon: DUNGEON_STATS[id] ?? {} },
+      ])
+    )
   )
 );

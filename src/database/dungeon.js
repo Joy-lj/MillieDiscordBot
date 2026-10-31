@@ -3,4 +3,6 @@ import { ITEMS } from "../config/items.js";
 import { dungeonConfig } from "../config/dungeon.js";
 import { createDungeonStore } from "../../services/dungeonStore.js";
 
-export const dungeon = createDungeonStore(db, ITEMS, dungeonConfig);
+import { dungeonLootTables } from "../config/dungeonLoot.js";
+
+export const dungeon = createDungeonStore(db, ITEMS, dungeonConfig, { lootTables: dungeonLootTables });

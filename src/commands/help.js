@@ -1,21 +1,240 @@
-import { EmbedBuilder } from "discord.js";
+import {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  PermissionFlagsBits,
+  MessageFlags,
+} from "discord.js";
+
+const GIVE_ADMIN_IDS = [
+  "428738370022277121",
+  "813870343767982100",
+];
+
+const quiet = { parse: [], repliedUser: false };
 
 export async function helpCommand(message) {
-  const helpEmbed = new EmbedBuilder()
-    .setColor(0x0099ff)
-    .setTitle("🤖 Bot Commands Help")
-    .setDescription("Here is a list of all available commands:")
-    .addFields(
-      { name: "💰 Economy & Ranks", value: "`!balance` - Check your current balance\n`!level` (or `!rank`) - Check your level, XP, and milestone progress\n`!daily` - Claim your daily reward\n`!work` - Work to earn some cash\n`!fish` - Cast your line and catch fish\n`!fishbag` - View your fish inventory and sell caught fish",  inline: false },
-      { name: "📊 Rankings", value: "`!leaderboard` (or `!baltop`) - View the richest users", inline: false },
-      { name: "🎁 Donations", value: "`!donate @user <amount>` - Donate to the community pool", inline: false },
-      { name: "🎲 Gambling & Minigames", value: "`!dice`, `!blackjack`, `!bj` - Bet your money against the house\n`!rps @user <amount>` - Challenge another player to a Rock, Paper, Scissors duel", inline: false },
-      { name: "🛒 Item Shop & Gear", value: "`!shop` - Browse weapons and armor for sale\n`!buy <item_id> [qty]` - Buy items from the shop\n`!inventory` - View your owned gear, stats, and equipped items\n`!equip <instance_id>` - Equip an item instance by ID\n`!unequip <weapon|armor>` - Unequip your current gear\n`!sell <instance_id>` - Sell an item instance for cookies", inline: false },
-      { name: "🎴 Card Collection", value: "`!cardshop` - Browse collectible cards\n`!buycard <card_id>` - Purchase a collectible card\n`!cardinventory` - View your card binder\n`!sellcard <card_id>` - Sell a card back from your collection", inline: false },
-      { name: "⚔️ Combat", value: "`!duel @user <wager>` - Challenge a player to a duel with a cookie bet", inline: false },
-      { name: "🐾 Pet System", value: "`!claimpet <dog|cat|bird>` - Adopt a companion pet\n`!pet` (or `!mypet`) - Check your pet status, stage, and XP\n`!petshop` - Visit the shop to purchase pet food\n`!buyfood` - Buy food packs for 50 cookies\n`!feedpet` - Feed your pet hourly to gain XP and evolve", inline: false }
-    )
-    .setTimestamp();
+  if (!message.inGuild() || message.author.bot) return;
 
-  await message.reply({ embeds: [helpEmbed] });
+  const staffCommands = [];
+
+  if (GIVE_ADMIN_IDS.includes(message.author.id)) {
+    staffCommands.push(
+      "`!give @user <amount>` — Add currency to a player."
+    );
+  }
+
+  if (
+    message.member?.permissions.has(PermissionFlagsBits.Administrator)
+  ) {
+    staffCommands.push(
+      "`!remove @user <amount>` — Remove currency from a player.",
+      "`!resetdungeon [@user]` — Clear dungeon entry cooldown; defaults to yourself.",
+      "`!wipe` — Reset the server economy after confirmation."
+    );
+  }
+
+  const pages = [
+    [
+      {
+        name: "💰 Economy & Ranks",
+        value: [
+          "`!balance` — Check your balance.",
+          "`!level` / `!rank` — View your level and XP.",
+          "`!daily` — Claim your daily reward.",
+          "`!work` — Work to earn currency.",
+          "`!leaderboard` / `!baltop` — View the richest players.",
+          "`!donate @user <amount>` — Transfer currency to another player.",
+        ].join("\n"),
+      },
+      {
+        name: "🎣 Fishing",
+        value: [
+          "`!fish` — Cast your line and catch a fish.",
+          "`!fishbag` — Browse and sell your catches.",
+          "Bag controls let you sell one fish, a stack, or everything.",
+        ].join("\n"),
+      },
+      {
+        name: "🎲 Gambling & Minigames",
+        value: [
+          "`!dice <amount>` — Roll 1–100; 55+ returns 2× your wager.",
+          "`!blackjack <amount>` / `!bj <amount>` — Play blackjack.",
+          "`!hc <hot|cold> <amount>` — Bet on a flower.",
+          "`!flowerpoker @user <amount>` / `!fp @user <amount>` — Challenge someone to flower poker.",
+          "`!rps @user <amount>` — Play rock, paper, scissors.",
+        ].join("\n"),
+      },
+      {
+        name: "🛒 Shop & Equipment",
+        value: [
+          "`!shop` — Browse equipment using Buy buttons.",
+          "`!buy <name or item-id> [quantity]` — Search and review a purchase.",
+          "`!inventory` — View your gear and serial numbers.",
+          "`!equip <item-id> <serial-number>` — Equip an item.",
+          "`!unequip <weapon|armor>` — Clear an equipment slot.",
+          "`!unequip <item-id> <serial-number>` — Unequip a specific item.",
+          "`!sell <item-id> <serial-number>` — Sell an owned item.",
+          "Dungeon-exclusive equipment cannot be purchased.",
+        ].join("\n"),
+      },
+      {
+        name: "🏰 Dungeons",
+        value: [
+          "`!dungeon solo [easy|normal|hard]` — Start a solo run.",
+          "`!dungeon @user [easy|normal|hard]` — Invite a partner.",
+          "`!dungeon` — Resume your dungeon.",
+          "`!dungeon rewards` — Find an unclaimed reward.",
+          "Clear three rooms for currency and one loot roll per player.",
+          "**Equipment odds:** Easy 2% • Normal 4% • Hard 6%.",
+          "Hard's two rarest drops are **0.1% each**.",
+        ].join("\n"),
+      },
+      {
+        name: "🤺 Player Combat",
+        value:
+          "`!duel @user <wager>` — Challenge a player to a wagered duel.",
+      },
+    ],
+    [
+      {
+        name: "🎴 Cards & Packs",
+        value: [
+          "`!cardshop` — Browse packs, prices, and availability.",
+          "`!packs` — View your unopened packs.",
+          "`!cards` — Browse your card collection.",
+          "Use shop buttons to buy packs and pack controls to open or sell them.",
+        ].join("\n"),
+      },
+      {
+        name: "🐾 Pets",
+        value: [
+          "`!claimpet <dog|cat|bird>` — Adopt a companion.",
+          "`!pet` / `!mypet` — View your pet's stage and XP.",
+          "`!petshop` — View pet food and its current price.",
+          "`!buyfood` — Buy one unit of pet food.",
+          "`!feedpet` — Feed your pet hourly to gain XP and evolve.",
+        ].join("\n"),
+      },
+      {
+        name: "✨ Evolved Pet Bonuses",
+        value: [
+          "**🐶 Dog:** Boosts daily rewards.",
+          "**🐱 Cat:** Improves work luck.",
+          "**🐦 Bird:** Reduces your fishing cooldown.",
+        ].join("\n"),
+      },
+      {
+        name: "🔧 Administration",
+        value: staffCommands.length
+          ? staffCommands.join("\n")
+          : "Administration commands are restricted to authorized staff.",
+      },
+    ],
+  ];
+
+  let currentPage = 0;
+
+  const previousId = `help:${message.id}:previous`;
+  const nextId = `help:${message.id}:next`;
+
+  function buildEmbed() {
+    return new EmbedBuilder()
+      .setColor(0x0099ff)
+      .setTitle(
+        currentPage === 0
+          ? "🐱 Millie's Guide • Economy & Adventures"
+          : "🐱 Millie's Guide • Cards, Pets & Administration"
+      )
+      .setDescription(
+        "`<argument>` means required • `[argument]` means optional"
+      )
+      .addFields(...pages[currentPage])
+      .setFooter({
+        text: `Page ${currentPage + 1}/${pages.length} • Controls expire after 2 minutes`,
+      });
+  }
+
+  function buildButtons(expired = false) {
+    return new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId(previousId)
+        .setLabel("Previous")
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(expired || currentPage === 0),
+
+      new ButtonBuilder()
+        .setCustomId(nextId)
+        .setLabel("Next")
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(expired || currentPage === pages.length - 1)
+    );
+  }
+
+  const reply = await message.reply({
+    embeds: [buildEmbed()],
+    components: [buildButtons()],
+    allowedMentions: quiet,
+  });
+
+  const collector = reply.createMessageComponentCollector({
+    filter: (interaction) =>
+      interaction.isButton() &&
+      [previousId, nextId].includes(interaction.customId),
+    time: 120_000,
+  });
+
+  // Keep rapid button clicks in order.
+  let updates = Promise.resolve();
+
+  collector.on("collect", async (interaction) => {
+    try {
+      if (interaction.user.id !== message.author.id) {
+        await interaction.reply({
+          content: "These controls belong to another player. Use !help.",
+          flags: MessageFlags.Ephemeral,
+          allowedMentions: quiet,
+        });
+        return;
+      }
+
+      await interaction.deferUpdate();
+
+      updates = updates
+        .then(async () => {
+          currentPage = Math.max(
+            0,
+            Math.min(
+              pages.length - 1,
+              currentPage +
+              (interaction.customId === nextId ? 1 : -1)
+            )
+          );
+
+          await reply.edit({
+            embeds: [buildEmbed()],
+            components: [buildButtons(collector.ended)],
+            allowedMentions: quiet,
+          });
+        })
+        .catch((error) => {
+          console.error("Help pagination failed:", error);
+        });
+    } catch (error) {
+      console.error("Help interaction failed:", error);
+    }
+  });
+
+  collector.on("end", () => {
+    void updates
+      .then(() =>
+        reply.edit({
+          components: [buildButtons(true)],
+        })
+      )
+      .catch((error) => {
+        console.error("Could not disable help buttons:", error);
+      });
+  });
 }
