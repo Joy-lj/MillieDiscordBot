@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+
 import {
   ActionRowBuilder,
   AttachmentBuilder,
@@ -57,8 +58,6 @@ const payload = (embed, components = []) => ({
 
 const SHOP_PAGE_SIZE = 25;
 const CONFIRM_MAX_AGE = 5 * 60 * 1000;
-
-// Prevent Confirm and Cancel from racing on the same panel.
 const consumedConfirmations = new Map();
 
 const CATEGORIES = {
@@ -102,7 +101,6 @@ function categoryOffers(offers, category) {
 
 async function shopView(user, page = 0, target = "-") {
   const offers = await cardShop.offers();
-
   let [category, selectedId] = String(target).split("~");
 
   if (!Object.hasOwn(CATEGORIES, category)) {
@@ -112,6 +110,7 @@ async function shopView(user, page = 0, target = "-") {
   }
 
   const entries = categoryOffers(offers, category);
+
   const selectedIndex = entries.findIndex(
     (pack) => pack.id === selectedId
   );
@@ -228,22 +227,12 @@ async function shopView(user, page = 0, target = "-") {
     components.push(
       row(
         button(
-          user,
-          "Previous packs",
-          "shop",
-          category,
-          page - 1,
-          ButtonStyle.Secondary,
-          page === 0
+          user, "Previous packs", "shop", category,
+          page - 1, ButtonStyle.Secondary, page === 0
         ),
         button(
-          user,
-          "Next packs",
-          "shop",
-          category,
-          page + 1,
-          ButtonStyle.Secondary,
-          page === pages - 1
+          user, "Next packs", "shop", category,
+          page + 1, ButtonStyle.Secondary, page === pages - 1
         )
       )
     );
@@ -326,7 +315,6 @@ async function purchaseView(user, target) {
     throw new CardShopError("Invalid purchase total.");
   }
 
-  // Unique to this purchase, even when reusing the same message.
   const token =
     `${Date.now().toString(36)}.${randomBytes(4).toString("hex")}`;
 
@@ -347,20 +335,12 @@ async function purchaseView(user, target) {
   return payload(embed, [
     row(
       button(
-        user,
-        "Confirm purchase",
-        "confirmbuy",
-        confirmationTarget,
-        0,
-        ButtonStyle.Success
+        user, "Confirm purchase", "confirmbuy",
+        confirmationTarget, 0, ButtonStyle.Success
       ),
       button(
-        user,
-        "Cancel",
-        "cancelbuy",
-        token,
-        0,
-        ButtonStyle.Danger
+        user, "Cancel", "cancelbuy",
+        token, 0, ButtonStyle.Danger
       )
     ),
   ]);
@@ -415,14 +395,12 @@ async function packsView(guild, user, page = 0) {
     row(
       button(
         user, "Previous", "packs", "-",
-        inventory.page - 1,
-        ButtonStyle.Secondary,
+        inventory.page - 1, ButtonStyle.Secondary,
         inventory.page === 0
       ),
       button(
         user, "Next", "packs", "-",
-        inventory.page + 1,
-        ButtonStyle.Secondary,
+        inventory.page + 1, ButtonStyle.Secondary,
         inventory.page === inventory.pages - 1
       ),
       button(user, "Shop", "shop"),
@@ -466,8 +444,8 @@ async function packView(guild, user, id) {
         0, ButtonStyle.Success, count < 10
       ),
       button(
-        user, `Open all (${count})`, "open", `${id}~all`,
-        0, ButtonStyle.Success
+        user, `Open all (${count})`, "open",
+        `${id}~all`, 0, ButtonStyle.Success
       )
     ),
     row(
@@ -484,9 +462,141 @@ async function packView(guild, user, id) {
   ]);
 }
 
+const OPENING_PAGE_SIZE = 50;
+const VIEW_CACHE_TTL = 5 * 60 * 1000;
+const VIEW_CACHE_MAX_BYTES = 32 * 1024 * 1024;
+
+const viewCache = new Map();
+const pendingViews = new Map();
+
+let viewCacheBytes = 0;
+
+const panelRevisions = new Map();
+const panelUpdates = new Map();
+let nextPanelRevision = 0;
+
+async function cachedView(key, load) {
+  const now = Date.now();
+
+  for (const [entryKey, entry] of viewCache) {
+    if (entry.expires <= now) {
+      viewCacheBytes -= entry.bytes;
+      viewCache.delete(entryKey);
+    }
+  }
+
+  const old = viewCache.get(key);
+
+  if (old) {
+    viewCache.delete(key);
+    viewCache.set(key, old);
+    return old.value;
+  }
+
+  if (pendingViews.has(key)) {
+    return pendingViews.get(key);
+  }
+
+  const task = (async () => {
+    const value = await load();
+
+    const bytes = ArrayBuffer.isView(value)
+      ? value.byteLength
+      : value?.image?.byteLength ??
+      Buffer.byteLength(JSON.stringify(value));
+
+    if (bytes <= VIEW_CACHE_MAX_BYTES) {
+      while (
+        viewCache.size &&
+        (
+          viewCacheBytes + bytes > VIEW_CACHE_MAX_BYTES ||
+          viewCache.size >= 100
+        )
+      ) {
+        const oldest = viewCache.keys().next().value;
+
+        viewCacheBytes -= viewCache.get(oldest).bytes;
+        viewCache.delete(oldest);
+      }
+
+      viewCache.set(key, {
+        value,
+        bytes,
+        expires: Date.now() + VIEW_CACHE_TTL,
+      });
+
+      viewCacheBytes += bytes;
+    }
+
+    return value;
+  })();
+
+  pendingViews.set(key, task);
+
+  try {
+    return await task;
+  } finally {
+    pendingViews.delete(key);
+  }
+}
+
+async function editPanel(interaction, revision, data) {
+  const key = interaction.message.id;
+  const previous = panelUpdates.get(key) ?? Promise.resolve();
+
+  const task = previous.catch(() => { }).then(async () => {
+    if (panelRevisions.get(key) === revision) {
+      await interaction.editReply(data);
+    }
+  });
+
+  panelUpdates.set(key, task);
+
+  try {
+    await task;
+  } finally {
+    if (panelUpdates.get(key) === task) {
+      panelUpdates.delete(key);
+    }
+  }
+}
+
+async function readOpening(guild, user, id) {
+  const opened = await cachedView(
+    `opening:${guild}:${user}:${id}`,
+    () => cardShop.opening(guild, user, id)
+  );
+
+  if (
+    !Array.isArray(opened.cards) ||
+    !opened.cards.length
+  ) {
+    throw new CardShopError(
+      "This opening has no cards to display."
+    );
+  }
+
+  return opened;
+}
+
+function openingParts(target) {
+  const [id, mode = "list"] = String(target).split("~");
+
+  if (!id || !["list", "grid"].includes(mode)) {
+    throw new CardShopError(
+      "Refresh !packs to view this opening."
+    );
+  }
+
+  return { id, mode };
+}
+
 async function attachCard(data, item) {
   try {
-    const png = await renderCard(item.card, item.copyId);
+    const png = await cachedView(
+      `card:${item.copyId}`,
+      () => renderCard(item.card, item.copyId)
+    );
 
     data.files = [
       new AttachmentBuilder(png, { name: "card.png" }),
@@ -494,7 +604,10 @@ async function attachCard(data, item) {
 
     data.embeds[0].setImage("attachment://card.png");
   } catch (error) {
-    console.error("Card render failed; keeping awarded card:", error);
+    console.error(
+      "Card render failed; keeping awarded card:",
+      error
+    );
 
     data.embeds[0].addFields({
       name: "Image unavailable",
@@ -505,54 +618,282 @@ async function attachCard(data, item) {
   return data;
 }
 
-async function openingView(guild, user, openingId, page = 0) {
-  const opened = await cardShop.opening(guild, user, openingId);
+async function openingView(
+  guild,
+  user,
+  openingId,
+  page = 0,
+  mode = "list"
+) {
+  const opened = await readOpening(guild, user, openingId);
 
-  page = Math.max(
-    0,
-    Math.min(page, opened.cards.length - 1)
+  const pages = Math.max(
+    1,
+    Math.ceil(opened.cards.length / OPENING_PAGE_SIZE)
   );
 
-  const item = opened.cards[page];
-  const summaryStart = Math.floor(page / 10) * 10;
-  const summary = opened.cards.slice(summaryStart, summaryStart + 10);
+  page = Number.isSafeInteger(page)
+    ? Math.max(0, Math.min(page, pages - 1))
+    : 0;
+
+  const start = page * OPENING_PAGE_SIZE;
+
+  const shown = opened.cards.slice(
+    start,
+    start + OPENING_PAGE_SIZE
+  );
+
+  const short = (value, max) =>
+    clean(value, max).slice(0, max).replace(/\\$/, "");
+
+  const summary = shown.map((pull, index) =>
+    `\`${start + index + 1}.\` ` +
+    `${short(pull.card.name, 32)} • ` +
+    short(pull.card.rarity, 18)
+  ).join("\n");
 
   const embed = new EmbedBuilder()
-    .setTitle(`✨ Opened ${opened.name}`)
+    .setTitle(
+      `✨ ${clean(opened.name, 100)} • Opening Results`
+    )
     .setColor(0xf4bd51)
     .setDescription(
       `Opened **${opened.quantity ?? 1} pack(s)** and saved ` +
-      `**${opened.cards.length} cards**.\n\n` +
-      summary.map((pull, index) =>
-        `${summaryStart + index === page ? "▶" : "•"} ` +
-        `${summaryStart + index + 1}. ` +
-        `**${clean(pull.card.name, 40)}** — ` +
-        clean(pull.card.rarity, 25)
-      ).join("\n")
+      `**${opened.cards.length} cards**.\n` +
+      `Showing **${start + 1}–${start + shown.length}**. ` +
+      "Select a card below for its full image.\n\n" +
+      (
+        mode === "grid"
+          ? "Numbered images match the dropdowns below."
+          : summary
+      )
     )
     .setFooter({
       text:
-        `Pull ${page + 1}/${opened.cards.length} • ` +
-        "All cards are already saved to your collection",
+        `Page ${page + 1}/${pages} • 50 pulls per page • ` +
+        "All cards are already saved",
     });
 
-  const data = payload(embed, [
+  const components = [];
+
+  for (let offset = 0; offset < shown.length; offset += 25) {
+    const choices = shown.slice(offset, offset + 25);
+
+    components.push(
+      row(
+        new StringSelectMenuBuilder()
+          .setCustomId(
+            cid(
+              user,
+              offset === 0 ? "openpick" : "openpick2",
+              `${openingId}~${mode}`,
+              page
+            )
+          )
+          .setPlaceholder(
+            `Inspect pull ${start + offset + 1}–` +
+            `${start + offset + choices.length}`
+          )
+          .addOptions(
+            choices.map((pull, index) => ({
+              label:
+                `${start + offset + index + 1}. ` +
+                pull.card.name,
+              description:
+                `${pull.card.rarity} • ` +
+                `${pull.card.set?.name ?? "Unknown set"}`,
+              value: String(start + offset + index),
+            })).map((option) => ({
+              ...option,
+              label: option.label.slice(0, 100),
+              description: option.description.slice(0, 100),
+            }))
+          )
+      )
+    );
+  }
+
+  if (pages > 1) {
+    const firstJump = Math.floor(page / 25) * 25;
+
+    components.push(
+      row(
+        new StringSelectMenuBuilder()
+          .setCustomId(
+            cid(user, "openjump", `${openingId}~${mode}`, page)
+          )
+          .setPlaceholder("Jump to a results page")
+          .addOptions(
+            Array.from(
+              { length: Math.min(25, pages - firstJump) },
+              (_, index) => {
+                const destination = firstJump + index;
+
+                return {
+                  label:
+                    `Page ${destination + 1} • pulls ` +
+                    `${destination * 50 + 1}–` +
+                    Math.min(
+                      opened.cards.length,
+                      (destination + 1) * 50
+                    ),
+                  value: String(destination),
+                  default: destination === page,
+                };
+              }
+            )
+          )
+      )
+    );
+  }
+
+  const action = mode === "grid" ? "opengrid" : "openlist";
+
+  components.push(
     row(
       button(
-        user, "Previous card", "reveal", openingId,
+        user, "Previous 50", action, openingId,
         page - 1, ButtonStyle.Secondary, page === 0
       ),
       button(
-        user, "Next card", "reveal", openingId,
-        page + 1, ButtonStyle.Secondary,
-        page === opened.cards.length - 1
+        user, "Next 50", action, openingId,
+        page + 1, ButtonStyle.Secondary, page === pages - 1
+      ),
+      button(
+        user,
+        mode === "grid" ? "Fast list" : "Grid view",
+        mode === "grid" ? "openlist" : "opengrid",
+        openingId,
+        page,
+        ButtonStyle.Primary
       ),
       button(user, "My packs", "packs"),
       button(user, "My cards", "cards")
-    ),
-  ]);
+    )
+  );
 
-  return attachCard(data, item);
+  if (pages > 1) {
+    components.push(
+      row(
+        button(
+          user, "First page", action, openingId,
+          0, ButtonStyle.Secondary, page === 0
+        ),
+        button(
+          user, "Last page", action, openingId,
+          pages - 1, ButtonStyle.Secondary,
+          page === pages - 1
+        ),
+        button(user, "Shop", "shop")
+      )
+    );
+  }
+
+  const data = payload(embed, components);
+
+  if (mode === "grid") {
+    try {
+      const grid = await cachedView(
+        `grid:${guild}:${user}:${openingId}:${page}`,
+        () => renderCardGrid(shown, {
+          startNumber: start + 1,
+        })
+      );
+
+      data.files = [
+        new AttachmentBuilder(grid.image, {
+          name: "opening.jpg",
+        }),
+      ];
+
+      embed.setImage("attachment://opening.jpg");
+
+      if (grid.missing) {
+        embed.addFields({
+          name: "Some artwork is unavailable",
+          value:
+            `${grid.missing} thumbnail(s) could not load. ` +
+            "Use the dropdowns to inspect cards.",
+        });
+      }
+    } catch (error) {
+      console.error("Opening grid failed:", error);
+
+      embed.setDescription(
+        `Your **${opened.cards.length} cards** are saved. ` +
+        `Showing pulls **${start + 1}–${start + shown.length}**.` +
+        `\n\n${summary}`
+      );
+
+      embed.addFields({
+        name: "Grid unavailable",
+        value:
+          "Use Fast list or select an individual card. " +
+          "No packs were reopened.",
+      });
+    }
+  }
+
+  return data;
+}
+
+async function openingCardView(
+  guild,
+  user,
+  openingId,
+  index = 0,
+  mode = "list"
+) {
+  const opened = await readOpening(guild, user, openingId);
+
+  index = Number.isSafeInteger(index)
+    ? Math.max(0, Math.min(index, opened.cards.length - 1))
+    : 0;
+
+  const item = opened.cards[index];
+
+  const embed = new EmbedBuilder()
+    .setTitle(`🃏 ${clean(item.card.name, 100)}`)
+    .setColor(0x63acff)
+    .setDescription(
+      `**${clean(item.card.rarity)}** • ` +
+      `${clean(item.card.set?.name)}\n` +
+      `Copy ID: \`${item.copyId}\``
+    )
+    .setFooter({
+      text:
+        `Pull ${index + 1}/${opened.cards.length} • ` +
+        "Select Back to results to browse 50 at once",
+    });
+
+  return attachCard(
+    payload(embed, [
+      row(
+        button(
+          user, "Previous card", "reveal",
+          `${openingId}~${mode}`, index - 1,
+          ButtonStyle.Secondary, index === 0
+        ),
+        button(
+          user, "Next card", "reveal",
+          `${openingId}~${mode}`, index + 1,
+          ButtonStyle.Secondary,
+          index === opened.cards.length - 1
+        ),
+        button(
+          user,
+          "Back to results",
+          mode === "grid" ? "opengrid" : "openlist",
+          openingId,
+          Math.floor(index / 50),
+          ButtonStyle.Primary
+        ),
+        button(user, "My packs", "packs"),
+        button(user, "My cards", "cards")
+      ),
+    ]),
+    item
+  );
 }
 
 async function cardsView(guild, user, page = 0) {
@@ -578,17 +919,27 @@ async function cardsView(guild, user, page = 0) {
 
   const components = [];
 
-  for (let offset = 0; offset < collection.items.length; offset += 25) {
+  for (
+    let offset = 0;
+    offset < collection.items.length;
+    offset += 25
+  ) {
     const choices = collection.items.slice(offset, offset + 25);
 
     components.push(
       row(
         new StringSelectMenuBuilder()
           .setCustomId(
-            cid(user, "cardpick", String(offset / 25), collection.page)
+            cid(
+              user,
+              "cardpick",
+              String(offset / 25),
+              collection.page
+            )
           )
           .setPlaceholder(
-            `View card ${first + offset}–${first + offset + choices.length - 1}`
+            `View card ${first + offset}–` +
+            `${first + offset + choices.length - 1}`
           )
           .addOptions(
             choices.map((item, index) => ({
@@ -688,11 +1039,8 @@ async function singleCardView(
     payload(embed, [
       row(
         button(
-          user,
-          "Back to collection",
-          "cards",
-          "-",
-          collectionPage
+          user, "Back to collection",
+          "cards", "-", collectionPage
         ),
         button(user, "My packs", "packs"),
         button(user, "Shop", "shop")
@@ -813,7 +1161,6 @@ export async function handleCardShopInteraction(interaction) {
     const key = token ?? interaction.message.id;
 
     if (consumedConfirmations.has(key)) {
-      // Silently acknowledge repeated clicks.
       await interaction.deferUpdate();
       return true;
     }
@@ -828,7 +1175,9 @@ export async function handleCardShopInteraction(interaction) {
       now - createdAt > CONFIRM_MAX_AGE
     ) {
       await interaction.update({
-        content: "Purchase confirmation expired. Open !cardshop again.",
+        content:
+          "Purchase confirmation expired. " +
+          "Open !cardshop for a new quote.",
         embeds: [],
         components: [],
         attachments: [],
@@ -841,7 +1190,18 @@ export async function handleCardShopInteraction(interaction) {
     consumedConfirmations.set(key, now + 15 * 60 * 1000);
   }
 
-  // All actions update the message containing the clicked control.
+  const panelKey = interaction.message.id;
+  const revision = ++nextPanelRevision;
+
+  panelRevisions.set(panelKey, revision);
+
+  if (panelRevisions.size > 1000) {
+    panelRevisions.delete(
+      panelRevisions.keys().next().value
+    );
+  }
+
+  // Every action updates the existing message.
   await interaction.deferUpdate();
 
   const guild = interaction.guildId;
@@ -906,8 +1266,50 @@ export async function handleCardShopInteraction(interaction) {
         interaction.values[0],
         page
       );
+    } else if (
+      action === "openlist" ||
+      action === "opengrid"
+    ) {
+      data = await openingView(
+        guild,
+        user,
+        target,
+        page,
+        action === "opengrid" ? "grid" : "list"
+      );
+    } else if (
+      ["openpick", "openpick2", "openjump"].includes(action) &&
+      interaction.isStringSelectMenu()
+    ) {
+      const { id, mode } = openingParts(target);
+      const value = interaction.values[0];
+
+      if (
+        !/^\d+$/.test(value ?? "") ||
+        !Number.isSafeInteger(Number(value))
+      ) {
+        throw new CardShopError(
+          "Invalid results selection."
+        );
+      }
+
+      data = action === "openjump"
+        ? await openingView(
+          guild, user, id, Number(value), mode
+        )
+        : await openingCardView(
+          guild, user, id, Number(value), mode
+        );
     } else if (action === "reveal") {
-      data = await openingView(guild, user, target, page);
+      const { id, mode } = openingParts(target);
+
+      data = await openingCardView(
+        guild,
+        user,
+        id,
+        page,
+        mode
+      );
     } else if (action === "buy") {
       data = await purchaseView(user, target);
     } else if (action === "confirmbuy") {
@@ -975,7 +1377,7 @@ export async function handleCardShopInteraction(interaction) {
           .setTitle("💰 Pack Sold")
           .setColor(0x39c995)
           .setDescription(
-            `Sold **${clean(receipt.name)}** ` +
+            `Sold **${receipt.name}** ` +
             `for **${money(receipt.price)}**.\n` +
             `Balance: **${money(receipt.balance)}**.`
           ),
@@ -992,13 +1394,22 @@ export async function handleCardShopInteraction(interaction) {
       );
     }
 
-    await interaction.editReply({
+    // Ignore older renders if the player has navigated elsewhere.
+    if (panelRevisions.get(panelKey) !== revision) {
+      return true;
+    }
+
+    await editPanel(interaction, revision, {
       ...data,
       content: null,
       attachments: [],
     });
   } catch (error) {
     console.error("Cardshop interaction failed:", error);
+
+    if (panelRevisions.get(panelKey) !== revision) {
+      return true;
+    }
 
     const text = committed
       ? "The action completed, but the display failed. " +
@@ -1007,7 +1418,7 @@ export async function handleCardShopInteraction(interaction) {
         ? error.message
         : "The action failed. Refresh !packs or check the bot log.";
 
-    await interaction.editReply({
+    await editPanel(interaction, revision, {
       content: text,
       embeds: [],
       components: [],
