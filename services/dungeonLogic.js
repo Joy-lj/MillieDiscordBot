@@ -1,15 +1,15 @@
 import { randomInt } from "node:crypto";
 import { ACTIVE_SKILLS, PASSIVES_BY_ID } from "./dungeonAbilities.js";
 
-export class DungeonError extends Error {}
+export class DungeonError extends Error { }
 const fail = (message) => { throw new DungeonError(message); };
 export const skills = ACTIVE_SKILLS;
 const defaults = {
-  "foam-sword": { speedBonus: 5, critChance: 0.05, ability: { id: "distracting-bonk" } },
+  "feather": { speedBonus: 5, critChance: 0.05, ability: { id: "distracting-bonk" } },
   "rusty-shank": { speedBonus: 3, critChance: 0.15, ability: { id: "dirty-cut" } },
   "beer-bottle": { speedBonus: 0, critChance: 0.10, ability: { id: "bottle-smash" } },
-  gun: { speedBonus: -3, critChance: 0.10, ability: { id: "cookie-barrage" } },
-  "bicycle-helmet": { healthBonus: 10, speedBonus: 3 },
+  "cookie-cannon": { speedBonus: -3, critChance: 0.10, ability: { id: "cookie-barrage" } },
+  "woolen-kitten-hood": { healthBonus: 10, speedBonus: 3 },
   "padded-pants": { healthBonus: 25, speedBonus: 1 },
   "chainmail-shirt": { healthBonus: 45, speedBonus: -2 },
   "bulletproof-vest": { healthBonus: 70, speedBonus: -5 },
@@ -112,7 +112,8 @@ export function resolveRound(input, rng = randomInt) {
   if (!alive.length || alive.some((player) => !player.choice)) fail("The round is not ready.");
   const log = [];
   const order = [
-    ...alive.map((player, index) => ({ player, index,
+    ...alive.map((player, index) => ({
+      player, index,
       speed: player.speed + (player.choice === "skill" ? skills[player.skill]?.priorityBonus ?? 0 : 0),
     })),
     { enemy: true, speed: enemy.speed, index: alive.length },

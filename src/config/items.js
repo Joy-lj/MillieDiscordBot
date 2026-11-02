@@ -146,7 +146,7 @@ const WEAPONS = [
 
 const ARMOR = [
   {
-    id: "bicycle-helmet",
+    id: "woolen-kitten-hood",
     name: "Woolen Kitten Hood",
     stat: 10,
     price: 7_500,
