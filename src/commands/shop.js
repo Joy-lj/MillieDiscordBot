@@ -101,6 +101,7 @@ function parsePurchase(content) {
   }
 
   validateQuantity(quantity);
+
   return { query, quantity };
 }
 
@@ -110,6 +111,7 @@ function findItems(query) {
   );
 
   const raw = query.trim().toLowerCase();
+
   const exactId = entries.find(
     ([id]) => id.toLowerCase() === raw
   );
@@ -149,30 +151,44 @@ function findItems(query) {
 function itemDetails(item) {
   const d = item.dungeon ?? {};
 
-  const primary = item.type === "weapon"
-    ? `⚔️ Attack +${item.stat}`
-    : `🛡️ Defense +${item.stat}`;
+  // Supports the new stats structure and older definitions.
+  const stats = item.stats ?? {
+    attack: item.type === "weapon" ? item.stat ?? 0 : 0,
+    defense: item.type === "armor" ? item.stat ?? 0 : 0,
+    health: d.healthBonus ?? 0,
+    speed: d.speedBonus ?? 0,
+    critChance: d.critChance ?? 0,
+  };
 
-  const extras = [];
+  const parts = [];
 
-  if (d.healthBonus != null) {
-    extras.push(`HP +${d.healthBonus}`);
+  for (const [key, label] of [
+    ["attack", "⚔️ Attack"],
+    ["defense", "🛡️ Defense"],
+    ["health", "❤️ Health"],
+    ["speed", "💨 Speed"],
+  ]) {
+    const value = Number(stats[key] ?? 0);
+
+    if (value) {
+      parts.push(
+        `${label} ${value > 0 ? "+" : ""}` +
+        value.toLocaleString("en-US")
+      );
+    }
   }
 
-  if (d.speedBonus != null) {
-    extras.push(
-      `Speed ${d.speedBonus >= 0 ? "+" : ""}${d.speedBonus}`
+  const crit = Number(stats.critChance ?? 0);
+
+  if (crit) {
+    const percent = Number((crit * 100).toFixed(2));
+
+    parts.push(
+      `🎯 Crit ${percent > 0 ? "+" : ""}${percent}%`
     );
   }
 
-  if (d.critChance != null) {
-    extras.push(`Crit ${Math.round(d.critChance * 100)}%`);
-  }
-
-  return (
-    primary +
-    (extras.length ? ` • ${extras.join(" • ")}` : "")
-  );
+  return parts.join(" • ") || "No stat bonuses";
 }
 
 async function notifyError(interaction, content) {
@@ -207,6 +223,7 @@ function ownerFilter(owner, allowedIds) {
         interaction,
         "These controls belong to another player. Use !shop."
       );
+
       return false;
     }
 
@@ -382,7 +399,7 @@ async function purchasePreview({
     return;
   }
 
-  // Display failure must never trigger a second purchase.
+  // A display failure must never trigger a second purchase.
   try {
     await update(
       result.success
@@ -410,6 +427,7 @@ async function quantityModal(interaction, itemId, guild, owner) {
       interaction,
       "That item is not available for purchase."
     );
+
     return;
   }
 
@@ -483,24 +501,130 @@ async function quantityModal(interaction, itemId, guild, owner) {
 }
 
 const categories = {
-  weapon: { label: "Weapons", icon: "⚔️" },
-  armor: { label: "Armor", icon: "🛡️" },
+  all: {
+    label: "All Equipment",
+    icon: "🛒",
+  },
+  weapon: {
+    label: "All Weapons",
+    icon: "⚔️",
+    type: "weapon",
+  },
+  armor: {
+    label: "All Armor",
+    icon: "🛡️",
+    type: "armor",
+  },
+  accessory: {
+    label: "All Accessories",
+    icon: "💎",
+    type: "accessory",
+  },
+  main_hand: {
+    label: "Main Hands",
+    icon: "🗡️",
+    slot: "main_hand",
+  },
+  off_hand: {
+    label: "Off Hands & Shields",
+    icon: "🛡️",
+    slot: "off_hand",
+  },
+  two_handed: {
+    label: "Two-Handed Weapons",
+    icon: "⚔️",
+    slot: "main_hand",
+    handedness: 2,
+  },
+  head: {
+    label: "Helmets",
+    icon: "🪖",
+    slot: "head",
+  },
+  torso: {
+    label: "Torsos",
+    icon: "👕",
+    slot: "torso",
+  },
+  legs: {
+    label: "Legs",
+    icon: "👖",
+    slot: "legs",
+  },
+  hands: {
+    label: "Gloves",
+    icon: "🧤",
+    slot: "hands",
+  },
+  feet: {
+    label: "Boots",
+    icon: "🥾",
+    slot: "feet",
+  },
+  cape: {
+    label: "Capes",
+    icon: "🧣",
+    slot: "cape",
+  },
+  ring: {
+    label: "Rings",
+    icon: "💍",
+    slot: "ring",
+  },
+  neck: {
+    label: "Necklaces",
+    icon: "📿",
+    slot: "neck",
+  },
+  ammo: {
+    label: "Ammo",
+    icon: "🏹",
+    slot: "ammo",
+  },
 };
 
 function categoryItems(category) {
+  if (!Object.hasOwn(categories, category)) return [];
+
+  const filter = categories[category];
+
   return Object.entries(ITEMS)
-    .filter(
-      ([, item]) => canBuy(item) && item.type === category
+    .filter(([, item]) =>
+      canBuy(item) &&
+      (!filter.type || item.type === filter.type) &&
+      (!filter.slot || item.slot === filter.slot) &&
+      (!filter.handedness || item.handedness === filter.handedness)
     )
-    .sort(
-      (a, b) =>
-        a[1].price - b[1].price ||
-        a[1].name.localeCompare(b[1].name)
+    .sort((a, b) =>
+      a[1].price - b[1].price ||
+      a[1].name.localeCompare(b[1].name)
     );
+}
+
+function itemPlacement(item) {
+  const type = {
+    weapon: "Weapon",
+    armor: "Armor",
+    accessory: "Accessory",
+  }[item.type] ?? item.type;
+
+  const slot =
+    categories[item.slot]?.label ??
+    String(item.slot ?? "Unassigned").replace(/_/g, " ");
+
+  return (
+    `${type} • ${slot}` +
+    (
+      item.handedness === 2
+        ? " • Two-handed (off hand must be empty)"
+        : ""
+    )
+  );
 }
 
 function shopView(state, prefix, expired = false) {
   const entries = categoryItems(state.category);
+
   const pages = Math.max(
     1,
     Math.ceil(entries.length / ITEMS_PER_PAGE)
@@ -567,6 +691,11 @@ function shopView(state, prefix, expired = false) {
         inline: true,
       },
       {
+        name: "Category & Equipment Slot",
+        value: clean(itemPlacement(item), 200),
+        inline: false,
+      },
+      {
         name: "Stats",
         value: itemDetails(item),
         inline: false,
@@ -617,38 +746,34 @@ function shopView(state, prefix, expired = false) {
       `Page ${page + 1}/${pages} • Purchases require confirmation`,
   });
 
-  const components = [
-    row(
-      button(
-        `${prefix}:category:weapon`,
-        "⚔️ Weapons",
-        ButtonStyle.Primary,
-        expired || state.category === "weapon"
-      ),
-      button(
-        `${prefix}:category:armor`,
-        "🛡️ Armor",
-        ButtonStyle.Primary,
-        expired || state.category === "armor"
-      )
-    ),
-  ];
+  const categoryMenu = new StringSelectMenuBuilder()
+    .setCustomId(`${prefix}:category`)
+    .setPlaceholder("Choose an equipment category")
+    .setDisabled(expired)
+    .addOptions(
+      Object.entries(categories).map(([key, category]) => ({
+        label: category.label,
+        value: key,
+        emoji: { name: category.icon },
+        description: `${categoryItems(key).length} items for sale`,
+        default: key === state.category,
+      }))
+    );
+
+  const components = [row(categoryMenu)];
 
   if (shown.length) {
     const menu = new StringSelectMenuBuilder()
       .setCustomId(`${prefix}:select`)
-      .setPlaceholder(
-        `Choose ${state.category === "weapon" ? "a weapon" : "armor"}`
-      )
+      .setPlaceholder(`Choose an item • ${category.label}`)
       .setDisabled(expired)
       .addOptions(
         shown.map(([id, candidate]) => ({
           label: candidate.name.slice(0, 100),
           value: id,
           description:
-            `${money(candidate.price)} • ` +
-            `${candidate.type === "weapon" ? "ATK" : "DEF"} ` +
-            `${candidate.stat}`.slice(0, 20),
+            `${money(candidate.price)} • ${itemDetails(candidate)}`
+              .slice(0, 100),
           default: id === selected?.[0],
         }))
       );
@@ -705,9 +830,7 @@ function shopView(state, prefix, expired = false) {
 export async function shopCommand(message) {
   if (!message.inGuild() || message.author.bot) return;
 
-  const initialCategory = categoryItems("weapon").length
-    ? "weapon"
-    : "armor";
+  const initialCategory = "all";
 
   const state = {
     category: initialCategory,
@@ -741,6 +864,7 @@ export async function shopCommand(message) {
           interaction,
           "These shop controls belong to another player. Use !shop."
         );
+
         return;
       }
 
@@ -763,6 +887,7 @@ export async function shopCommand(message) {
             interaction,
             "That selection changed. Choose an item from the current shop panel."
           );
+
           return;
         }
 
@@ -792,8 +917,7 @@ export async function shopCommand(message) {
       }
 
       const navigation = [
-        "category:weapon",
-        "category:armor",
+        "category",
         "select",
         "previous",
         "next",
@@ -802,7 +926,7 @@ export async function shopCommand(message) {
       if (!navigation.includes(suffix)) return;
 
       if (
-        suffix === "select" &&
+        ["category", "select"].includes(suffix) &&
         !interaction.isStringSelectMenu()
       ) {
         return;
@@ -817,12 +941,20 @@ export async function shopCommand(message) {
           const ackError = await acknowledgement;
           if (ackError) throw ackError;
 
-          if (suffix.startsWith("category:")) {
-            remembered[state.category] = state.selected;
+          if (suffix === "category") {
+            const nextCategory = interaction.values[0];
 
-            state.category = suffix.slice(
-              "category:".length
-            );
+            if (!Object.hasOwn(categories, nextCategory)) {
+              await notifyError(
+                interaction,
+                "Unknown category. Reopen !shop."
+              );
+
+              return;
+            }
+
+            remembered[state.category] = state.selected;
+            state.category = nextCategory;
 
             const entries = categoryItems(state.category);
 
@@ -850,19 +982,19 @@ export async function shopCommand(message) {
               (state.page + 1) * ITEMS_PER_PAGE
             );
 
-            if (
-              !visible.some(([id]) => id === selectedId)
-            ) {
+            if (!visible.some(([id]) => id === selectedId)) {
               await notifyError(
                 interaction,
                 "That category or page changed. Select an item from the current dropdown."
               );
+
               return;
             }
 
             state.selected = selectedId;
           } else {
             const entries = categoryItems(state.category);
+
             const pages = Math.max(
               1,
               Math.ceil(entries.length / ITEMS_PER_PAGE)
@@ -905,9 +1037,7 @@ export async function shopCommand(message) {
 
   collector.on("end", () => {
     void updates
-      .then(() =>
-        reply.edit(shopView(state, prefix, true))
-      )
+      .then(() => reply.edit(shopView(state, prefix, true)))
       .catch(console.error);
   });
 }
@@ -934,7 +1064,8 @@ async function matchingItems(message, matches, quantity) {
         shown.map(([id, item]) => ({
           label: item.name.slice(0, 100),
           description:
-            `${money(item.price)} each • ${item.type}`.slice(0, 100),
+            `${money(item.price)} each • ${item.type}`
+              .slice(0, 100),
           value: id,
         }))
       );
@@ -990,6 +1121,7 @@ async function matchingItems(message, matches, quantity) {
           interaction,
           "Use !buy yourself to choose an item."
         );
+
         return;
       }
 
@@ -1004,6 +1136,7 @@ async function matchingItems(message, matches, quantity) {
             interaction,
             "That item is not one of the matches."
           );
+
           return;
         }
 
@@ -1096,6 +1229,7 @@ export async function buyCommand(message) {
       content: error.message,
       allowedMentions: quiet,
     });
+
     return;
   }
 
@@ -1107,6 +1241,7 @@ export async function buyCommand(message) {
         "No matching item found. Check !shop or try part of the item's name.",
       allowedMentions: quiet,
     });
+
     return;
   }
 
@@ -1116,6 +1251,7 @@ export async function buyCommand(message) {
       matches,
       parsed.quantity
     );
+
     return;
   }
 

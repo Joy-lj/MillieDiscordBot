@@ -11,14 +11,27 @@ function decode(row) {
   // pre-migration snapshots in fixtures without changing their saved rules.
   const party = row.party_ids ?? [row.leader_id, row.partner_id].filter((user) => user != null);
   if (!Array.isArray(party) || ![1, 2].includes(party.length) || new Set(party).size !== party.length ||
-      party.some((user) => typeof user !== "string" || !user) || party[0] !== row.leader_id ||
-      (party.length === 1 ? row.partner_id != null : party[1] !== row.partner_id)) fail("Invalid saved dungeon party.");
-  return { ...row, party_ids: party, state: typeof row.state === "string" ? JSON.parse(row.state) : row.state,
-    expires_at: Number(row.expires_at), created_at: Number(row.created_at) };
+    party.some((user) => typeof user !== "string" || !user) || party[0] !== row.leader_id ||
+    (party.length === 1 ? row.partner_id != null : party[1] !== row.partner_id)) fail("Invalid saved dungeon party.");
+  return {
+    ...row, party_ids: party, state: typeof row.state === "string" ? JSON.parse(row.state) : row.state,
+    expires_at: Number(row.expires_at), created_at: Number(row.created_at)
+  };
 }
 
 export function createDungeonStore(db, items, config, { rng = randomInt, lootRng = randomInt, clock = Date.now, lootTables = null } = {}) {
   validateConfig(config);
+  for (const [difficulty, dungeon] of Object.entries(config.difficulties)) {
+    const cooldownMs = dungeon.cooldownMs ?? config.cooldownMs;
+
+    if (
+      !Number.isSafeInteger(cooldownMs) ||
+      cooldownMs < 1 ||
+      cooldownMs > Number.MAX_SAFE_INTEGER - Date.now()
+    ) {
+      fail(`Invalid dungeon cooldown for "${difficulty}".`);
+    }
+  }
   // Fail at startup for malformed/missing tables, not after a successful fight.
   if (lootTables !== null) for (const difficulty of Object.keys(config.difficulties)) {
     snapshotLootTable(lootTables[difficulty], items);
@@ -116,6 +129,11 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
     const mode = party.length === 1 ? "solo" : "coop";
     const lootTable = lootTables === null ? null : snapshotLootTable(lootTables[difficulty], items);
     const dungeon = dungeonForParty(config.difficulties[difficulty], party.length, config);
+    const runConfig = structuredClone(config);
+    runConfig.cooldownMs =
+      config.difficulties[difficulty].cooldownMs ??
+      config.cooldownMs;
+
     return transaction(guild, async (client) => {
       const accounts = await lockAccounts(client, guild, party);
       for (const user of [...party].sort()) {
@@ -141,11 +159,23 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
         id: randomUUID(), guild_id: guild, channel_id: channel, leader_id: leader, partner_id: partner ?? null, party_ids: party,
         status: mode === "solo" ? "active" : "invited", created_at: now,
         expires_at: now + (mode === "solo" ? config.roundMs : config.inviteMs),
-        state: { version: 1, mode, status: "invited", round: 0, difficulty, dungeon: structuredClone(dungeon), rules: structuredClone(config), players: [], log: [] },
+        state: { version: 1, mode, status: "invited", round: 0, difficulty, dungeon: structuredClone(dungeon), rules: structuredClone(runConfig), players: [], log: [] },
       };
       if (mode === "solo") {
         const account = accounts.get(leader);
-        run.state = startState(dungeon, [makePlayer(leader, account.weapon_item_id, account.armor_item_id, items, config)], config);
+        run.state = startState(
+          dungeon,
+          [
+            makePlayer(
+              leader,
+              account.weapon_item_id,
+              account.armor_item_id,
+              items,
+              runConfig
+            ),
+          ],
+          runConfig
+        );
         run.state.difficulty = difficulty;
       }
       run.state.lootTable = lootTable;
@@ -160,7 +190,7 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
         if (mode === "solo") {
           await client.query(
             "UPDATE public.dungeon_members SET next_entry_at = $1 WHERE guild_id = $2 AND user_id = $3",
-            [now + config.cooldownMs, guild, user]
+            [now + run.state.rules.cooldownMs, guild, user]
           );
         }
       }

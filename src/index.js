@@ -43,6 +43,7 @@ import {
 } from "./commands/dungeon.js";
 
 import { resetDungeonCommand } from "./commands/resetDungeon.js";
+import { resetItemsCommand } from "./commands/resetItems.js";
 
 
 // Choose which Discord events the bot can receive.
@@ -74,6 +75,13 @@ client.on(Events.MessageCreate, async (message) => {
 
     if (/^!dungeon(?:\s|$)/i.test(message.content.trim())) {
       await dungeonCommand(message);
+      return;
+    }
+
+    if (
+      message.content.trim().split(/\s+/)[0].toLowerCase() === "!resetitems"
+    ) {
+      await resetItemsCommand(message);
       return;
     }
 
