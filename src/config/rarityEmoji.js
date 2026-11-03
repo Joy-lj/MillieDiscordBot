@@ -1,3 +1,16 @@
+const gem = (name) =>
+    new URL(`../../assets/emojis/rarity_${name}.png`, import.meta.url);
+
+export const RARITY_IMAGES = {
+    common: gem("common"),
+    uncommon: gem("uncommon"),
+    rare: gem("rare"),
+    epic: gem("epic"),
+    ultra_rare: gem("epic"),
+    legendary: gem("legendary"),
+    mythic: gem("mythic"),
+};
+
 export const RARITY_EMOJIS = {
     common: "⚪",
     uncommon: "🟢",

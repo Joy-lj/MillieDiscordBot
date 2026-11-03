@@ -1,4 +1,5 @@
 import { createHash, randomInt, randomUUID } from "node:crypto";
+import { loadDungeonEquipment } from "./dungeonEquipment.js";
 import { DungeonError, dungeonForParty, makePlayer, resolveRound, startState, validateChoice, validateConfig } from "./dungeonLogic.js";
 export { DungeonError } from "./dungeonLogic.js";
 const fail = (message) => { throw new DungeonError(message); };
@@ -68,7 +69,10 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
          WHERE a.guild_id = $1 AND a.user_id = $2 FOR UPDATE OF a`, [guild, user]
       );
       if (!rows[0]) fail("Every participant needs an economy account. Run !balance first.");
-      accounts.set(user, rows[0]);
+      accounts.set(user, {
+        ...rows[0],
+        equipment: await loadDungeonEquipment(client, guild, user, items),
+      });
     }
     return accounts;
   }
@@ -171,7 +175,8 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
               account.weapon_item_id,
               account.armor_item_id,
               items,
-              runConfig
+              runConfig,
+              account.equipment
             ),
           ],
           runConfig
@@ -244,7 +249,14 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
         }
         const players = users.map((player) => {
           const account = accounts.get(player);
-          return makePlayer(player, account.weapon_item_id, account.armor_item_id, items, run.state.rules);
+          return makePlayer(
+            player,
+            account.weapon_item_id,
+            account.armor_item_id,
+            items,
+            run.state.rules,
+            account.equipment
+          );
         });
         const difficulty = run.state.difficulty;
         const lootTable = run.state.lootTable ?? null;

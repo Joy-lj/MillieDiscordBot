@@ -1,4 +1,5 @@
 import { randomInt } from "node:crypto";
+import { makeLoadoutPlayer } from "./dungeonEquipment.js";
 
 import {
   ACTIVE_SKILLS,
@@ -258,9 +259,15 @@ export function makePlayer(
   weaponId,
   armorId,
   items,
-  config
+  config,
+  loadout = null
 ) {
   const combat = resolveCombatConfig(config.combat ?? {});
+
+  // New runs use every equipped slot; legacy callers remain supported.
+  if (loadout !== null) {
+    return makeLoadoutPlayer(userId, loadout, config, combat);
+  }
 
   const candidateWeapon = Object.hasOwn(items, weaponId)
     ? items[weaponId]

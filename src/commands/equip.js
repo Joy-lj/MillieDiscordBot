@@ -1,91 +1,40 @@
-import { equipItemBySerial } from "../database/items.js";
+import { equipItemBySerial, getUserInventory, ITEMS } from "../database/items.js";
+import { openEquipmentPanel } from "./inventory.js";
+const quiet={parse:[],repliedUser:false};
 
-const quiet = { parse: [], repliedUser: false };
-
-export async function equipCommand(message) {
-  if (!message.inGuild() || message.author.bot) return;
-
-  const args = message.content.trim().split(/\s+/);
-  const itemId = args[1]?.toLowerCase();
-  const serialText = args[2];
-
-  if (
-    args.length !== 3 ||
-    !itemId ||
-    !/^\d+$/.test(serialText ?? "")
-  ) {
-    return message.reply({
-      content:
-        "Usage: `!equip <item-id> <serial-number>`\n" +
-        "Example: `!equip millies-wrath 1`",
-      allowedMentions: quiet,
-    });
+export async function equipCommand(message){
+  if(!message.inGuild()||message.author.bot)return;
+  const args=message.content.trim().split(/\s+/).slice(1);
+  // !equip opens the compact manager with an automatic copy selection.
+  if(!args.length)return openEquipmentPanel(message,{view:"manager"});
+  const itemId=args[0]?.toLowerCase();
+  if(args.length>2||(args[1]!==undefined&&!/^\d+$/.test(args[1]))){
+    return message.reply({content:"Use !equip to browse, or `!equip <item-id> [serial-number]`.",allowedMentions:quiet});
   }
-
-  const serialNumber = Number(serialText);
-
-  if (!Number.isSafeInteger(serialNumber) || serialNumber < 1) {
-    return message.reply({
-      content: "Enter a valid positive whole-number serial.",
-      allowedMentions: quiet,
-    });
+  if(!Object.hasOwn(ITEMS,itemId))return message.reply({content:"That item isn't configured. Use !equip to browse your bag.",allowedMentions:quiet});
+  let serial=args[1]===undefined?null:Number(args[1]);
+  if(serial!==null&&(!Number.isSafeInteger(serial)||serial<1)){
+    return message.reply({content:"Enter a valid positive whole-number serial.",allowedMentions:quiet});
   }
-
   let result;
-
-  try {
-    result = await equipItemBySerial(
-      message.guildId,
-      message.author.id,
-      itemId,
-      serialNumber
-    );
-  } catch (error) {
-    console.error("Equip failed:", error);
-
-    return message.reply({
-      content:
-        "Couldn't confirm the equipment change. " +
-        "Check your equipment before trying again.",
-      allowedMentions: quiet,
-    });
+  try{
+    if(serial===null){
+      const copies=(await getUserInventory(message.guildId,message.author.id))
+        .filter(c=>c.item_id===itemId).sort((a,b)=>Number(a.serial_number)-Number(b.serial_number));
+      if(!copies.length)return message.reply({content:"You don't own that item. Use !inventory.",allowedMentions:quiet});
+      serial=copies[0].serial_number;
+    }
+    result=await equipItemBySerial(message.guildId,message.author.id,itemId,serial);
+  }catch(error){
+    console.error("Equip failed:",error);
+    return message.reply({content:"Couldn't confirm the equipment change. Use !inventory to check before trying again.",allowedMentions:quiet});
   }
-
-  if (!result.success) {
-    const errors = {
-      invalid_item:
-        "❌ That item doesn't exist! Check `!shop` for available items.",
-
-      not_owned:
-        "❌ You don't own that item and serial. Check `!inventory`.",
-
-      invalid_type:
-        "❌ That item doesn't have a valid equipment slot.",
-
-      two_handed_equipped:
-        "❌ Unequip your two-handed weapon before equipping " +
-        "an off-hand item. Use `!unequip main_hand`.",
-    };
-
-    return message.reply({
-      content: errors[result.reason] ?? "❌ Failed to equip item.",
-      allowedMentions: quiet,
-    });
+  if(!result.success){
+    const errors={not_owned:"You don't own that copy.",invalid_item:"That item isn't configured.",invalid_type:"That item has no valid equipment slot.",two_handed_equipped:"Unequip your two-handed weapon before using off-hand gear."};
+    return message.reply({content:errors[result.reason]??"Couldn't equip that item.",allowedMentions:quiet});
   }
-
-  // Equipment has already been saved; do not repeat the operation
-  // if sending this message fails.
-  await message.reply({
-    content:
-      `✅ Equipped **${result.item.name} #${result.serialNumber}** ` +
-      `in **${result.slot.replace(/_/g, " ")}**.` +
-      (
-        result.offHandUnequipped
-          ? "\nYour off-hand item was unequipped and remains in your inventory."
-          : ""
-      ),
-    allowedMentions: quiet,
-  }).catch((error) => {
-    console.error("Equipment saved, but confirmation failed:", error);
-  });
+  // The mutation has committed. Opening a panel must never repeat it.
+  return openEquipmentPanel(message,{view:"manager",itemId,copyId:result.instanceId,slot:result.slot,notice:
+    `✅ Equipped ${result.item.name} #${result.serialNumber}.`+
+    (result.offHandUnequipped?" Off-hand gear returned to your bag.":"")});
 }

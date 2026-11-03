@@ -6,24 +6,20 @@ import { dungeonLootTables } from "../config/dungeonLoot.js";
 import { snapshotLootTable } from "../../services/dungeonLootLogic.js";
 import { economyConfig } from "../config/economy.js";
 import { DungeonError, skills } from "../../services/dungeonLogic.js";
-
 const quiet = { parse: [], repliedUser: false };
 const money = (amount) => `${amount.toLocaleString("en-US")} ${economyConfig.currencyName}`;
 const ongoing = ["invited", "active"];
 const publicEdits = new Map();
 const text = (value, max = 200) => String(value ?? "").slice(0, max).replace(/([\\`*_~|>])/g, "\\$1");
-
 function button(run, action, label, style = ButtonStyle.Secondary, disabled = false) {
   return new ButtonBuilder().setCustomId(`dg:${run.id}:${run.state.round}:${action}`)
     .setLabel(label).setStyle(style).setDisabled(disabled);
 }
 const row = (...buttons) => new ActionRowBuilder().addComponents(buttons);
-
 const LOOT_PER_PAGE = 6;
 const percent = (weight, total) => `${Number((weight / total * 100).toFixed(4))}%`;
 const lootId = (owner, source, difficulty, page, action) =>
   `dg:loot:${owner}:${source}:${difficulty}:${page}:${action}`;
-
 function lootView(table, difficulty, owner, source = "current", page = 0) {
   const embed = new EmbedBuilder().setColor(0xf1c40f)
     .setTitle(`🎁 Dungeon Loot • ${text(difficulty, 40)}`);
@@ -48,12 +44,21 @@ function lootView(table, difficulty, owner, source = "current", page = 0) {
   for (const drop of drops.slice(page * LOOT_PER_PAGE, (page + 1) * LOOT_PER_PAGE)) {
     const item = Object.hasOwn(ITEMS, drop.itemId) ? ITEMS[drop.itemId] : null;
     const d = item?.dungeon ?? {};
-    const stats = item ? `${item.type === "weapon" ? "⚔️ ATK" : "🛡️ DEF"} **${item.stat}**` +
-      (d.healthBonus != null ? ` • HP **+${d.healthBonus}**` : "") : "Item definition is currently unavailable.";
+    const values = item?.stats;
+    const stats = !item ? "Item definition is currently unavailable." : values
+      ? [
+          `⚔️ ATK **${values.attack ?? 0}**`,
+          `🛡️ DEF **${values.defense ?? 0}**`,
+          `❤️ HP **+${values.health ?? 0}**`,
+          `💨 SPD **${values.speed ?? 0}**`,
+          `🎯 CRIT **${Number(((values.critChance ?? 0) * 100).toFixed(2))}%**`,
+        ].join(" • ")
+      : `${item.type === "weapon" ? "⚔️ ATK" : "🛡️ DEF"} **${item.stat ?? 0}**` +
+        (d.healthBonus != null ? ` • HP **+${d.healthBonus}**` : "");
     const ability = d.ability ?? d.passive;
     embed.addFields({
       name: `${text(drop.name ?? item?.name ?? drop.itemId, 80)} • ${percent(drop.weight, total)}`,
-      value: `${item ? `**${text(d.rarity ?? "Equipment", 30)}** • ${text(item.type, 20)}\n` : ""}` +
+      value: `${item ? `**${text(d.rarity ?? "Equipment", 30)}** • ${text(item.type, 20)} • ${text(item.slot ?? "Unassigned", 20)}\n` : ""}` +
         `${stats}\n` + (ability ? `${d.ability ? "Skill" : "Passive"}: **${text(ability.name, 60)}**\n` : "") +
         `ID: \`${text(drop.itemId, 90)}\``,
       inline: false,
@@ -76,7 +81,6 @@ function lootView(table, difficulty, owner, source = "current", page = 0) {
   }
   return { embeds: [embed], components: controls, allowedMentions: quiet };
 }
-
 async function handleLootPagination(interaction) {
   const parts = interaction.customId.split(":");
   const [, , owner, source, difficulty, pageText, action] = parts;
@@ -105,7 +109,6 @@ async function handleLootPagination(interaction) {
   }
   return true;
 }
-
 function dungeonView(run) {
   const state = run.state;
   const reward = state.dungeon.reward;
@@ -116,7 +119,7 @@ function dungeonView(run) {
   if (run.status === "invited") {
     embed.setDescription(
       `<@${run.leader_id}> invited <@${run.partner_id}> to a **${text(state.difficulty)}** dungeon!\n\n` +
-      `Clear all three rooms to earn **${money(reward)} per player**.\n` +
+      `Clear all ${state.dungeon.rooms.length} rooms to earn **${money(reward)} per player**.\n` +
       (state.lootTable ? "Each player also gets one independent equipment drop roll.\n" : "") +
       `Free entry. Your entry cooldown starts on acceptance (**${Math.round(state.rules.cooldownMs / 60000)} minutes**).\n` +
       `Accept before <t:${Math.ceil(run.expires_at / 1000)}:R>.\n\n` +
@@ -133,12 +136,14 @@ function dungeonView(run) {
         (solo ? "Your action resolves the round immediately." : "Both living players must lock an action.") : "")
     );
     for (const player of state.players) {
-      const skill = skills[player.skill];
+      const skill = (state.rules.skillRules ?? skills)[player.skill];
       embed.addFields({ name: player.hp > 0 ? "🧑 Party member" : "💀 Knocked out", value:
         `<@${player.userId}> • **${player.hp}/${player.maxHealth} HP**\n` +
-        `ATK ${player.attack} • DEF ${player.defense} • SPD ${player.speed}\n` +
-        `${text(player.weaponName)} / ${text(player.armorName)}\n` +
-        `Passive: ${text(player.passive?.name ?? "None")} • Shield: ${player.shield ?? 0}\n` +
+        `ATK ${player.attack} • DEF ${player.defense} • SPD ${player.speed} • CRIT ${Number(((player.critChance ?? 0) * 100).toFixed(2))}%\n` +
+        (player.equipment
+          ? `Gear: **${Object.keys(player.equipment).length}/11 slots** • Main: ${text(player.weaponName, 80)}\n`
+          : `${text(player.weaponName)} / ${text(player.armorName)}\nLegacy loadout: start a new run after the equipment update.\n`) +
+        `Passive: ${text(player.passives?.map(p => p.name).join(", ") || player.passive?.name || "None", 160)} • Shield: ${player.shield ?? 0}\n` +
         `Potions: ${player.potions} • Skill: ${skill ? `${skill.name} (${player.skillCooldown ? `${player.skillCooldown} turn cooldown` : "ready"})` : "none"}` +
         (run.status === "active" ? `\nAction: ${player.hp <= 0 ? "knocked out" : player.choice ? "🔒 locked" : "waiting"}` : ""), inline: false });
     }
@@ -173,10 +178,9 @@ function dungeonView(run) {
       "\nPress Loot Table for item stats and individual odds." });
   }
   components.push(row(button(run, "loot", "🎁 Loot Table")));
-  embed.setFooter({ text: "Equipment is saved on entry • Choices stay private • !dungeon resumes • !dungeon rewards finds unclaimed rewards" });
+  embed.setFooter({ text: "Combat totals include base stats • Gear is saved on entry • Choices stay private • !dungeon resumes • !dungeon rewards finds unclaimed rewards" });
   return { embeds: [embed], components, allowedMentions: quiet };
 }
-
 async function refreshPanel(message, guild, user, id) {
   // Prevent concurrent local edits from replacing a newer round with an old one.
   const previous = publicEdits.get(id) ?? Promise.resolve();
@@ -188,7 +192,6 @@ async function refreshPanel(message, guild, user, id) {
   try { await task; }
   finally { if (publicEdits.get(id) === task) publicEdits.delete(id); }
 }
-
 export async function dungeonCommand(message) {
   if (!message.inGuild() || message.author.bot) return;
   const args = message.content.trim().split(/\s+/);
@@ -243,7 +246,6 @@ export async function dungeonCommand(message) {
       "Could not load or confirm the dungeon. Use !dungeon to check your saved run before trying again.", allowedMentions: quiet }).catch(console.error);
   }
 }
-
 export async function handleDungeonInteraction(interaction) {
   if (!interaction.isButton() || !interaction.customId.startsWith("dg:")) return false;
   if (!interaction.inGuild()) {
