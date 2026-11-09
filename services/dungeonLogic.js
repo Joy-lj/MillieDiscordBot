@@ -1,3 +1,5 @@
+import { dungeonSpecials } from "../src/config/dungeonSpecials.js";
+import { resolvePlayerAttack } from "./dungeonAttack.js";
 import { randomInt } from "node:crypto";
 import { makeLoadoutPlayer } from "./dungeonEquipment.js";
 
@@ -516,6 +518,13 @@ export function dungeonForParty(dungeon, partySize, config) {
   return result;
 }
 
+function resolveSpecialConfig(input = dungeonSpecials) {
+  if (!input || input.version !== 1 || !Number.isFinite(input.normalAccuracy) || input.normalAccuracy < 0 || input.normalAccuracy > 1) {
+    fail("Invalid special combat settings.");
+  }
+  return { version: 1, normalAccuracy: input.normalAccuracy };
+}
+
 export function startState(dungeon, players, config) {
   const combat = resolveCombatConfig(config.combat ?? {});
 
@@ -523,6 +532,7 @@ export function startState(dungeon, players, config) {
     ...structuredClone(config),
     combat,
     skillRules: structuredClone(ACTIVE_SKILLS),
+    specialCombat: resolveSpecialConfig(config.specialCombat ?? dungeonSpecials),
   };
 
   if (
@@ -591,6 +601,8 @@ export function resolveRound(input, rng = randomInt) {
 
   const skillRules =
     state.rules.skillRules ?? ACTIVE_SKILLS;
+
+  const specialCombat = state.rules.specialCombat ? resolveSpecialConfig(state.rules.specialCombat) : null;
 
   const varianceWidth = Number(
     (
@@ -833,6 +845,15 @@ export function resolveRound(input, rng = randomInt) {
         state.round + skill.exposedRounds - 1;
     }
 
+    let actualDamage = 0, landedHits = 1;
+    if (specialCombat) {
+      const result = resolvePlayerAttack({ player, enemy, skill, combat, specialCombat, round: state.round,
+        roll: () => chance(rng), variance });
+      actualDamage = result.actualDamage;
+      landedHits = result.landedHits;
+      if ((player.attackBuffTurns ?? 0) > 0) player.attackBuffTurns -= 1;
+      log.push(`<@${player.userId}> used ${skill?.name ?? "Attack"}: ${result.labels.join(" + ")} = ${actualDamage} damage.`);
+    } else {
     const critical = skill?.canCrit === false
       ? false
       : chance(rng) < Math.min(
@@ -868,7 +889,7 @@ export function resolveRound(input, rng = randomInt) {
       )
     );
 
-    const actualDamage = Math.min(enemy.hp, damage);
+    actualDamage = Math.min(enemy.hp, damage);
     enemy.hp = Math.max(0, enemy.hp - damage);
 
     if ((player.attackBuffTurns ?? 0) > 0) {
@@ -880,10 +901,12 @@ export function resolveRound(input, rng = randomInt) {
       `${damage} damage${critical ? " (critical)" : ""}.`
     );
 
+    }
+
     if (skill) {
       player.skillCooldown = skill.cooldown + 1;
 
-      if (skill.weakenAttacks) {
+      if (skill.weakenAttacks && landedHits > 0) {
         enemy.weakMultiplier = enemy.weakAttacks > 0
           ? Math.min(
             enemy.weakMultiplier ??
@@ -898,11 +921,11 @@ export function resolveRound(input, rng = randomInt) {
         );
       }
 
-      if (skill.bleedRounds) {
+      if (skill.bleedRounds && landedHits > 0) {
         enemy.bleedDamage = Math.max(
           combat.minimumBleedDamage,
           Math.floor(
-            player.attack * combat.bleedAttackRatio
+            player.attack * (specialCombat ? skill.bleedAttackRatio ?? combat.bleedAttackRatio : combat.bleedAttackRatio)
           )
         );
 
@@ -910,7 +933,7 @@ export function resolveRound(input, rng = randomInt) {
           state.round + skill.bleedRounds - 1;
       }
 
-      if (skill.armorBreakRounds) {
+      if (skill.armorBreakRounds && landedHits > 0) {
         enemy.armorBreakUntil =
           state.round + skill.armorBreakRounds - 1;
       }

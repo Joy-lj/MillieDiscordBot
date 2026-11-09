@@ -44,6 +44,13 @@ import {
 
 import { resetDungeonCommand } from "./commands/resetDungeon.js";
 import { resetItemsCommand } from "./commands/resetItems.js";
+import { spawnItemCommand } from "./commands/spawnItem.js";
+import {
+  questsCommand,
+  claimQuestCommand,
+} from "./commands/quests.js";
+import { craftCommand, salvageCommand } from "./commands/crafting.js";
+import { specialCommand } from "./commands/special.js";
 
 
 // Choose which Discord events the bot can receive.
@@ -71,6 +78,49 @@ client.on(Events.MessageCreate, async (message) => {
       await fishCommand(message);
     } else if (fishingCommand === "!fishbag") {
       await fishBagCommand(message);
+    }
+
+    const questCommandName = message.content
+      .trim()
+      .split(/\s+/)[0]
+      .toLowerCase();
+
+    if (questCommandName === "!quests") {
+      await questsCommand(message);
+      return;
+    }
+
+    if (questCommandName === "!claimquest") {
+      await claimQuestCommand(message);
+      return;
+    }
+
+    const craftingCommandName = message.content.trim().split(/\s+/)[0].toLowerCase();
+    if (craftingCommandName === "!craft") {
+      await craftCommand(message);
+      return;
+    }
+    if (craftingCommandName === "!salvage") {
+      await salvageCommand(message);
+      return;
+    }
+
+    const specialCommandName = message.content
+      .trim()
+      .split(/\s+/)[0]
+      .toLowerCase();
+
+    if (specialCommandName === "!special") {
+      await specialCommand(message);
+      return;
+    }
+
+    if (
+      message.content.trim().split(/\s+/)[0].toLowerCase()
+      === "!spawnitem"
+    ) {
+      await spawnItemCommand(message);
+      return;
     }
 
     if (/^!dungeon(?:\s|$)/i.test(message.content.trim())) {

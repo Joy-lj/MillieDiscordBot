@@ -1,3 +1,4 @@
+import { withMaterialDrops } from "./crafting.js";
 import {
   ABILITIES,
   ARMOR_PASSIVES,
@@ -273,6 +274,32 @@ export const dungeonLootTables = {
     { itemId: "millies-eclipse", weight: 10 },
     { itemId: "eclipse-cat-regalia", weight: 10 },
   ],
+  // Total weight: 10,000.
+  ultra: [
+    // Currency reward only — no additional item.
+    { itemId: null, weight: 6300 }, // 63%
+
+    // Rare equipment
+    { itemId: "tombfang-sabre", weight: 300 },          // 3%
+    { itemId: "cryptkeeper-purrplate", weight: 300 },   // 3%
+
+    // Epic equipment
+    { itemId: "cryptclaw-talons", weight: 200 },        // 2%
+    { itemId: "spectral-tabby-shroud", weight: 200 },   // 2%
+
+    // Legendary equipment
+    { itemId: "abyssal-pawreaper", weight: 80 },        // 0.8%
+    { itemId: "abyssal-maneplate", weight: 80 },        // 0.8%
+
+    // Mythic equipment
+    { itemId: "millies-eclipse", weight: 20 },          // 0.2%
+    { itemId: "eclipse-cat-regalia", weight: 20 },      // 0.2%
+
+    // Crafting materials
+    { itemId: "catsteel-scrap", weight: 1200 },         // 12%
+    { itemId: "enchanted-fur", weight: 1200 },          // 12%
+    { itemId: "eternal-cosmic-cat-orb", weight: 100 },  // 1%
+  ],
 };
 
 export function withDungeonItems(items) {
@@ -287,3 +314,5 @@ export function withDungeonItems(items) {
     ...structuredClone(DUNGEON_ITEMS),
   };
 }
+// MILLIE_MATERIAL_DROPS_V1
+Object.assign(dungeonLootTables, withMaterialDrops(dungeonLootTables));

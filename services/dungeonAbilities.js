@@ -1,5 +1,63 @@
 // One source for item descriptions and the dungeon engine's actual effects.
 const definitions = {
+  flutter: {
+    id: "feather-flutter", name: "Distracting Flutter", cooldownTurns: 2,
+    description: "One 65% damage hit at 88% accuracy. A landed hit weakens the enemy's next attack by 10%.",
+    multiplier: 0.65, hits: 1, accuracy: 0.88, weakenMultiplier: 0.90, weakenAttacks: 1,
+  },
+  tangle: {
+    id: "yarn-tangle", name: "Tangled Bonk", cooldownTurns: 2,
+    description: "One 95% damage hit at 92% accuracy. A landed hit weakens the enemy's next attack by 20%.",
+    multiplier: 0.95, hits: 1, accuracy: 0.92, weakenMultiplier: 0.80, weakenAttacks: 1,
+  },
+  doubleSlash: {
+    id: "nightfall-double-slash", name: "Nightfall Double Slash", cooldownTurns: 1,
+    description: "Two independent 70% damage hits at 94% accuracy each. Each gains +5 percentage points crit chance; critical hits deal 165% damage. One-round cooldown.",
+    multiplier: 0.70, hits: 2, accuracy: 0.94, critBonus: 0.05, critDamageMultiplier: 1.65,
+  },
+  twinFang: {
+    id: "tombfang-rend", name: "Twin Fang Rend", cooldownTurns: 2,
+    description: "Two 75% damage hits at 96% accuracy each, +5 percentage points crit chance and 170% critical damage. A landed hit causes 2 bleed ticks of 8% ATK (minimum 2 each), starting this round.",
+    multiplier: 0.75, hits: 2, accuracy: 0.96, critBonus: 0.05, critDamageMultiplier: 1.70,
+    bleedRounds: 2, bleedAttackRatio: 0.08,
+  },
+  cannonade: {
+    id: "crumb-cannonade", name: "Crumb Cannonade", cooldownTurns: 3,
+    description: "Three 75% damage hits at 96% accuracy each, ignoring 15% defense. Each gains +5 percentage points crit chance and deals 165% critical damage.",
+    multiplier: 0.75, hits: 3, accuracy: 0.96, armorPierce: 0.15, critBonus: 0.05, critDamageMultiplier: 1.65,
+  },
+  cryptFeast: {
+    id: "cryptclaw-feast", name: "Cryptclaw Feast", cooldownTurns: 2,
+    description: "Two 100% damage hits at 97% accuracy each. Gain +10 percentage points crit chance and 180% critical damage; heal for 25% of HP actually removed across both hits.",
+    multiplier: 1, hits: 2, accuracy: 0.97, critBonus: 0.10, critDamageMultiplier: 1.80, lifestealRatio: 0.25,
+  },
+  starFlurry: {
+    id: "starfall-flurry", name: "Starfall Flurry", cooldownTurns: 3,
+    description: "Four 70% damage hits at 98% accuracy each, ignoring 15% defense. Each gains +15 percentage points crit chance and deals 190% critical damage.",
+    multiplier: 0.70, hits: 4, accuracy: 0.98, critBonus: 0.15, critDamageMultiplier: 1.90, armorPierce: 0.15,
+  },
+  abyssalReap: {
+    id: "abyssal-reaping", name: "Abyssal Reaping", cooldownTurns: 3,
+    description: "Two guaranteed 140% damage hits, ignoring 45% defense. Each gains +10 percentage points crit chance and deals 180% critical damage.",
+    multiplier: 1.40, hits: 2, accuracy: 1, armorPierce: 0.45, critBonus: 0.10, critDamageMultiplier: 1.80,
+  },
+  eclipseExecution: {
+    id: "eclipse-execution", name: "Eclipse Execution", cooldownTurns: 4,
+    description: "One guaranteed 340% damage hit, ignoring 50% defense. Gain +10 percentage points crit chance; a critical hit deals 200% damage.",
+    multiplier: 3.40, hits: 1, accuracy: 1, armorPierce: 0.50, critBonus: 0.10, critDamageMultiplier: 2,
+  },
+  royalFury: {
+    id: "royal-annihilation", name: "Royal Annihilation", cooldownTurns: 4,
+    description: "Two guaranteed 180% damage hits, ignoring 35% defense. Each gains +20 percentage points crit chance and deals 210% critical damage.",
+    multiplier: 1.80, hits: 2, accuracy: 1, armorPierce: 0.35, critBonus: 0.20, critDamageMultiplier: 2.10,
+  },
+  eternalFury: {
+    id: "eternal-cataclysm", name: "Eternal Cataclysm", cooldownTurns: 5,
+    description: "Three guaranteed 140% damage hits, ignoring 45% defense. Each gains +25 percentage points crit chance and deals 220% critical damage. Your next 2 damaging actions gain +20% damage.",
+    multiplier: 1.40, hits: 3, accuracy: 1, armorPierce: 0.45, critBonus: 0.25, critDamageMultiplier: 2.20,
+    attackBuffTurns: 2, attackBuffMultiplier: 1.20,
+  },
+  // Keep old IDs/effects available for old catalogs and saved runs.
   bonk: {
     id: "distracting-bonk", name: "Playful Bonk", cooldownTurns: 3,
     description: "Deal normal damage and reduce the enemy's next attack by 25%.",

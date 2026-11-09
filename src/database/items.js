@@ -218,6 +218,7 @@ export async function buyItem(guildId, userId, itemId, quantity = 1) {
 export async function sellItemBySerial(guildId, userId, itemId, serialNumber) {
   const item = definition(itemId);
   if (!item) return { success: false, reason: "invalid_item" };
+  if (item.type === "material" || item.sellable === false) return { success: false, reason: "not_sellable" };
   const serial = positiveInteger(serialNumber);
   if (serial === null) return { success: false, reason: "not_owned" };
   const sellPrice = Math.floor(itemPrice(item) * 0.5);

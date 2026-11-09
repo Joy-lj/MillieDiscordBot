@@ -1,3 +1,5 @@
+import { applyWeaponSpecials } from "../../services/weaponSpecialAssignments.js";
+import { withCraftingItems } from "./crafting.js";
 // src/config/items.js
 import { ABILITIES } from "../../services/dungeonAbilities.js";
 import { withDungeonItems } from "./dungeonLoot.js";
@@ -62,7 +64,7 @@ export const SHOP_ITEMS = {
     description:
       "One feather, one string, and Millie's limitless hunting ambition.",
     stats: { attack: 5, speed: 5, critChance: 0.05 },
-    skill: "bonk",
+    skill: "flutter",
   }),
 
   "yarn-flail": equipment({
@@ -75,7 +77,7 @@ export const SHOP_ITEMS = {
     description:
       "A dense yarn ball attached to a handle stolen from a scratching post.",
     stats: { attack: 20, speed: 3, critChance: 0.07 },
-    skill: "bonk",
+    skill: "tangle",
   }),
 
   "black-cat-katana": equipment({
@@ -88,7 +90,7 @@ export const SHOP_ITEMS = {
     description:
       "A midnight blade that leaves scratches before its victim hears a purr.",
     stats: { attack: 80, speed: 5, critChance: 0.15 },
-    skill: "bleed",
+    skill: "doubleSlash",
   }),
 
   "starforged-claws": equipment({
@@ -101,7 +103,7 @@ export const SHOP_ITEMS = {
     description:
       "A single celestial claw forged from the shooting star Millie caught.",
     stats: { attack: 230, speed: 7, critChance: 0.22 },
-    skill: "bleed",
+    skill: "starFlurry",
   }),
 
   // ─────────────────────────────────────────────
@@ -152,7 +154,7 @@ export const SHOP_ITEMS = {
     description:
       "A heavy cannon loaded with cookies baked far beyond their safe crunch.",
     stats: { attack: 150, speed: -4, critChance: 0.12 },
-    skill: "barrage",
+    skill: "cannonade",
   }),
 
   "millies-wrath": equipment({
@@ -165,7 +167,7 @@ export const SHOP_ITEMS = {
     description:
       "The queen's legendary weapon, awakened when dinner is one minute late.",
     stats: { attack: 400, speed: 0, critChance: 0.25 },
-    skill: "barrage",
+    skill: "royalFury",
   }),
 
   // ─────────────────────────────────────────────
@@ -474,3 +476,8 @@ export const SHOP_ITEMS = {
 
 export const SHOP_ITEM_IDS = Object.keys(SHOP_ITEMS);
 export const ITEMS = withDungeonItems(SHOP_ITEMS);
+// MILLIE_CRAFTING_CATALOG_V1
+Object.assign(ITEMS, withCraftingItems(ITEMS));
+
+// Apply after crafting, so Eternal Wrath gets its own special instead of inheriting Wrath's.
+Object.assign(ITEMS, applyWeaponSpecials(ITEMS));
