@@ -14,10 +14,10 @@ export function createHotColdStore(db) {
     if (
       !Number.isSafeInteger(wager) ||
       wager < 1 ||
-      wager > 1_000_000
+      wager > 100_000_000
     ) {
       return {
-        error: "Bet a whole number between 1 and 1,000,000.",
+        error: "Bet a whole number between 1 and 100,000,000.",
       };
     }
 

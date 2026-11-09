@@ -2,7 +2,120 @@ import { randomUUID } from "node:crypto";
 import db from "./connection.js";
 
 const MAX_BALANCE = Number.MAX_SAFE_INTEGER;
-const MAX_WAGER = 1_000_000;
+const MAX_WAGER = 100_000_000;
+// Maximum combined wager for the entire blackjack game.
+const MAX_BLACKJACK_WAGER = 1_000_000_000;
+
+export async function increaseBetWager(id, amount, expectedWager) {
+  if (
+    !Number.isSafeInteger(amount) ||
+    amount < 1 ||
+    !Number.isSafeInteger(expectedWager) ||
+    expectedWager < 1
+  ) {
+    return { error: "Invalid additional wager." };
+  }
+
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const betResult = await client.query(
+      `SELECT guild_id, user_id, wager, status
+       FROM public.bets
+       WHERE id = $1
+       FOR UPDATE`,
+      [id]
+    );
+
+    const bet = betResult.rows[0];
+
+    async function reject(error) {
+      await client.query("ROLLBACK");
+      return { error };
+    }
+
+    if (!bet || bet.status !== "open") {
+      return await reject("This bet is no longer active.");
+    }
+
+    const currentWager = Number(bet.wager);
+
+    // Prevent the same wager change from being applied twice.
+    if (currentWager !== expectedWager) {
+      return await reject(
+        "The game's wager changed. This action was not charged."
+      );
+    }
+
+    const nextWager = currentWager + amount;
+
+    if (
+      !Number.isSafeInteger(nextWager) ||
+      nextWager > MAX_BLACKJACK_WAGER
+    ) {
+      return await reject(
+        "Splitting or doubling would exceed the game's " +
+        "1,000,000 total wager limit."
+      );
+    }
+
+    const accountResult = await client.query(
+      `SELECT balance
+       FROM public.accounts
+       WHERE guild_id = $1 AND user_id = $2
+       FOR UPDATE`,
+      [bet.guild_id, bet.user_id]
+    );
+
+    const balance = Number(accountResult.rows[0]?.balance);
+
+    if (!Number.isSafeInteger(balance) || balance < amount) {
+      return await reject(
+        "You don't have enough currency for that additional wager."
+      );
+    }
+
+    // Leave enough room for the eventual payout.
+    const maximumPayout = Math.floor(nextWager * 2.5);
+
+    if (
+      balance - amount >
+      Number.MAX_SAFE_INTEGER - maximumPayout
+    ) {
+      return await reject(
+        "Your balance is too high to increase this wager."
+      );
+    }
+
+    await client.query(
+      `UPDATE public.accounts
+       SET balance = balance - $1
+       WHERE guild_id = $2 AND user_id = $3`,
+      [amount, bet.guild_id, bet.user_id]
+    );
+
+    await client.query(
+      `UPDATE public.bets
+       SET wager = $1
+       WHERE id = $2`,
+      [nextWager, id]
+    );
+
+    await client.query("COMMIT");
+
+    return {
+      success: true,
+      wager: nextWager,
+    };
+  } catch (error) {
+    await client.query("ROLLBACK").catch(console.error);
+    throw error;
+  } finally {
+    client.release();
+  }
+}
 
 function safeInteger(value, name) {
   const number = Number(value);

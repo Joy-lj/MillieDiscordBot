@@ -49,7 +49,8 @@ import {
   questsCommand,
   claimQuestCommand,
 } from "./commands/quests.js";
-import { craftCommand, salvageCommand } from "./commands/crafting.js";
+import { craftCommand, salvageCommand, upgradeCommand, prepareCommand }
+  from "./commands/crafting.js";
 import { specialCommand } from "./commands/special.js";
 
 
@@ -99,7 +100,15 @@ client.on(Events.MessageCreate, async (message) => {
     if (craftingCommandName === "!craft") {
       await craftCommand(message);
       return;
+
     }
+    if (craftingCommandName === "!upgrade") {
+      return await upgradeCommand(message);
+    }
+    if (craftingCommandName === "prepare") {
+      return await prepareCommand(message);
+    }
+
     if (craftingCommandName === "!salvage") {
       await salvageCommand(message);
       return;

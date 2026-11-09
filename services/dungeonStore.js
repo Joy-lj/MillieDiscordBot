@@ -1,3 +1,4 @@
+import { consumePreparedSupply } from "./dungeonSupplies.js";
 import { createHash, randomInt, randomUUID } from "node:crypto";
 import { loadDungeonEquipment } from "./dungeonEquipment.js";
 import { DungeonError, dungeonForParty, makePlayer, resolveRound, startState, validateChoice, validateConfig } from "./dungeonLogic.js";
@@ -183,6 +184,9 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
         );
         run.state.difficulty = difficulty;
       }
+      if (mode === "solo") {
+        run.state.players[0] = await consumePreparedSupply(client, guild, leader, run.state.players[0], items);
+      }
       run.state.lootTable = lootTable;
       await client.query(
         `INSERT INTO public.dungeon_runs
@@ -260,6 +264,9 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
         });
         const difficulty = run.state.difficulty;
         const lootTable = run.state.lootTable ?? null;
+        for (let i = 0; i < players.length; i++) {
+          players[i] = await consumePreparedSupply(client, guild, users[i], players[i], items);
+        }
         run.state = startState(run.state.dungeon, players, run.state.rules);
         run.state.difficulty = difficulty;
         run.state.lootTable = lootTable;

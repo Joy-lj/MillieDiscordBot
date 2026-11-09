@@ -1,3 +1,4 @@
+import { applyItemUpgrade } from "../../services/itemUpgrades.js";
 import { randomUUID } from "node:crypto";
 import {
   ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle,
@@ -113,7 +114,7 @@ async function managerView(state, prefix, username, expired) {
     embed.setDescription("No owned equipment in this category. Browse !shop or choose another category.");
     controls.push(row(btn("loadout","View Loadout"),btn("bag","Bag"),btn("manager","Equip manager"),btn("refresh","Refresh")));
   } else {
-    const item = group.item;
+    const item = applyItemUpgrade(group.item, copy.upgrade_level ?? 0);
     const comparison = equipmentComparison(state.stats.equipment ?? {}, item, copy.id);
     const rarity = item.dungeon?.rarity ?? "common";
     embed.setTitle(clean(item.name))
@@ -148,7 +149,7 @@ async function managerView(state, prefix, username, expired) {
     if(state.showCopies && group.copies.length>1) {
       const visible=group.copies.slice(state.copyPage*COPY_PAGE_SIZE,(state.copyPage+1)*COPY_PAGE_SIZE);
       controls.push(row(new StringSelectMenuBuilder().setCustomId(`${prefix}:copy`).setPlaceholder("Choose a particular copy")
-        .setDisabled(expired).addOptions(visible.map(entry=>({label:`Copy #${entry.serial_number}${state.equippedIds.has(String(entry.id)) ? " • Equipped" : ""}`,
+        .setDisabled(expired).addOptions(visible.map(entry=>({label:`Copy #${entry.serial_number}${entry.upgrade_level ? ` +${entry.upgrade_level}` : ""}${state.equippedIds.has(String(entry.id)) ? " • Equipped" : ""}`,
           value:String(entry.id),default:String(entry.id)===state.copyId})))));
     }
     const pagination=[];
@@ -165,7 +166,7 @@ async function managerView(state, prefix, username, expired) {
 }
 
 const BAG_CATEGORIES = {
-  all: "All Items", weapon: "Weapons", armor: "Armor", accessory: "Accessories", material: "Materials",
+  all: "All Items", weapon: "Weapons", armor: "Armor", accessory: "Accessories", material: "Materials", consumable: "Supplies",
   dungeon: "Dungeon Drops", locked: "Favorites", equipped: "Equipped",
 };
 const BAG_SORTS = { name: "Name (A–Z)", rarity: "Rarity (highest)", value: "Value (highest)", newest: "Newest acquired" };
@@ -313,11 +314,11 @@ async function panel(state,prefix,username,expired=false) {
     state.copyPage=Math.floor(group.copies.indexOf(copy)/COPY_PAGE_SIZE);
     const shown=group.copies.slice(state.copyPage*COPY_PAGE_SIZE,(state.copyPage+1)*COPY_PAGE_SIZE);
     const isEquipped=state.equippedIds.has(String(copy.id));
-    const item=group.item;
+    const item=applyItemUpgrade(group.item, copy.upgrade_level ?? 0);
     embed.setTitle(clean(item?.name??group.id))
       .setDescription(`Owned: **${group.copies.length}** • ${isEquipped?"✅ Equipped":"In your bag"}\n\n`+
-        (item ? item.type === "material"
-          ? `Material • Inventory only\n\n${clean(item.description,350)}`
+        (item ? ["material", "consumable"].includes(item.type)
+          ? `${item.type === "consumable" ? "Supply" : "Material"} • Inventory only\n\n${clean(item.description,350)}${item.use ? `\n${clean(item.use,200)}` : ""}`
           : `${clean(item.type)} • ${EQUIPMENT_LABELS[item.slot]??"Unassigned"}${item.handedness===2?" • Two-handed":""}\n\n${bonuses(item.stats)}`
           : "Item definition is missing.")+notice);
     if(item)embed.addFields({name:"Rarity",value:clean((item.dungeon?.rarity??"common").replace(/_/g," "))});
@@ -328,9 +329,9 @@ async function panel(state,prefix,username,expired=false) {
     if(icon){files.push(new AttachmentBuilder(icon,{name:"item.png"}));embed.setThumbnail("attachment://item.png");}
     if(group.copies.length>1)controls.push(row(new StringSelectMenuBuilder().setCustomId(`${prefix}:copy`)
       .setPlaceholder("Choose an owned copy").setDisabled(expired)
-      .addOptions(shown.map(c=>({label:`Copy #${c.serial_number}${state.equippedIds.has(String(c.id))?" • Equipped":""}${c.is_locked?" • Locked":""}`,
+      .addOptions(shown.map(c=>({label:`Copy #${c.serial_number}${c.upgrade_level ? ` +${c.upgrade_level}` : ""}${state.equippedIds.has(String(c.id))?" • Equipped":""}${c.is_locked?" • Locked":""}`,
         value:String(c.id),default:String(c.id)===state.copyId})))));
-    if(item?.type==="material")controls.push(row(btn(`favorite:${copy.id}:${copy.is_locked?"0":"1"}`,copy.is_locked?"🔓 Unlock":"🔒 Lock")));
+    if(["material","consumable"].includes(item?.type))controls.push(row(btn(`favorite:${copy.id}:${copy.is_locked?"0":"1"}`,copy.is_locked?"🔓 Unlock":"🔒 Lock")));
     else controls.push(row(
       btn(`equip:${copy.id}`,"Equip",isEquipped||!item||!Object.hasOwn(EQUIPMENT_LABELS,item.slot),ButtonStyle.Success),
       btn(`unequip:${item?.slot??"-"}:${copy.id}`,"Unequip",!isEquipped,ButtonStyle.Danger),

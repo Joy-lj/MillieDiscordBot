@@ -2,7 +2,7 @@
 export const flowerPokerConfig = {
   invitationMs: 60_000,
   plantingMs: 60_000,
-  maxWager: 1_000_000,
+  maxWager: 100_000_000,
 };
 
 // We normalize these reciprocal odds when drawing. Each flower can repeat.

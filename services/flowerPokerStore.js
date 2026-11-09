@@ -1,5 +1,5 @@
 const MAX_BALANCE = Number.MAX_SAFE_INTEGER;
-const MAX_WAGER = 1_000_000;
+const MAX_WAGER = 100_000_000;
 
 function safeInteger(value, name) {
   const number = Number(value);

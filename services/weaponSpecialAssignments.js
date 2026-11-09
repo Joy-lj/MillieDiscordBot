@@ -13,6 +13,8 @@ export const WEAPON_SPECIALS = {
   "abyssal-pawreaper": "abyssalReap",
   "millies-eclipse": "eclipseExecution",
   "millies-eternal-wrath": "eternalFury",
+  "moonfang-katana": "moonfangDrain",
+  "starforged-cookie-cannon": "coreVolley",
 };
 
 export function applyWeaponSpecials(items) {

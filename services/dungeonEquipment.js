@@ -1,3 +1,4 @@
+import { applyItemUpgrade } from "./itemUpgrades.js";
 import { ACTIVE_SKILLS, PASSIVES_BY_ID } from "./dungeonAbilities.js";
 
 const SLOTS = new Set([
@@ -14,7 +15,7 @@ function number(value, min, max, name) {
 // Call with the SAME PostgreSQL client after locking this player's account.
 export async function loadDungeonEquipment(client, guildId, userId, items) {
   const { rows } = await client.query(
-    `SELECT e.slot, i.id, i.item_id, i.serial_number
+    `SELECT e.slot, i.id, i.item_id, i.serial_number, i.upgrade_level
      FROM public.user_equipment e
      JOIN public.user_items i ON i.id = e.item_instance_id
        AND i.guild_id = e.guild_id AND i.user_id = e.user_id
@@ -28,12 +29,13 @@ export async function loadDungeonEquipment(client, guildId, userId, items) {
     if (!SLOTS.has(row.slot) || !item || item.slot !== row.slot) continue;
     const instanceId = Number(row.id), serialNumber = Number(row.serial_number);
     if (!Number.isSafeInteger(instanceId) || instanceId < 1 ||
-      !Number.isSafeInteger(serialNumber) || serialNumber < 1) {
+        !Number.isSafeInteger(serialNumber) || serialNumber < 1) {
       throw new Error("Invalid equipped item instance.");
     }
     equipment[row.slot] = {
       instanceId, itemId: row.item_id, serialNumber,
-      item: structuredClone(item),
+      item: applyItemUpgrade(item, row.upgrade_level ?? 0),
+      upgradeLevel: Number(row.upgrade_level ?? 0),
     };
   }
   if (equipment.main_hand?.item.handedness === 2) delete equipment.off_hand;

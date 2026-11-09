@@ -6,7 +6,6 @@ import {
   PermissionFlagsBits,
   MessageFlags,
 } from "discord.js";
-
 import { dungeonConfig } from "../config/dungeon.js";
 
 const GIVE_ADMIN_IDS = [
@@ -14,7 +13,7 @@ const GIVE_ADMIN_IDS = [
   "813870343767982100",
 ];
 
-// Keep these synchronized with spawnItem.js.
+// Matches the allowlist in spawnItem.js. Edit separately if permissions differ.
 const ITEM_ADMIN_IDS = [
   "428738370022277121",
   "813870343767982100",
@@ -24,13 +23,9 @@ const quiet = { parse: [], repliedUser: false };
 
 function duration(ms) {
   const minutes = Math.ceil(ms / 60_000);
-
   if (minutes < 60) return `${minutes} min`;
-
   const hours = Math.floor(minutes / 60);
-
-  return `${hours} hr${minutes % 60 ? ` ${minutes % 60} min` : ""
-    }`;
+  return `${hours} hr${minutes % 60 ? ` ${minutes % 60} min` : ""}`;
 }
 
 export async function helpCommand(message) {
@@ -39,9 +34,7 @@ export async function helpCommand(message) {
   const staffCommands = [];
 
   if (GIVE_ADMIN_IDS.includes(message.author.id)) {
-    staffCommands.push(
-      "`!give @user <amount>` — Add currency to a player."
-    );
+    staffCommands.push("`!give @user <amount>` — Add currency to a player.");
   }
 
   if (ITEM_ADMIN_IDS.includes(message.author.id)) {
@@ -50,11 +43,7 @@ export async function helpCommand(message) {
     );
   }
 
-  if (
-    message.member?.permissions.has(
-      PermissionFlagsBits.Administrator
-    )
-  ) {
+  if (message.member?.permissions.has(PermissionFlagsBits.Administrator)) {
     staffCommands.push(
       "`!remove @user <amount>` — Remove currency from a player.",
       "`!resetdungeon [@user]` — Clear dungeon entry cooldown; defaults to yourself.",
@@ -62,24 +51,12 @@ export async function helpCommand(message) {
     );
   }
 
-  const difficulties = Object.keys(
-    dungeonConfig.difficulties
-  );
-
+  const difficulties = Object.keys(dungeonConfig.difficulties);
   const difficultyOptions = difficulties.join("|");
-
-  const cooldowns = difficulties
-    .map((key) => {
-      const cooldown =
-        dungeonConfig.difficulties[key].cooldownMs ??
-        dungeonConfig.cooldownMs;
-
-      const label =
-        key.charAt(0).toUpperCase() + key.slice(1);
-
-      return `${label}: ${duration(cooldown)}`;
-    })
-    .join(" • ");
+  const cooldowns = difficulties.map((key) => {
+    const cooldown = dungeonConfig.difficulties[key].cooldownMs ?? dungeonConfig.cooldownMs;
+    return `${key.charAt(0).toUpperCase() + key.slice(1)}: ${duration(cooldown)}`;
+  }).join(" • ");
 
   const pages = [
     [
@@ -150,17 +127,17 @@ export async function helpCommand(message) {
       },
       {
         name: "🤺 Player Combat",
-        value:
-          "`!duel @user <wager>` — Challenge a player to a wagered duel.",
+        value: "`!duel @user <wager>` — Challenge a player to a wagered duel.",
       },
     ],
-
     [
       {
         name: "🔨 Crafting, Materials & Salvaging",
         value: [
           "`!craft` — View crafting recipes and required ingredients.",
           "`!craft <recipe-id> [base-serial]` — Preview and confirm a craft.",
+          "`!upgrade <item-id> <serial-number>` — Reinforce weapons/armor up to +3 after a preview.",
+          "`!prepare [supply-id|clear]` — Prepare one crafted supply for your next dungeon.",
           "`!salvage <item-id> <serial-number>` — Preview and confirm salvaging a gear copy into materials.",
           "**Eternal upgrade:** Millie's Wrath + Eternal Cosmic Cat Orb → Millie's Eternal Wrath.",
           "Example: `!craft millies-eternal-wrath 1`.",
@@ -207,9 +184,7 @@ export async function helpCommand(message) {
     "🐱 Millie's Guide • Economy & Adventures",
     "🐱 Millie's Guide • Crafting, Cards, Pets & Staff",
   ];
-
   let currentPage = 0;
-
   const previousId = `help:${message.id}:previous`;
   const nextId = `help:${message.id}:next`;
 
@@ -217,127 +192,55 @@ export async function helpCommand(message) {
     return new EmbedBuilder()
       .setColor(0x0099ff)
       .setTitle(titles[currentPage])
-      .setDescription(
-        "`<argument>` means required • `[argument]` means optional"
-      )
+      .setDescription("`<argument>` means required • `[argument]` means optional")
       .addFields(...pages[currentPage])
-      .setFooter({
-        text:
-          `Page ${currentPage + 1}/${pages.length}` +
-          " • Controls expire after 2 minutes",
-      });
+      .setFooter({ text: `Page ${currentPage + 1}/${pages.length} • Controls expire after 2 minutes` });
   }
 
   function buildButtons(expired = false) {
     return new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId(previousId)
-        .setLabel("Previous")
-        .setStyle(ButtonStyle.Primary)
-        .setDisabled(expired || currentPage === 0),
-
-      new ButtonBuilder()
-        .setCustomId(nextId)
-        .setLabel("Next")
-        .setStyle(ButtonStyle.Primary)
-        .setDisabled(
-          expired || currentPage === pages.length - 1
-        )
+      new ButtonBuilder().setCustomId(previousId).setLabel("Previous")
+        .setStyle(ButtonStyle.Primary).setDisabled(expired || currentPage === 0),
+      new ButtonBuilder().setCustomId(nextId).setLabel("Next")
+        .setStyle(ButtonStyle.Primary).setDisabled(expired || currentPage === pages.length - 1)
     );
   }
 
   const reply = await message.reply({
-    embeds: [buildEmbed()],
-    components: [buildButtons()],
-    allowedMentions: quiet,
+    embeds: [buildEmbed()], components: [buildButtons()], allowedMentions: quiet,
+  });
+  const collector = reply.createMessageComponentCollector({
+    filter: interaction => interaction.isButton() && [previousId, nextId].includes(interaction.customId),
+    time: 120_000,
   });
 
-  const collector =
-    reply.createMessageComponentCollector({
-      filter: (interaction) =>
-        interaction.isButton() &&
-        [previousId, nextId].includes(
-          interaction.customId
-        ),
-      time: 120_000,
-    });
-
   let updates = Promise.resolve();
-
-  collector.on("collect", async (interaction) => {
+  collector.on("collect", async interaction => {
     if (interaction.user.id !== message.author.id) {
-      await interaction
-        .reply({
-          content:
-            "These controls belong to another player. Use !help.",
-          flags: MessageFlags.Ephemeral,
-          allowedMentions: quiet,
-        })
-        .catch(console.error);
-
+      await interaction.reply({
+        content: "These controls belong to another player. Use !help.",
+        flags: MessageFlags.Ephemeral, allowedMentions: quiet,
+      }).catch(console.error);
       return;
     }
 
-    // Acknowledge immediately, then process clicks in order.
-    const acknowledged = interaction
-      .deferUpdate()
-      .then(
-        () => true,
-        (error) => {
-          console.error(
-            "Help interaction failed:",
-            error
-          );
-
-          return false;
-        }
-      );
-
-    updates = updates
-      .then(async () => {
-        if (!(await acknowledged) || collector.ended) {
-          return;
-        }
-
-        currentPage = Math.max(
-          0,
-          Math.min(
-            pages.length - 1,
-            currentPage +
-            (interaction.customId === nextId
-              ? 1
-              : -1)
-          )
-        );
-
-        await reply.edit({
-          embeds: [buildEmbed()],
-          components: [
-            buildButtons(collector.ended),
-          ],
-          allowedMentions: quiet,
-        });
-      })
-      .catch((error) => {
-        console.error(
-          "Help pagination failed:",
-          error
-        );
+    // Queue in click order while acknowledging immediately.
+    const acknowledged = interaction.deferUpdate().then(() => true, error => {
+      console.error("Help interaction failed:", error);
+      return false;
+    });
+    updates = updates.then(async () => {
+      if (!await acknowledged || collector.ended) return;
+      currentPage = Math.max(0, Math.min(pages.length - 1,
+        currentPage + (interaction.customId === nextId ? 1 : -1)));
+      await reply.edit({
+        embeds: [buildEmbed()], components: [buildButtons(collector.ended)], allowedMentions: quiet,
       });
+    }).catch(error => console.error("Help pagination failed:", error));
   });
 
   collector.on("end", () => {
-    void updates
-      .then(() =>
-        reply.edit({
-          components: [buildButtons(true)],
-        })
-      )
-      .catch((error) => {
-        console.error(
-          "Could not disable help buttons:",
-          error
-        );
-      });
+    void updates.then(() => reply.edit({ components: [buildButtons(true)] }))
+      .catch(error => console.error("Could not disable help buttons:", error));
   });
 }

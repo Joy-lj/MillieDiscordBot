@@ -1,3 +1,5 @@
+import { ABILITIES, ARMOR_PASSIVES } from "../../services/dungeonAbilities.js";
+
 // Materials use your existing user_items inventory, one row per copy.
 const material = (name, rarity, description) => ({
   name, type: "material", slot: null, stat: 0, stats: {}, price: 0,
@@ -10,16 +12,46 @@ export const MATERIAL_ITEMS = {
   "catsteel-scrap": material("Catsteel Scrap", "common", "Metal recovered from unwanted equipment and dungeon debris."),
   "enchanted-fur": material("Enchanted Fur", "uncommon", "Soft enchanted fibers salvaged from armor and found in catacombs."),
   "eternal-cosmic-cat-orb": material("Eternal Cosmic Cat Orb", "mythic", "A tiny feline cosmos capable of awakening Millie's Wrath."),
+  "moonlit-fang": material("Moonlit Fang", "epic", "A moonlit fang used to turn a katana into a life-stealing blade."),
+  "starforged-core": material("Starforged Core", "legendary", "A celestial firing core that gives a cannon powerful armor penetration."),
+  "royal-thread": material("Royal Thread", "legendary", "Royal fibers used to craft defensive chest armor."),
 };
+
+export const SUPPLY_ITEMS = Object.fromEntries([
+  ["emergency-treat", "Emergency Treat", "common", "Start your next dungeon with one additional potion."],
+  ["hunters-catnip", "Hunter's Catnip", "uncommon", "Gain +5 percentage points accuracy for your next dungeon, capped at 100%."],
+  ["padded-paw-charm", "Padded Paw Charm", "rare", "Start your next dungeon with an extra shield worth 10% of maximum HP."],
+].map(([id,name,rarity,description]) => [id, {
+  name, type: "consumable", slot: null, stats: {}, stat: 0, price: 0,
+  purchasable: false, sellable: false, salvageable: false, source: "crafting",
+  description, use: `Prepare with !prepare ${id}.`, dungeon: { rarity },
+}]));
 
 export const craftingConfig = {
   eternalWrath: { attackMultiplier: 1.35, critBonus: 0.05 },
+  supplies: {
+    "emergency-treat": { potions: 1 },
+    "hunters-catnip": { accuracyBonus: 0.05 },
+    "padded-paw-charm": { shieldRatio: 0.10 },
+  },
+  reinforcement: {
+    maxLevel: 3, ratePerLevel: 0.03,
+    fees: { 1: 25_000, 2: 75_000, 3: 200_000 },
+    materialCounts: { 1: 5, 2: 10, 3: 20 },
+    rarityFactors: { common: 1, uncommon: 1, rare: 2, epic: 3, legendary: 5, mythic: 8 },
+  },
   recipes: {
     "millies-eternal-wrath": {
       name: "Millie's Eternal Wrath", baseItemId: "millies-wrath",
       ingredients: [{ itemId: "millies-wrath", quantity: 1 }, { itemId: "eternal-cosmic-cat-orb", quantity: 1 }],
       outputItemId: "millies-eternal-wrath", fee: 0,
     },
+    "emergency-treat": { name: "Emergency Treat", ingredients: [{ itemId: "enchanted-fur", quantity: 10 }, { itemId: "catsteel-scrap", quantity: 5 }], outputItemId: "emergency-treat", fee: 5_000 },
+    "hunters-catnip": { name: "Hunter's Catnip", ingredients: [{ itemId: "enchanted-fur", quantity: 15 }, { itemId: "catsteel-scrap", quantity: 10 }], outputItemId: "hunters-catnip", fee: 10_000 },
+    "padded-paw-charm": { name: "Padded Paw Charm", ingredients: [{ itemId: "enchanted-fur", quantity: 20 }, { itemId: "catsteel-scrap", quantity: 15 }], outputItemId: "padded-paw-charm", fee: 15_000 },
+    "moonfang-katana": { name: "Moonfang Katana", baseItemId: "black-cat-katana", ingredients: [{ itemId: "black-cat-katana", quantity: 1 }, { itemId: "moonlit-fang", quantity: 1 }, { itemId: "catsteel-scrap", quantity: 40 }, { itemId: "enchanted-fur", quantity: 20 }], outputItemId: "moonfang-katana", fee: 100_000 },
+    "starforged-cookie-cannon": { name: "Starforged Cookie Cannon", baseItemId: "cookie-cannon", ingredients: [{ itemId: "cookie-cannon", quantity: 1 }, { itemId: "starforged-core", quantity: 1 }, { itemId: "catsteel-scrap", quantity: 80 }, { itemId: "enchanted-fur", quantity: 30 }], outputItemId: "starforged-cookie-cannon", fee: 250_000 },
+    "royal-moonwoven-chestplate": { name: "Royal Moonwoven Chestplate", baseItemId: "royal-cat-chestplate", ingredients: [{ itemId: "royal-cat-chestplate", quantity: 1 }, { itemId: "royal-thread", quantity: 1 }, { itemId: "catsteel-scrap", quantity: 60 }, { itemId: "enchanted-fur", quantity: 80 }], outputItemId: "royal-moonwoven-chestplate", fee: 300_000 },
   },
   salvageByRarity: { common: 1, uncommon: 2, rare: 4, epic: 8, legendary: 16, mythic: 32 },
   salvageMaterialByType: { weapon: "catsteel-scrap", armor: "enchanted-fur", accessory: "catsteel-scrap" },
@@ -27,8 +59,9 @@ export const craftingConfig = {
   // Basis points: 10 / 10,000 = 0.1%. These replace currency-only outcomes.
   materialDrops: {
     easy: [{ itemId: "catsteel-scrap", bps: 1500 }, { itemId: "enchanted-fur", bps: 1500 }],
-    normal: [{ itemId: "catsteel-scrap", bps: 1500 }, { itemId: "enchanted-fur", bps: 1500 }],
-    hard: [{ itemId: "catsteel-scrap", bps: 1200 }, { itemId: "enchanted-fur", bps: 1200 }, { itemId: "eternal-cosmic-cat-orb", bps: 10 }],
+    normal: [{ itemId: "catsteel-scrap", bps: 1500 }, { itemId: "enchanted-fur", bps: 1500 }, { itemId: "moonlit-fang", bps: 10 }],
+    hard: [{ itemId: "catsteel-scrap", bps: 1200 }, { itemId: "enchanted-fur", bps: 1200 }, { itemId: "eternal-cosmic-cat-orb", bps: 10 }, { itemId: "moonlit-fang", bps: 25 }, { itemId: "starforged-core", bps: 25 }, { itemId: "royal-thread", bps: 25 }],
+    ultra: [{ itemId: "catsteel-scrap", bps: 1200 }, { itemId: "enchanted-fur", bps: 1200 }, { itemId: "eternal-cosmic-cat-orb", bps: 100 }, { itemId: "moonlit-fang", bps: 50 }, { itemId: "starforged-core", bps: 50 }, { itemId: "royal-thread", bps: 50 }],
   },
 };
 
@@ -45,6 +78,7 @@ export function withCraftingItems(catalog) {
   }
   const additions = {
     ...structuredClone(MATERIAL_ITEMS),
+    ...structuredClone(SUPPLY_ITEMS),
     "millies-eternal-wrath": {
       ...structuredClone(base), name: "Millie's Eternal Wrath", stat: attack,
       stats: { ...base.stats, attack, critChance },
@@ -54,6 +88,26 @@ export function withCraftingItems(catalog) {
       dungeon: { ...structuredClone(base.dungeon ?? {}), rarity: "mythic", critChance },
     },
   };
+  const variants = [
+    ["moonfang-katana", "black-cat-katana", "Moonfang Katana", { attack: 1.15 }, "moonfangDrain"],
+    ["starforged-cookie-cannon", "cookie-cannon", "Starforged Cookie Cannon", { attack: 1.15 }, "coreVolley"],
+    ["royal-moonwoven-chestplate", "royal-cat-chestplate", "Royal Moonwoven Chestplate", { defense: 1.10, health: 1.20 }, null],
+  ];
+  for (const [id, baseId, name, scales, skill] of variants) {
+    const original = catalog[baseId];
+    if (!original) continue;
+    const stats = { ...original.stats };
+    for (const [key, scale] of Object.entries(scales)) stats[key] = Math.round(Number(stats[key] ?? 0) * scale);
+    if (skill && !ABILITIES[skill]) throw new Error(`Missing attachment ability: ${skill}`);
+    additions[id] = { ...structuredClone(original), name, stats,
+      stat: original.type === "weapon" ? stats.attack : stats.defense,
+      price: 0, purchasable: false, sellable: false, salvageable: false, source: "crafting",
+      description: `An attachment-enhanced version of ${original.name}.`,
+      dungeon: { ...structuredClone(original.dungeon ?? {}), rarity: original.dungeon?.rarity === "mythic" ? "mythic" : "legendary",
+        ...(skill ? { ability: { ...ABILITIES[skill] } } : { passive: { ...ARMOR_PASSIVES.fortify } }),
+      },
+    };
+  }
   for (const id of Object.keys(additions)) if (Object.hasOwn(catalog, id)) throw new Error(`Crafting item already exists: ${id}`);
   return { ...catalog, ...additions };
 }
@@ -66,9 +120,9 @@ export function withMaterialDrops(tables) {
     const table = result[difficulty];
     const total = table.reduce((sum, row) => sum + row.weight, 0);
     if (!Number.isSafeInteger(total) || total < 1) throw new Error("Invalid loot table total.");
-    const additions = drops.map(drop => {
+    const additions = drops.filter(drop => !table.some(row => row.itemId === drop.itemId)).map(drop => {
       const weight = total * drop.bps / 10_000;
-      if (!MATERIAL_ITEMS[drop.itemId] || !Number.isSafeInteger(weight) || weight < 1 || table.some(row => row.itemId === drop.itemId)) {
+      if (!MATERIAL_ITEMS[drop.itemId] || !Number.isSafeInteger(weight) || weight < 1) {
         throw new Error(`Invalid or duplicate material drop: ${drop.itemId}`);
       }
       return { itemId: drop.itemId, weight };

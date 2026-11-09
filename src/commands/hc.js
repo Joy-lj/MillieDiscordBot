@@ -2,6 +2,7 @@ import { EmbedBuilder } from "discord.js";
 import { flowers } from "../config/flowerPoker.js";
 import { economyConfig } from "../config/economy.js";
 import { playHotCold } from "../database/hotCold.js";
+import { resolveWager } from "../utils/resolveWager.js";
 
 const quiet = { parse: [], repliedUser: false };
 
@@ -25,29 +26,31 @@ export async function hotColdCommand(message) {
 
   const args = message.content.trim().split(/\s+/);
   const choice = args[1]?.toLowerCase();
-  const amountText = args[2];
 
   if (
     args.length !== 3 ||
-    !["hot", "cold"].includes(choice) ||
-    !/^\d+$/.test(amountText ?? "")
+    !["hot", "cold"].includes(choice)
   ) {
-    await message.reply({
-      content: "Usage: `!hc hot 100` or `!hc cold 100`",
-      allowedMentions: quiet,
-    });
-    return;
+    return message.reply(
+      "Usage: `!hc hot <amount|all>` or `!hc cold <amount|all>`"
+    );
   }
 
-  const wager = Number(amountText);
+  const parsed = await resolveWager(message, args[2]);
+
+  if (parsed.error) {
+    return message.reply(parsed.error);
+  }
+
+  const wager = parsed.wager;
 
   if (
     !Number.isSafeInteger(wager) ||
     wager < 1 ||
-    wager > 1_000_000
+    wager > 100_000_000
   ) {
     await message.reply({
-      content: "Bet a whole number between 1 and 1,000,000.",
+      content: "Bet a whole number between 1 and 100,000,000.",
       allowedMentions: quiet,
     });
     return;

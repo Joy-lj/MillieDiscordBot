@@ -1,3 +1,4 @@
+import { applyItemUpgrade, reinforcementCost, upgradeLevel } from "../../services/itemUpgrades.js";
 import { createHash } from "node:crypto";
 import db from "./connection.js";
 import { ITEMS } from "../config/items.js";
@@ -13,10 +14,10 @@ const integer = value => {
 const itemFor = id => Object.hasOwn(ITEMS, id) ? ITEMS[id] : null;
 
 function selectionFor(selection) {
-  if (!selection || !["craft", "salvage"].includes(selection.kind) ||
+  if (!selection || !["craft", "salvage", "upgrade"].includes(selection.kind) ||
     typeof selection.itemId !== "string" || !/^[a-z0-9_-]+$/.test(selection.itemId)) fail("Invalid crafting selection.");
   const serial = selection.serialNumber == null ? null : integer(selection.serialNumber);
-  if (serial === 0 || (selection.kind === "salvage" && serial == null)) fail("Provide a positive item serial number.");
+  if (serial === 0 || (["salvage", "upgrade"].includes(selection.kind) && serial == null)) fail("Provide a positive item serial number.");
   return { kind: selection.kind, itemId: selection.itemId, serialNumber: serial };
 }
 
@@ -41,7 +42,7 @@ async function transaction(guild, user, fn) {
 
 async function inventory(client, guild, user, account) {
   const { rows } = await client.query(
-    `SELECT id, item_id, serial_number, is_locked FROM public.user_items
+    `SELECT id, item_id, serial_number, is_locked, upgrade_level FROM public.user_items
      WHERE guild_id = $1 AND user_id = $2 ORDER BY item_id, serial_number FOR UPDATE`, [guild, user]
   );
   const equipped = await client.query(
@@ -49,34 +50,56 @@ async function inventory(client, guild, user, account) {
   );
   const protectedIds = new Set(equipped.rows.map(row => String(row.item_instance_id)));
   for (const id of [account.equipped_weapon_id, account.equipped_armor_id]) if (id != null) protectedIds.add(String(id));
-  return { rows: rows.map(row => ({ ...row, id: integer(row.id), serial_number: integer(row.serial_number) })), protectedIds };
+  return { rows: rows.map(row => ({ ...row, id: integer(row.id), serial_number: integer(row.serial_number), upgrade_level: upgradeLevel(row.upgrade_level ?? 0) })), protectedIds };
 }
 
 function planFor(guild, user, selection, owned) {
   const { kind, itemId, serialNumber } = selection;
-  const consumed = [], outputs = [];
+  const consumed = [], outputs = [], requirements = [];
   const protectedCopy = row => row.is_locked || owned.protectedIds.has(String(row.id));
-  let fee = 0, name;
-  if (kind === "craft") {
-    const recipe = Object.hasOwn(craftingConfig.recipes, itemId) ? craftingConfig.recipes[itemId] : null;
-    if (!recipe) fail("Unknown recipe. Use !craft to see recipes.");
+  let fee = 0, name, upgrade = null;
+  if (kind === "craft" || kind === "upgrade") {
+    let recipe;
+    if (kind === "upgrade") {
+      const item = itemFor(itemId);
+      const copy = owned.rows.find(row => row.item_id === itemId && row.serial_number === serialNumber);
+      if (!item || !["weapon", "armor"].includes(item.type)) fail("Only weapons and armor can be reinforced.");
+      if (!copy) fail("You don't own that item and serial number.");
+      if (protectedCopy(copy)) fail("Unequip and unlock that copy before upgrading it.");
+      const next = copy.upgrade_level + 1;
+      if (next > craftingConfig.reinforcement.maxLevel) fail("That item is already at the maximum reinforcement level.");
+      const costs = reinforcementCost(item, next);
+      const before = applyItemUpgrade(item, copy.upgrade_level), after = applyItemUpgrade(item, next);
+      const key = item.type === "weapon" ? "attack" : "defense";
+      if (!(after.stats[key] > before.stats[key])) fail("This item has no reinforceable combat stat.");
+      upgrade = { id: copy.id, itemId, serialNumber, from: copy.upgrade_level, to: next, key, before: before.stats[key], after: after.stats[key] };
+      recipe = { ...costs, name: after.name };
+      name = after.name;
+    } else {
+      recipe = Object.hasOwn(craftingConfig.recipes, itemId) ? craftingConfig.recipes[itemId] : null;
+      if (!recipe) fail("Unknown recipe. Use !craft to see recipes.");
+    }
     if (!Array.isArray(recipe.ingredients) || !recipe.ingredients.length || recipe.ingredients.length > 10) fail("Invalid recipe ingredients.");
     fee = integer(recipe.fee ?? 0);
     const seen = new Set();
     for (const ingredient of recipe.ingredients) {
       const item = itemFor(ingredient.itemId);
-      if (!item || seen.has(ingredient.itemId) || !Number.isSafeInteger(ingredient.quantity) || ingredient.quantity < 1 || ingredient.quantity > 100) fail("Invalid recipe ingredient.");
+      if (!item || seen.has(ingredient.itemId) || !Number.isSafeInteger(ingredient.quantity) || ingredient.quantity < 1 || ingredient.quantity > 1000) fail("Invalid recipe ingredient.");
       seen.add(ingredient.itemId);
       const eligible = owned.rows.filter(row => row.item_id === ingredient.itemId && !protectedCopy(row) &&
-        (serialNumber == null || ingredient.itemId !== recipe.baseItemId || row.serial_number === serialNumber));
-      if (eligible.length < ingredient.quantity) fail(`Need ${ingredient.quantity} unlocked, unequipped ${item.name}${serialNumber != null && ingredient.itemId === recipe.baseItemId ? ` #${serialNumber}` : ""}.`);
+        (kind === "upgrade" || serialNumber == null || ingredient.itemId !== recipe.baseItemId || row.serial_number === serialNumber));
+      requirements.push({ itemId: ingredient.itemId, name: item.name, required: ingredient.quantity, available: eligible.length, missing: Math.max(0, ingredient.quantity - eligible.length) });
       consumed.push(...eligible.slice(0, ingredient.quantity));
     }
-    if (serialNumber != null && !seen.has(recipe.baseItemId)) fail("This recipe has no selectable base item.");
-    const output = itemFor(recipe.outputItemId);
-    if (!output) fail("The recipe's output item is missing from ITEMS.");
-    name = output.name;
-    outputs.push({ itemId: recipe.outputItemId, name: output.name, quantity: 1 });
+    if (kind === "craft") {
+      if (serialNumber != null && !seen.has(recipe.baseItemId)) fail("This recipe has no selectable base item.");
+      const output = itemFor(recipe.outputItemId);
+      if (!output) fail("The recipe's output item is missing from ITEMS.");
+      const base = consumed.find(row => row.item_id === recipe.baseItemId);
+      const level = ["weapon", "armor"].includes(output.type) ? base?.upgrade_level ?? 0 : 0;
+      name = applyItemUpgrade(output, level).name;
+      outputs.push({ itemId: recipe.outputItemId, name, quantity: 1, upgradeLevel: level });
+    }
   } else {
     const item = itemFor(itemId);
     if (!item || !["weapon", "armor", "accessory"].includes(item.type) || item.salvageable === false) fail("That item cannot be salvaged.");
@@ -88,12 +111,13 @@ function planFor(guild, user, selection, owned) {
     const materialId = craftingConfig.salvageMaterialBySlot[item.slot] ?? craftingConfig.salvageMaterialByType[item.type];
     const material = itemFor(materialId);
     if (!material || material.type !== "material") fail("Salvage material is missing from ITEMS.");
-    consumed.push(copy);name = item.name;
-    outputs.push({ itemId: materialId, name: material.name, quantity });
+    consumed.push(copy);name = applyItemUpgrade(item, copy.upgrade_level).name;
+    outputs.push({ itemId: materialId, name: material.name, quantity, upgradeLevel: 0 });
   }
-  const plan = { ...selection, name, fee,
-    consumed: consumed.map(row => ({ id: row.id, itemId: row.item_id, serialNumber: row.serial_number, name: itemFor(row.item_id)?.name ?? row.item_id })), outputs };
-  plan.quote = createHash("sha256").update(JSON.stringify({ guild, user, plan, definitions: outputs.map(output => itemFor(output.itemId)) })).digest("hex");
+  const plan = { ...selection, name, fee, upgrade, requirements,
+    consumed: consumed.map(row => ({ id: row.id, itemId: row.item_id, serialNumber: row.serial_number,
+      upgradeLevel: row.upgrade_level, name: applyItemUpgrade(itemFor(row.item_id), row.upgrade_level)?.name ?? row.item_id })), outputs };
+  plan.quote = createHash("sha256").update(JSON.stringify({ guild, user, plan, definitions: [itemFor(itemId), ...outputs.map(output => itemFor(output.itemId))] })).digest("hex");
   return plan;
 }
 
@@ -101,8 +125,8 @@ export async function previewCrafting(guild, user, selection) {
   selection = selectionFor(selection);
   return transaction(guild, user, async (client, account) => {
     const plan = planFor(guild, user, selection, await inventory(client, guild, user, account));
-    if (integer(account.balance) < plan.fee) fail("You don't have enough currency for the crafting fee.");
-    return plan;
+    const balance = integer(account.balance);
+    return { ...plan, balance, ready: balance >= plan.fee && plan.requirements.every(row => row.missing === 0) };
   });
 }
 
@@ -120,6 +144,7 @@ export async function confirmCrafting(guild, user, requestId, selection, quote) 
     }
     const owned = await inventory(client, guild, user, account);
     const plan = planFor(guild, user, selection, owned);
+    if (plan.requirements.some(row => row.missing > 0)) fail("Requirements are no longer met. Open a new preview to see every requirement; nothing was consumed.");
     if (plan.quote !== quote) fail("Your eligible items or recipe changed. Open a new preview; nothing was consumed.");
     if (integer(account.balance) < plan.fee) fail("You no longer have enough currency for the crafting fee.");
     if (plan.fee) {
@@ -133,6 +158,16 @@ export async function confirmCrafting(guild, user, requestId, selection, quote) 
       `DELETE FROM public.user_items WHERE guild_id = $1 AND user_id = $2 AND id = ANY($3::bigint[]) AND is_locked = FALSE RETURNING id`, [guild, user, ids]
     );
     if (removed.rows.length !== ids.length) fail("The selected items changed. The action was rolled back.");
+    let updatedItem = null;
+    if (plan.upgrade) {
+      const change = plan.upgrade;
+      const changed = await client.query(
+        `UPDATE public.user_items SET upgrade_level = $1 WHERE guild_id = $2 AND user_id = $3 AND id = $4 AND upgrade_level = $5 AND is_locked = FALSE RETURNING id`,
+        [change.to, guild, user, change.id, change.from]
+      );
+      if (changed.rows.length !== 1) fail("The target gear changed. Reinforcement was rolled back.");
+      updatedItem = { ...change, name: plan.name };
+    }
     const remaining = owned.rows.filter(row => !ids.includes(row.id));
     const addedItems = [];
     for (const output of plan.outputs) {
@@ -142,14 +177,14 @@ export async function confirmCrafting(guild, user, requestId, selection, quote) 
         while (used.has(next)) next++;
         integer(next);
         const result = await client.query(
-          `INSERT INTO public.user_items (guild_id, user_id, item_id, serial_number) VALUES ($1, $2, $3, $4) RETURNING id, serial_number`, [guild, user, output.itemId, next]
+          `INSERT INTO public.user_items (guild_id, user_id, item_id, serial_number, upgrade_level) VALUES ($1, $2, $3, $4, $5) RETURNING id, serial_number`, [guild, user, output.itemId, next, output.upgradeLevel ?? 0]
         );
         if (!result.rows[0]) fail("Could not grant the resulting item.");
-        addedItems.push({ itemId: output.itemId, name: output.name, id: integer(result.rows[0].id), serialNumber: integer(result.rows[0].serial_number) });
+        addedItems.push({ itemId: output.itemId, name: output.name, id: integer(result.rows[0].id), serialNumber: integer(result.rows[0].serial_number), upgradeLevel: output.upgradeLevel ?? 0 });
         used.add(next);
       }
     }
-    const receipt = { kind: plan.kind, consumed: plan.consumed, outputs: plan.outputs, addedItems, fee: plan.fee };
+    const receipt = { kind: plan.kind, consumed: plan.consumed, outputs: plan.outputs, addedItems, updatedItem, fee: plan.fee };
     await client.query(
       `INSERT INTO public.crafting_actions (guild_id, user_id, request_id, kind, target, result) VALUES ($1, $2, $3, $4, $5, $6::jsonb)`, [guild, user, requestId, plan.kind, target, JSON.stringify(receipt)]
     );

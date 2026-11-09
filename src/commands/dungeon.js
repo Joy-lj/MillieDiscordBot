@@ -24,21 +24,21 @@ function lootView(table, difficulty, owner, source = "current", page = 0) {
   const embed = new EmbedBuilder().setColor(0xf1c40f)
     .setTitle(`🎁 Dungeon Loot • ${text(difficulty, 40)}`);
   if (table == null) {
-    return {
-      embeds: [embed.setDescription(
-        "This dungeon was entered before equipment drops were added. Its reward is currency only.\n\n" +
-        "Use `!dungeon loot easy`, `!dungeon loot normal`, or `!dungeon loot hard` to browse future runs."
-      )], components: [], allowedMentions: quiet
-    };
+    return { embeds: [embed.setDescription(
+      "This dungeon was entered before equipment drops were added. Its reward is currency only.\n\n" +
+      "Use `!dungeon loot easy`, `!dungeon loot normal`, or `!dungeon loot hard` to browse future runs."
+    )], components: [], allowedMentions: quiet };
   }
   const total = table.reduce((sum, entry) => sum + entry.weight, 0);
   if (!Number.isSafeInteger(total) || total < 1) throw new DungeonError("This loot table is unavailable.");
   const drops = table.filter(entry => entry.itemId !== null);
   const none = table.filter(entry => entry.itemId === null).reduce((sum, entry) => sum + entry.weight, 0);
+  const materialWeight = drops.filter(entry => Object.hasOwn(ITEMS, entry.itemId) && ITEMS[entry.itemId].type === "material").reduce((sum, entry) => sum + entry.weight, 0);
+  const itemWeight = total - none - materialWeight;
   const pages = Math.max(1, Math.ceil(drops.length / LOOT_PER_PAGE));
   page = Math.max(0, Math.min(pages - 1, page));
   embed.setDescription(
-    `**Item drop: ${percent(total - none, total)}** • **No item: ${percent(none, total)}**\n\n` +
+    `**No item: ${percent(none, total)}**\n**Material item drop: ${percent(materialWeight, total)}**\n**Item drop: ${percent(itemWeight, total)}**\n\n` +
     "Each player gets **one independent roll per full clear**, alongside their currency reward.\n" +
     "The percentages below are per clear. Only one item can drop per player.\n" +
     (source === "current" ? "These are the current odds for a new dungeon." : "These are the saved odds for this dungeon.")
@@ -49,14 +49,14 @@ function lootView(table, difficulty, owner, source = "current", page = 0) {
     const values = item?.stats;
     const stats = !item ? "Item definition is currently unavailable." : item.type === "material"
       ? text(item.description ?? "Crafting ingredient. Cannot be equipped.", 250) : values
-        ? [
+      ? [
           `⚔️ ATK **${values.attack ?? 0}**`,
           `🛡️ DEF **${values.defense ?? 0}**`,
           `❤️ HP **+${values.health ?? 0}**`,
           `💨 SPD **${values.speed ?? 0}**`,
           `🎯 CRIT **${Number(((values.critChance ?? 0) * 100).toFixed(2))}%**`,
         ].join(" • ")
-        : `${item.type === "weapon" ? "⚔️ ATK" : "🛡️ DEF"} **${item.stat ?? 0}**` +
+      : `${item.type === "weapon" ? "⚔️ ATK" : "🛡️ DEF"} **${item.stat ?? 0}**` +
         (d.healthBonus != null ? ` • HP **+${d.healthBonus}**` : "");
     const ability = d.ability ?? d.passive;
     embed.addFields({
@@ -77,7 +77,7 @@ function lootView(table, difficulty, owner, source = "current", page = 0) {
       .setLabel("Next").setStyle(ButtonStyle.Secondary).setDisabled(page === pages - 1)
   ));
   if (source === "current") {
-    controls.push(row(...["easy", "normal", "hard", "ultra"].filter(key => Object.hasOwn(dungeonLootTables, key)).map(key =>
+    controls.push(row(...Object.keys(dungeonLootTables).filter(key => Object.hasOwn(dungeonLootTables, key)).map(key =>
       new ButtonBuilder().setCustomId(lootId(owner, "current", key, 0, "choose"))
         .setLabel(key[0].toUpperCase() + key.slice(1)).setStyle(ButtonStyle.Primary).setDisabled(key === difficulty)
     )));
@@ -88,9 +88,9 @@ async function handleLootPagination(interaction) {
   const parts = interaction.customId.split(":");
   const [, , owner, source, difficulty, pageText, action] = parts;
   if (parts.length !== 7 || !/^\d{1,25}$/.test(owner ?? "") ||
-    !(source === "current" || /^[0-9a-f-]{36}$/.test(source ?? "")) ||
-    !Object.hasOwn(dungeonLootTables, difficulty ?? "") || !/^-?\d{1,6}$/.test(pageText ?? "") ||
-    !["prev", "next", "choose"].includes(action)) {
+      !(source === "current" || /^[0-9a-f-]{36}$/.test(source ?? "")) ||
+      !Object.hasOwn(dungeonLootTables, difficulty ?? "") || !/^-?\d{1,6}$/.test(pageText ?? "") ||
+      !["prev", "next", "choose"].includes(action)) {
     await interaction.reply({ content: "Invalid loot control. Use !dungeon loot.", flags: MessageFlags.Ephemeral });
     return true;
   }
@@ -106,11 +106,9 @@ async function handleLootPagination(interaction) {
     await interaction.editReply(lootView(table, difficulty, owner, source, Number(pageText)));
   } catch (error) {
     console.error("Loot table navigation failed:", error);
-    await interaction.followUp({
-      content: error instanceof DungeonError ? error.message :
-        "Could not load this loot table. Use !dungeon loot to browse current odds.",
-      flags: MessageFlags.Ephemeral, allowedMentions: quiet
-    }).catch(console.error);
+    await interaction.followUp({ content: error instanceof DungeonError ? error.message :
+      "Could not load this loot table. Use !dungeon loot to browse current odds.",
+      flags: MessageFlags.Ephemeral, allowedMentions: quiet }).catch(console.error);
   }
   return true;
 }
@@ -142,23 +140,22 @@ function dungeonView(run) {
     );
     for (const player of state.players) {
       const skill = (state.rules.skillRules ?? skills)[player.skill];
-      embed.addFields({
-        name: player.hp > 0 ? "🧑 Party member" : "💀 Knocked out", value:
-          `<@${player.userId}> • **${player.hp}/${player.maxHealth} HP**\n` +
-          `ATK ${player.attack} • DEF ${player.defense} • SPD ${player.speed} • CRIT ${Number(((player.critChance ?? 0) * 100).toFixed(2))}%\n` +
-          (player.equipment
-            ? `Gear: **${Object.keys(player.equipment).length}/11 slots** • Main: ${text(player.weaponName, 80)}\n`
-            : `${text(player.weaponName)} / ${text(player.armorName)}\nLegacy loadout: start a new run after the equipment update.\n`) +
-          `Passive: ${text(player.passives?.map(p => p.name).join(", ") || player.passive?.name || "None", 160)} • Shield: ${player.shield ?? 0}\n` +
-          `Potions: ${player.potions} • Skill: ${skill ? `${skill.name} (${player.skillCooldown ? `${player.skillCooldown} turn cooldown` : "ready"})` : "none"}` +
-          (run.status === "active" ? `\nAction: ${player.hp <= 0 ? "knocked out" : player.choice ? "🔒 locked" : "waiting"}` : ""), inline: false
-      });
+      embed.addFields({ name: player.hp > 0 ? "🧑 Party member" : "💀 Knocked out", value:
+        `<@${player.userId}> • **${player.hp}/${player.maxHealth} HP**\n` +
+        `ATK ${player.attack} • DEF ${player.defense} • SPD ${player.speed} • CRIT ${Number(((player.critChance ?? 0) * 100).toFixed(2))}%\n` +
+        (player.equipment
+          ? `Gear: **${Object.keys(player.equipment).length}/11 slots** • Main: ${text(player.weaponName, 80)}\n`
+          : `${text(player.weaponName)} / ${text(player.armorName)}\nLegacy loadout: start a new run after the equipment update.\n`) +
+        (player.preparedSupply ? `Supply: **${text(player.preparedSupply.name, 60)}**${player.accuracyBonus ? ` • Accuracy +${Math.round(player.accuracyBonus * 100)}pp` : ""}\n` : "") +
+        `Passive: ${text(player.passives?.map(p => p.name).join(", ") || player.passive?.name || "None", 160)} • Shield: ${player.shield ?? 0}\n` +
+        `Potions: ${player.potions} • Skill: ${skill ? `${skill.name} (${player.skillCooldown ? `${player.skillCooldown} turn cooldown` : "ready"})` : "none"}` +
+        (run.status === "active" ? `\nAction: ${player.hp <= 0 ? "knocked out" : player.choice ? "🔒 locked" : "waiting"}` : ""), inline: false });
     }
     if (state.log.length) embed.addFields({ name: "Last round", value: state.log.join("\n").slice(0, 1024) });
     if (run.status === "active") {
       components = [
         row(button(run, "attack", "⚔️ Attack", ButtonStyle.Primary), button(run, "defend", "🛡️ Defend"),
-          button(run, "skill", "✨ Weapon special"), button(run, "heal", "🧪 Use potion"), button(run, "refresh", "Refresh")),
+          button(run, "skill", "✨ Weapon skill"), button(run, "heal", "🧪 Use potion"), button(run, "refresh", "Refresh")),
         row(button(run, "leave", solo ? "Retreat — ends run" : "Retreat — ends party run", ButtonStyle.Danger)),
       ];
     }
@@ -166,27 +163,24 @@ function dungeonView(run) {
     embed.setDescription(`**${run.status.toUpperCase()}**\nThe invitation ended. No entry cooldown was started.`);
   }
   if (run.status === "won") {
-    embed.addFields({
-      name: "Clear rewards", value: run.rewards.map((entry) =>
-        `<@${entry.user_id}>: **${money(entry.amount)}** — ${entry.claimed_at == null ? "ready to claim" : "claimed"}` +
-        `\n${entry.loot?.length ? "🎁 " + entry.loot.map(drop => `${text(drop.name, 60)} × ${drop.quantity}`).join(", ") :
-          entry.loot_rolled ? "No equipment drop this time." : "Currency-only reward from an earlier run."}`
-      ).join("\n\n").slice(0, 1024) || "Rewards are being prepared."
-    });
+    embed.addFields({ name: "Clear rewards", value: run.rewards.map((entry) =>
+      `<@${entry.user_id}>: **${money(entry.amount)}** — ${entry.claimed_at == null ? "ready to claim" : "claimed"}` +
+      `\n${entry.loot?.length ? "🎁 " + entry.loot.map(drop => `${text(drop.name, 60)} × ${drop.quantity}`).join(", ") :
+        entry.loot_rolled ? "No item drop this time." : "Currency-only reward from an earlier run."}`
+    ).join("\n\n").slice(0, 1024) || "Rewards are being prepared." });
     components = [row(button(run, "claim", "Claim my reward", ButtonStyle.Success,
       run.rewards.length > 0 && run.rewards.every((entry) => entry.claimed_at != null)), button(run, "refresh", "Refresh"))];
   }
   if (Array.isArray(state.lootTable)) {
     const total = state.lootTable.reduce((sum, entry) => sum + entry.weight, 0);
     const drops = state.lootTable.filter(entry => entry.itemId !== null);
-    const itemWeight = drops.reduce((sum, entry) => sum + entry.weight, 0);
-    if (total > 0) embed.addFields({
-      name: "🎁 Potential loot", value:
-        `**${percent(itemWeight, total)} equipment chance per player per clear.**\n` +
-        (drops.slice(0, 4).map(entry => text(entry.name, 70)).join(" • ") || "Currency only") +
-        (drops.length > 4 ? ` • and ${drops.length - 4} more` : "") +
-        "\nPress Loot Table for item stats and individual odds."
-    });
+    const materialWeight = drops.filter(entry => ITEMS[entry.itemId]?.type === "material").reduce((sum, entry) => sum + entry.weight, 0);
+    const itemWeight = drops.reduce((sum, entry) => sum + entry.weight, 0) - materialWeight;
+    if (total > 0) embed.addFields({ name: "🎁 Potential loot", value:
+      `**No item: ${percent(total-itemWeight-materialWeight,total)} • Material item drop: ${percent(materialWeight,total)} • Item drop: ${percent(itemWeight,total)}**\n` +
+      (drops.slice(0, 4).map(entry => text(entry.name, 70)).join(" • ") || "Currency only") +
+      (drops.length > 4 ? ` • and ${drops.length - 4} more` : "") +
+      "\nPress Loot Table for item stats and individual odds." });
   }
   components.push(row(button(run, "loot", "🎁 Loot Table")));
   embed.setFooter({ text: "Combat totals include base stats • Gear is saved on entry • Choices stay private • !dungeon resumes • !dungeon rewards finds unclaimed rewards" });
@@ -195,7 +189,7 @@ function dungeonView(run) {
 async function refreshPanel(message, guild, user, id) {
   // Prevent concurrent local edits from replacing a newer round with an old one.
   const previous = publicEdits.get(id) ?? Promise.resolve();
-  const task = previous.catch(() => { }).then(async () => {
+  const task = previous.catch(() => {}).then(async () => {
     const result = await dungeon.act(guild, user, id, 0, "refresh");
     await message.edit({ ...dungeonView(result.run), content: null });
   });
@@ -210,7 +204,7 @@ export async function dungeonCommand(message) {
     if (["loot", "drops"].includes(args[1]?.toLowerCase())) {
       const difficulty = (args[2] ?? "easy").toLowerCase();
       if (args.length > 3 || !Object.hasOwn(dungeonLootTables, difficulty)) {
-        await message.reply({ content: "Usage: `!dungeon loot [easy|normal|hard]`", allowedMentions: quiet });
+        await message.reply({ content: "Usage: `!dungeon loot [easy|normal|hard|ultra]`", allowedMentions: quiet });
         return;
       }
       await message.reply(lootView(snapshotLootTable(dungeonLootTables[difficulty], ITEMS), difficulty, message.author.id));
@@ -222,17 +216,15 @@ export async function dungeonCommand(message) {
       const rewardsOnly = args.length === 2;
       run = await dungeon.current(message.guildId, message.author.id, rewardsOnly);
       if (!run) {
-        await message.reply({
-          content: rewardsOnly ? "You have no unclaimed dungeon rewards." :
-            "Solo: `!dungeon solo easy`\nCo-op: `!dungeon @friend easy`\n" +
-            "Difficulties: `easy`, `normal`, `hard`.\nResume: `!dungeon`\nUnclaimed rewards: `!dungeon rewards`\nLoot tables: `!dungeon loot [easy|normal|hard]`", allowedMentions: quiet
-        });
+        await message.reply({ content: rewardsOnly ? "You have no unclaimed dungeon rewards." :
+          "Solo: `!dungeon solo easy`\nCo-op: `!dungeon @friend easy`\n" +
+          "Difficulties: `easy`, `normal`, `hard`, `ultra`.\nResume: `!dungeon`\nUnclaimed rewards: `!dungeon rewards`\nLoot tables: `!dungeon loot [easy|normal|hard|ultra]`", allowedMentions: quiet });
         return;
       }
     } else if (args[1]?.toLowerCase() === "solo") {
       const difficulty = (args[2] ?? "easy").toLowerCase();
       if (args.length > 3 || !Object.hasOwn(dungeonConfig.difficulties, difficulty)) {
-        await message.reply("Usage: `!dungeon solo [easy|normal|hard]`"); return;
+        await message.reply("Usage: `!dungeon solo [easy|normal|hard|ultra]`"); return;
       }
       run = await dungeon.create(message.guildId, message.channelId, message.author.id, null, difficulty);
     } else {
@@ -240,7 +232,7 @@ export async function dungeonCommand(message) {
       const partner = mention ? message.mentions.users.get(mention[1]) : null;
       const difficulty = (args[2] ?? "easy").toLowerCase();
       if (!partner || args.length > 3 || !Object.hasOwn(dungeonConfig.difficulties, difficulty)) {
-        await message.reply("Usage: `!dungeon @friend [easy|normal|hard]` or `!dungeon solo [easy|normal|hard]`"); return;
+        await message.reply("Usage: `!dungeon @friend [easy|normal|hard|ultra]` or `!dungeon solo [easy|normal|hard|ultra]`"); return;
       }
       if (partner.bot || partner.id === message.author.id) {
         await message.reply("Choose another human player for your dungeon party."); return;
@@ -250,17 +242,13 @@ export async function dungeonCommand(message) {
       run = await dungeon.create(message.guildId, message.channelId, message.author.id, partner.id, difficulty);
       invited = true;
     }
-    await message.reply({
-      ...dungeonView(run), ...(invited ? {
-        content: `<@${run.partner_id}>`, allowedMentions: { parse: [], users: [run.partner_id], repliedUser: false },
-      } : {})
-    });
+    await message.reply({ ...dungeonView(run), ...(invited ? {
+      content: `<@${run.partner_id}>`, allowedMentions: { parse: [], users: [run.partner_id], repliedUser: false },
+    } : {}) });
   } catch (error) {
     console.error("Dungeon command failed:", error);
-    await message.reply({
-      content: error instanceof DungeonError ? error.message :
-        "Could not load or confirm the dungeon. Use !dungeon to check your saved run before trying again.", allowedMentions: quiet
-    }).catch(console.error);
+    await message.reply({ content: error instanceof DungeonError ? error.message :
+      "Could not load or confirm the dungeon. Use !dungeon to check your saved run before trying again.", allowedMentions: quiet }).catch(console.error);
   }
 }
 export async function handleDungeonInteraction(interaction) {
@@ -272,7 +260,7 @@ export async function handleDungeonInteraction(interaction) {
   const parts = interaction.customId.split(":");
   const [, id, roundText, action] = parts;
   if (parts.length !== 4 || !/^[0-9a-f-]{36}$/.test(id ?? "") || !/^\d+$/.test(roundText ?? "") ||
-    !["accept", "decline", "attack", "defend", "skill", "heal", "refresh", "leave", "claim", "loot"].includes(action)) {
+      !["accept", "decline", "attack", "defend", "skill", "heal", "refresh", "leave", "claim", "loot"].includes(action)) {
     await interaction.reply({ content: "Invalid dungeon control. Use !dungeon.", flags: MessageFlags.Ephemeral }); return true;
   }
   if (action === "loot") {
@@ -282,10 +270,8 @@ export async function handleDungeonInteraction(interaction) {
       await interaction.editReply(lootView(run.state.lootTable, run.state.difficulty ?? "easy", interaction.user.id, run.id));
     } catch (error) {
       console.error("Dungeon loot view failed:", error);
-      await interaction.editReply({
-        content: error instanceof DungeonError ? error.message :
-          "Could not load this run's loot. Use !dungeon loot to browse current odds.", allowedMentions: quiet
-      }).catch(console.error);
+      await interaction.editReply({ content: error instanceof DungeonError ? error.message :
+        "Could not load this run's loot. Use !dungeon loot to browse current odds.", allowedMentions: quiet }).catch(console.error);
     }
     return true;
   }
@@ -297,10 +283,8 @@ export async function handleDungeonInteraction(interaction) {
     result = await dungeon.act(interaction.guildId, interaction.user.id, id, Number(roundText), action);
   } catch (error) {
     console.error("Dungeon action failed:", error);
-    const data = {
-      content: error instanceof DungeonError ? error.message :
-        "Could not confirm the action. Use !dungeon or !dungeon rewards to check before retrying.", allowedMentions: quiet
-    };
+    const data = { content: error instanceof DungeonError ? error.message :
+      "Could not confirm the action. Use !dungeon or !dungeon rewards to check before retrying.", allowedMentions: quiet };
     if (claiming) await interaction.editReply(data).catch(console.error);
     else await interaction.followUp({ ...data, flags: MessageFlags.Ephemeral }).catch(console.error);
     return true;
@@ -311,7 +295,7 @@ export async function handleDungeonInteraction(interaction) {
     content = receipt.alreadyClaimed ? "You already claimed this run's reward." :
       `Claimed **${money(receipt.amount)}**! Balance: **${money(receipt.balance)}**.`;
     if (receipt.items?.length) content += "\n🎁 " + receipt.items.map(item =>
-      `**${text(item.name, 60)} #${item.serialNumber}**`
+      `**${text(item.name, 60)} #${item.serialNumber}**` + (ITEMS[item.itemId]?.type === "material" ? " — crafting material" : ` — equip with \`!equip ${item.itemId} ${item.serialNumber}\``)
     ).join("\n");
   }
   try { await refreshPanel(interaction.message, interaction.guildId, interaction.user.id, id); }

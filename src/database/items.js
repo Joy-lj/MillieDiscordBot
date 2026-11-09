@@ -1,3 +1,4 @@
+import { applyItemUpgrade } from "../../services/itemUpgrades.js";
 import { createHash } from "node:crypto";
 import db from "./connection.js";
 import { ITEMS } from "../config/items.js";
@@ -79,7 +80,7 @@ async function lockAccount(client, guildId, userId, create = false) {
 
 async function ownedItem(client, guildId, userId, itemId, serialNumber) {
   const { rows } = await client.query(
-    `SELECT id, item_id, serial_number, is_locked FROM public.user_items
+    `SELECT id, item_id, serial_number, is_locked, upgrade_level FROM public.user_items
      WHERE guild_id = $1 AND user_id = $2 AND item_id = $3 AND serial_number = $4`,
     [guildId, userId, itemId, serialNumber]
   );
@@ -88,7 +89,7 @@ async function ownedItem(client, guildId, userId, itemId, serialNumber) {
 
 export async function getUserInventory(guildId, userId) {
   const { rows } = await db.query(
-    `SELECT id, item_id, serial_number, is_locked FROM public.user_items
+    `SELECT id, item_id, serial_number, is_locked, upgrade_level FROM public.user_items
      WHERE guild_id = $1 AND user_id = $2 ORDER BY item_id, serial_number ASC`,
     [guildId, userId]
   );
@@ -112,7 +113,7 @@ async function syncLegacyEquipment(client, guildId, userId) {
 
 export async function getUserCombatStats(guildId, userId) {
   const { rows } = await db.query(
-    `SELECT a.balance, e.slot, i.id, i.item_id, i.serial_number
+    `SELECT a.balance, e.slot, i.id, i.item_id, i.serial_number, i.upgrade_level
      FROM public.accounts a
      LEFT JOIN public.user_equipment e
        ON e.guild_id = a.guild_id AND e.user_id = a.user_id
@@ -132,7 +133,8 @@ export async function getUserCombatStats(guildId, userId) {
       instanceId: integer(row.id, "item instance ID"),
       itemId: row.item_id,
       serialNumber: integer(row.serial_number, "serial number"),
-      item,
+      item: applyItemUpgrade(item, row.upgrade_level ?? 0),
+      upgradeLevel: Number(row.upgrade_level ?? 0),
     };
   }
   // A two-handed weapon cannot receive off-hand bonuses.
@@ -304,7 +306,7 @@ export async function equipItemBySerial(guildId, userId, itemId, serialNumber) {
     );
     await syncLegacyEquipment(client, guildId, userId);
     return {
-      success: true, item, slot, serialNumber: owned.serial_number,
+      success: true, item: applyItemUpgrade(item, owned.upgrade_level ?? 0), slot, serialNumber: owned.serial_number,
       instanceId: owned.id, offHandUnequipped,
     };
   });
@@ -384,7 +386,7 @@ function buildSalePlan(rows, equippedIds, mode, instanceId, guildId, userId) {
     if (!item || item.sellable === false || !Number.isSafeInteger(item.price) || item.price < 1) continue;
     const price = Math.floor(item.price * 0.5);
     if (price < 1) continue;
-    copies.sort((a, b) => Number(a.serial_number) - Number(b.serial_number));
+    copies.sort((a,b) => Number(a.serial_number)-Number(b.serial_number));
     const protectedCopy = row => row.is_locked || equippedIds.has(String(row.id));
     const kept = mode === "duplicates" && !copies.some(protectedCopy) ? String(copies[0].id) : null;
     for (const row of copies) {
@@ -393,19 +395,17 @@ function buildSalePlan(rows, equippedIds, mode, instanceId, guildId, userId) {
       sale.push({ id: integer(row.id, "item instance ID"), itemId, serialNumber: integer(row.serial_number, "serial number"), name: item.name, price });
     }
   }
-  sale.sort((a, b) => a.id - b.id);
-  const total = sale.reduce((sum, item) => sum + item.price, 0);
+  sale.sort((a,b)=>a.id-b.id);
+  const total = sale.reduce((sum, item)=>sum+item.price, 0);
   if (!Number.isSafeInteger(total)) throw new Error("Sale total exceeds the supported limit.");
-  const quote = createHash("sha256").update(JSON.stringify({
-    guildId, userId, mode, instanceId: mode === "one" ? String(instanceId) : null,
-    sale: sale.map(({ id, itemId, serialNumber, price }) => ({ id, itemId, serialNumber, price }))
-  })).digest("hex");
+  const quote = createHash("sha256").update(JSON.stringify({guildId,userId,mode,instanceId:mode==="one"?String(instanceId):null,
+    sale:sale.map(({id,itemId,serialNumber,price})=>({id,itemId,serialNumber,price}))})).digest("hex");
   return { mode, instanceId: mode === "one" ? String(instanceId) : null, items: sale, count: sale.length, total, quote };
 }
 
 async function saleInventory(client, guildId, userId, account) {
   const { rows } = await client.query(
-    `SELECT id, item_id, serial_number, is_locked FROM public.user_items
+    `SELECT id, item_id, serial_number, is_locked, upgrade_level FROM public.user_items
      WHERE guild_id = $1 AND user_id = $2 ORDER BY item_id, serial_number`,
     [guildId, userId]
   );
@@ -413,7 +413,7 @@ async function saleInventory(client, guildId, userId, account) {
     `SELECT item_instance_id FROM public.user_equipment WHERE guild_id = $1 AND user_id = $2`,
     [guildId, userId]
   );
-  const ids = new Set(equipped.map(row => String(row.item_instance_id)));
+  const ids = new Set(equipped.map(row=>String(row.item_instance_id)));
   // Protect legacy equipped pointers as well during the equipment transition.
   for (const id of [account.equipped_weapon_id, account.equipped_armor_id]) if (id != null) ids.add(String(id));
   return { rows, equippedIds: ids };
@@ -447,7 +447,7 @@ export async function confirmItemSale(guildId, userId, mode, instanceId, expecte
     const deleted = await client.query(
       `DELETE FROM public.user_items WHERE guild_id = $1 AND user_id = $2
        AND id = ANY($3::bigint[]) AND is_locked = FALSE RETURNING id`,
-      [guildId, userId, plan.items.map(item => item.id)]
+      [guildId, userId, plan.items.map(item=>item.id)]
     );
     if (deleted.rows.length !== plan.count) throw new Error("Inventory changed during the sale.");
     return { success: true, sold: plan.count, earned: plan.total, balance: integer(credited[0].balance, "balance") };

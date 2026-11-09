@@ -316,3 +316,5 @@ export function withDungeonItems(items) {
 }
 // MILLIE_MATERIAL_DROPS_V1
 Object.assign(dungeonLootTables, withMaterialDrops(dungeonLootTables));
+// MILLIE_CRAFTING_STAGES_V1: apply after every difficulty, including Ultra.
+Object.assign(dungeonLootTables, withMaterialDrops(dungeonLootTables));

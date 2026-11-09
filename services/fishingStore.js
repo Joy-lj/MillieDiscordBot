@@ -28,7 +28,7 @@ export function createFishingStore(
       if (!/^[a-z0-9_-]+$/.test(fish.id) || !fish.name || !fish.emoji || !fish.rarity ||
         !Number.isSafeInteger(fish.weight) || fish.weight <= 0 ||
         !Number.isSafeInteger(fish.sellValue) || fish.sellValue < 1 ||
-        fish.sellValue > 1_000_000) fail("Invalid fish definition.");
+        fish.sellValue > 100_000_000) fail("Invalid fish definition.");
     }
     const weight = config.fish.reduce((sum, fish) => sum + fish.weight, 0);
     if (!Number.isSafeInteger(weight) || weight > 1_000_000_000) {

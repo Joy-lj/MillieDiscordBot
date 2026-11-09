@@ -1,5 +1,15 @@
 // One source for item descriptions and the dungeon engine's actual effects.
 const definitions = {
+  moonfangDrain: {
+    id: "moonfang-drain", name: "Moonfang Drain", cooldownTurns: 2,
+    description: "Two 85% damage hits at 98% accuracy each, +8 percentage points crit chance and 180% critical damage. Heal for 25% of actual HP removed.",
+    multiplier: 0.85, hits: 2, accuracy: 0.98, critBonus: 0.08, critDamageMultiplier: 1.8, lifestealRatio: 0.25,
+  },
+  coreVolley: {
+    id: "starforged-core-volley", name: "Corebreaker Volley", cooldownTurns: 3,
+    description: "Three guaranteed 80% damage hits, ignoring 50% defense. Each gains +8 percentage points crit chance and deals 180% critical damage.",
+    multiplier: 0.8, hits: 3, accuracy: 1, armorPierce: 0.5, critBonus: 0.08, critDamageMultiplier: 1.8,
+  },
   flutter: {
     id: "feather-flutter", name: "Distracting Flutter", cooldownTurns: 2,
     description: "One 65% damage hit at 88% accuracy. A landed hit weakens the enemy's next attack by 10%.",
