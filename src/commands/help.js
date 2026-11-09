@@ -7,12 +7,31 @@ import {
   MessageFlags,
 } from "discord.js";
 
+import { dungeonConfig } from "../config/dungeon.js";
+
 const GIVE_ADMIN_IDS = [
   "428738370022277121",
   "813870343767982100",
 ];
 
+// Keep these synchronized with spawnItem.js.
+const ITEM_ADMIN_IDS = [
+  "428738370022277121",
+  "813870343767982100",
+];
+
 const quiet = { parse: [], repliedUser: false };
+
+function duration(ms) {
+  const minutes = Math.ceil(ms / 60_000);
+
+  if (minutes < 60) return `${minutes} min`;
+
+  const hours = Math.floor(minutes / 60);
+
+  return `${hours} hr${minutes % 60 ? ` ${minutes % 60} min` : ""
+    }`;
+}
 
 export async function helpCommand(message) {
   if (!message.inGuild() || message.author.bot) return;
@@ -25,8 +44,16 @@ export async function helpCommand(message) {
     );
   }
 
+  if (ITEM_ADMIN_IDS.includes(message.author.id)) {
+    staffCommands.push(
+      "`!spawnitem @user <item-id> [quantity]` — Grant inventory items without charging currency."
+    );
+  }
+
   if (
-    message.member?.permissions.has(PermissionFlagsBits.Administrator)
+    message.member?.permissions.has(
+      PermissionFlagsBits.Administrator
+    )
   ) {
     staffCommands.push(
       "`!remove @user <amount>` — Remove currency from a player.",
@@ -34,6 +61,25 @@ export async function helpCommand(message) {
       "`!wipe` — Reset the server economy after confirmation."
     );
   }
+
+  const difficulties = Object.keys(
+    dungeonConfig.difficulties
+  );
+
+  const difficultyOptions = difficulties.join("|");
+
+  const cooldowns = difficulties
+    .map((key) => {
+      const cooldown =
+        dungeonConfig.difficulties[key].cooldownMs ??
+        dungeonConfig.cooldownMs;
+
+      const label =
+        key.charAt(0).toUpperCase() + key.slice(1);
+
+      return `${label}: ${duration(cooldown)}`;
+    })
+    .join(" • ");
 
   const pages = [
     [
@@ -46,6 +92,15 @@ export async function helpCommand(message) {
           "`!work` — Work to earn currency.",
           "`!leaderboard` / `!baltop` — View the richest players.",
           "`!donate @user <amount>` — Transfer currency to another player.",
+        ].join("\n"),
+      },
+      {
+        name: "📜 Daily & Weekly Quests",
+        value: [
+          "`!quests` — View daily and weekly progress, rewards, and reset times.",
+          "`!claimquest <quest-id>` — Claim a completed quest.",
+          "`!claimquest all` — Collect every completed, unclaimed quest reward.",
+          "Work, fishing, and dungeon clears advance quests. Claim before reset!",
         ].join("\n"),
       },
       {
@@ -67,28 +122,30 @@ export async function helpCommand(message) {
         ].join("\n"),
       },
       {
-        name: "🛒 Shop & Equipment",
+        name: "🛒 Shop, Inventory & Equipment",
         value: [
-          "`!shop` — Browse equipment using Buy buttons.",
+          "`!shop` — Browse equipment categories and item details.",
           "`!buy <name or item-id> [quantity]` — Search and review a purchase.",
-          "`!inventory` — View your gear and serial numbers.",
-          "`!equip <item-id> <serial-number>` — Equip an item.",
-          "`!unequip <weapon|armor>` — Clear an equipment slot.",
-          "`!unequip <item-id> <serial-number>` — Unequip a specific item.",
-          "`!sell <item-id> <serial-number>` — Sell an owned item.",
-          "Dungeon-exclusive equipment cannot be purchased.",
+          "`!inventory` — Browse gear/materials, equip items, lock copies, or preview sales.",
+          "`!equip` — Open the equipment manager.",
+          "`!equip <item-id> [serial-number]` — Equip an owned copy.",
+          "`!unequip <slot>` — Clear a slot, such as `main_hand`, `torso`, or `ring`.",
+          "`!unequip <item-id> <serial-number>` — Unequip a specific copy.",
+          "`!sell <item-id> <serial-number>` — Sell a sellable, unlocked item.",
+          "`!special [weapon or skill]` — Browse or search weapon special attacks.",
         ].join("\n"),
       },
       {
         name: "🏰 Dungeons",
         value: [
-          "`!dungeon solo [easy|normal|hard]` — Start a solo run.",
-          "`!dungeon @user [easy|normal|hard]` — Invite a partner.",
+          `\`!dungeon solo [${difficultyOptions}]\` — Start a solo run.`,
+          `\`!dungeon @user [${difficultyOptions}]\` — Invite a partner.`,
           "`!dungeon` — Resume your dungeon.",
           "`!dungeon rewards` — Find an unclaimed reward.",
+          "`!dungeon loot [difficulty]` — View current gear/material drop odds.",
           "Clear three rooms for currency and one loot roll per player.",
-          "**Equipment odds:** Easy 2% • Normal 4% • Hard 6%.",
-          "Hard's two rarest drops are **0.1% each**.",
+          `**Entry cooldowns:** ${cooldowns}.`,
+          "The selected difficulty starts a shared entry cooldown across all dungeons.",
         ].join("\n"),
       },
       {
@@ -97,7 +154,19 @@ export async function helpCommand(message) {
           "`!duel @user <wager>` — Challenge a player to a wagered duel.",
       },
     ],
+
     [
+      {
+        name: "🔨 Crafting, Materials & Salvaging",
+        value: [
+          "`!craft` — View crafting recipes and required ingredients.",
+          "`!craft <recipe-id> [base-serial]` — Preview and confirm a craft.",
+          "`!salvage <item-id> <serial-number>` — Preview and confirm salvaging a gear copy into materials.",
+          "**Eternal upgrade:** Millie's Wrath + Eternal Cosmic Cat Orb → Millie's Eternal Wrath.",
+          "Example: `!craft millies-eternal-wrath 1`.",
+          "Materials are inventory-only items. Unequip and unlock ingredients before consuming them.",
+        ].join("\n"),
+      },
       {
         name: "🎴 Cards & Packs",
         value: [
@@ -134,6 +203,11 @@ export async function helpCommand(message) {
     ],
   ];
 
+  const titles = [
+    "🐱 Millie's Guide • Economy & Adventures",
+    "🐱 Millie's Guide • Crafting, Cards, Pets & Staff",
+  ];
+
   let currentPage = 0;
 
   const previousId = `help:${message.id}:previous`;
@@ -142,17 +216,15 @@ export async function helpCommand(message) {
   function buildEmbed() {
     return new EmbedBuilder()
       .setColor(0x0099ff)
-      .setTitle(
-        currentPage === 0
-          ? "🐱 Millie's Guide • Economy & Adventures"
-          : "🐱 Millie's Guide • Cards, Pets & Administration"
-      )
+      .setTitle(titles[currentPage])
       .setDescription(
         "`<argument>` means required • `[argument]` means optional"
       )
       .addFields(...pages[currentPage])
       .setFooter({
-        text: `Page ${currentPage + 1}/${pages.length} • Controls expire after 2 minutes`,
+        text:
+          `Page ${currentPage + 1}/${pages.length}` +
+          " • Controls expire after 2 minutes",
       });
   }
 
@@ -168,7 +240,9 @@ export async function helpCommand(message) {
         .setCustomId(nextId)
         .setLabel("Next")
         .setStyle(ButtonStyle.Primary)
-        .setDisabled(expired || currentPage === pages.length - 1)
+        .setDisabled(
+          expired || currentPage === pages.length - 1
+        )
     );
   }
 
@@ -178,52 +252,78 @@ export async function helpCommand(message) {
     allowedMentions: quiet,
   });
 
-  const collector = reply.createMessageComponentCollector({
-    filter: (interaction) =>
-      interaction.isButton() &&
-      [previousId, nextId].includes(interaction.customId),
-    time: 120_000,
-  });
+  const collector =
+    reply.createMessageComponentCollector({
+      filter: (interaction) =>
+        interaction.isButton() &&
+        [previousId, nextId].includes(
+          interaction.customId
+        ),
+      time: 120_000,
+    });
 
-  // Keep rapid button clicks in order.
   let updates = Promise.resolve();
 
   collector.on("collect", async (interaction) => {
-    try {
-      if (interaction.user.id !== message.author.id) {
-        await interaction.reply({
-          content: "These controls belong to another player. Use !help.",
+    if (interaction.user.id !== message.author.id) {
+      await interaction
+        .reply({
+          content:
+            "These controls belong to another player. Use !help.",
           flags: MessageFlags.Ephemeral,
           allowedMentions: quiet,
-        });
-        return;
-      }
+        })
+        .catch(console.error);
 
-      await interaction.deferUpdate();
+      return;
+    }
 
-      updates = updates
-        .then(async () => {
-          currentPage = Math.max(
-            0,
-            Math.min(
-              pages.length - 1,
-              currentPage +
-              (interaction.customId === nextId ? 1 : -1)
-            )
+    // Acknowledge immediately, then process clicks in order.
+    const acknowledged = interaction
+      .deferUpdate()
+      .then(
+        () => true,
+        (error) => {
+          console.error(
+            "Help interaction failed:",
+            error
           );
 
-          await reply.edit({
-            embeds: [buildEmbed()],
-            components: [buildButtons(collector.ended)],
-            allowedMentions: quiet,
-          });
-        })
-        .catch((error) => {
-          console.error("Help pagination failed:", error);
+          return false;
+        }
+      );
+
+    updates = updates
+      .then(async () => {
+        if (!(await acknowledged) || collector.ended) {
+          return;
+        }
+
+        currentPage = Math.max(
+          0,
+          Math.min(
+            pages.length - 1,
+            currentPage +
+            (interaction.customId === nextId
+              ? 1
+              : -1)
+          )
+        );
+
+        await reply.edit({
+          embeds: [buildEmbed()],
+          components: [
+            buildButtons(collector.ended),
+          ],
+          allowedMentions: quiet,
         });
-    } catch (error) {
-      console.error("Help interaction failed:", error);
-    }
+      })
+      .catch((error) => {
+        console.error(
+          "Help pagination failed:",
+          error
+        );
+      });
   });
 
   collector.on("end", () => {
@@ -234,7 +334,10 @@ export async function helpCommand(message) {
         })
       )
       .catch((error) => {
-        console.error("Could not disable help buttons:", error);
+        console.error(
+          "Could not disable help buttons:",
+          error
+        );
       });
   });
 }
