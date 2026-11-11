@@ -49,9 +49,19 @@ import {
   questsCommand,
   claimQuestCommand,
 } from "./commands/quests.js";
-import { craftCommand, salvageCommand, upgradeCommand, prepareCommand }
-  from "./commands/crafting.js";
 import { specialCommand } from "./commands/special.js";
+import {
+  gatheringCommand,
+  handleGatheringInteraction,
+} from "./commands/gathering.js";
+
+import {
+  craftCommand,
+  salvageCommand,
+  upgradeCommand,
+  prepareCommand,
+} from "./commands/crafting.js";
+
 
 
 // Choose which Discord events the bot can receive.
@@ -121,6 +131,11 @@ client.on(Events.MessageCreate, async (message) => {
 
     if (specialCommandName === "!special") {
       await specialCommand(message);
+      return;
+    }
+    const gatheringName = message.content.trim().split(/\s+/)[0].toLowerCase();
+    if (["!mine", "!scavenge", "!scavange", "!hunt", "!gathering"].includes(gatheringName)) {
+      await gatheringCommand(message);
       return;
     }
 
@@ -332,5 +347,6 @@ client.on("interactionCreate", async (interaction) => {
   if (await handleFishingInteraction(interaction)) return;
   if (await handleCardShopInteraction(interaction)) return;
   if (await handleDungeonInteraction(interaction)) return;
+  if (await handleGatheringInteraction(interaction)) return;
   if (!interaction.isButton() || !interaction.isStringSelectMenu()) return;
 });

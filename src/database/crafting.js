@@ -5,6 +5,7 @@ import { ITEMS } from "../config/items.js";
 import { craftingConfig } from "../config/crafting.js";
 
 export class CraftingError extends Error {}
+export const MAX_CRAFT_BATCH = 10;
 const fail = message => { throw new CraftingError(message); };
 const integer = value => {
   const n = Number(value);
@@ -18,7 +19,9 @@ function selectionFor(selection) {
     typeof selection.itemId !== "string" || !/^[a-z0-9_-]+$/.test(selection.itemId)) fail("Invalid crafting selection.");
   const serial = selection.serialNumber == null ? null : integer(selection.serialNumber);
   if (serial === 0 || (["salvage", "upgrade"].includes(selection.kind) && serial == null)) fail("Provide a positive item serial number.");
-  return { kind: selection.kind, itemId: selection.itemId, serialNumber: serial };
+  const quantity = selection.quantity ?? 1;
+  if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > MAX_CRAFT_BATCH || (selection.kind !== "craft" && quantity !== 1)) fail("Use 1–10 supplies per craft; gear actions are one copy at a time.");
+  return { kind: selection.kind, itemId: selection.itemId, serialNumber: serial, quantity };
 }
 
 async function transaction(guild, user, fn) {
@@ -54,8 +57,8 @@ async function inventory(client, guild, user, account) {
 }
 
 function planFor(guild, user, selection, owned) {
-  const { kind, itemId, serialNumber } = selection;
-  const consumed = [], outputs = [], requirements = [];
+  const { kind, itemId, serialNumber, quantity: batch } = selection;
+  const consumed = [], outputs = [], requirements = [], blockers = [];
   const protectedCopy = row => row.is_locked || owned.protectedIds.has(String(row.id));
   let fee = 0, name, upgrade = null;
   if (kind === "craft" || kind === "upgrade") {
@@ -65,7 +68,7 @@ function planFor(guild, user, selection, owned) {
       const copy = owned.rows.find(row => row.item_id === itemId && row.serial_number === serialNumber);
       if (!item || !["weapon", "armor"].includes(item.type)) fail("Only weapons and armor can be reinforced.");
       if (!copy) fail("You don't own that item and serial number.");
-      if (protectedCopy(copy)) fail("Unequip and unlock that copy before upgrading it.");
+      if (protectedCopy(copy)) blockers.push("Unequip and unlock that copy before upgrading it.");
       const next = copy.upgrade_level + 1;
       if (next > craftingConfig.reinforcement.maxLevel) fail("That item is already at the maximum reinforcement level.");
       const costs = reinforcementCost(item, next);
@@ -78,34 +81,37 @@ function planFor(guild, user, selection, owned) {
     } else {
       recipe = Object.hasOwn(craftingConfig.recipes, itemId) ? craftingConfig.recipes[itemId] : null;
       if (!recipe) fail("Unknown recipe. Use !craft to see recipes.");
+      if (batch > 1 && (recipe.baseItemId || itemFor(recipe.outputItemId)?.type !== "consumable")) fail("Only supplies can be crafted in batches.");
     }
     if (!Array.isArray(recipe.ingredients) || !recipe.ingredients.length || recipe.ingredients.length > 10) fail("Invalid recipe ingredients.");
-    fee = integer(recipe.fee ?? 0);
+    fee = integer(integer(recipe.fee ?? 0) * batch);
     const seen = new Set();
     for (const ingredient of recipe.ingredients) {
       const item = itemFor(ingredient.itemId);
       if (!item || seen.has(ingredient.itemId) || !Number.isSafeInteger(ingredient.quantity) || ingredient.quantity < 1 || ingredient.quantity > 1000) fail("Invalid recipe ingredient.");
       seen.add(ingredient.itemId);
+      const required = integer(ingredient.quantity * batch);
       const eligible = owned.rows.filter(row => row.item_id === ingredient.itemId && !protectedCopy(row) &&
-        (kind === "upgrade" || serialNumber == null || ingredient.itemId !== recipe.baseItemId || row.serial_number === serialNumber));
-      requirements.push({ itemId: ingredient.itemId, name: item.name, required: ingredient.quantity, available: eligible.length, missing: Math.max(0, ingredient.quantity - eligible.length) });
-      consumed.push(...eligible.slice(0, ingredient.quantity));
+        (kind === "upgrade" || serialNumber == null || ingredient.itemId !== recipe.baseItemId || row.serial_number === serialNumber))
+        .sort((a, b) => a.upgrade_level - b.upgrade_level || a.serial_number - b.serial_number);
+      requirements.push({ itemId: ingredient.itemId, name: item.name, required, available: eligible.length, missing: Math.max(0, required - eligible.length) });
+      consumed.push(...eligible.slice(0, required));
     }
     if (kind === "craft") {
       if (serialNumber != null && !seen.has(recipe.baseItemId)) fail("This recipe has no selectable base item.");
       const output = itemFor(recipe.outputItemId);
       if (!output) fail("The recipe's output item is missing from ITEMS.");
-      const base = consumed.find(row => row.item_id === recipe.baseItemId);
+      const base = consumed.find(row => row.item_id === recipe.baseItemId) ?? owned.rows.find(row => row.item_id === recipe.baseItemId && row.serial_number === serialNumber);
       const level = ["weapon", "armor"].includes(output.type) ? base?.upgrade_level ?? 0 : 0;
       name = applyItemUpgrade(output, level).name;
-      outputs.push({ itemId: recipe.outputItemId, name, quantity: 1, upgradeLevel: level });
+      outputs.push({ itemId: recipe.outputItemId, name, quantity: batch, upgradeLevel: level });
     }
   } else {
     const item = itemFor(itemId);
     if (!item || !["weapon", "armor", "accessory"].includes(item.type) || item.salvageable === false) fail("That item cannot be salvaged.");
     const copy = owned.rows.find(row => row.item_id === itemId && row.serial_number === serialNumber);
     if (!copy) fail("You don't own that item and serial number.");
-    if (protectedCopy(copy)) fail("Unequip and unlock that copy before salvaging it.");
+    if (protectedCopy(copy)) blockers.push("Unequip and unlock that copy before salvaging it.");
     const quantity = craftingConfig.salvageByRarity[item.dungeon?.rarity ?? "common"];
     if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 100) fail("Missing or invalid salvage yield for this rarity.");
     const materialId = craftingConfig.salvageMaterialBySlot[item.slot] ?? craftingConfig.salvageMaterialByType[item.type];
@@ -114,10 +120,14 @@ function planFor(guild, user, selection, owned) {
     consumed.push(copy);name = applyItemUpgrade(item, copy.upgrade_level).name;
     outputs.push({ itemId: materialId, name: material.name, quantity, upgradeLevel: 0 });
   }
-  const plan = { ...selection, name, fee, upgrade, requirements,
+  if (consumed.length > 1000) fail("Too many ingredients for one action. Use a smaller batch.");
+  const plan = { ...selection, name, fee, upgrade, requirements, blockers,
     consumed: consumed.map(row => ({ id: row.id, itemId: row.item_id, serialNumber: row.serial_number,
       upgradeLevel: row.upgrade_level, name: applyItemUpgrade(itemFor(row.item_id), row.upgrade_level)?.name ?? row.item_id })), outputs };
-  plan.quote = createHash("sha256").update(JSON.stringify({ guild, user, plan, definitions: [itemFor(itemId), ...outputs.map(output => itemFor(output.itemId))] })).digest("hex");
+  // Extra materials arriving from gathering do not invalidate a reviewed craft.
+  // The exact consumed copies, prices, outputs and target upgrade still must match.
+  const signature = { ...plan, requirements: requirements.map(({ itemId, required }) => ({ itemId, required })) };
+  plan.quote = createHash("sha256").update(JSON.stringify({ guild, user, plan: signature, definitions: [itemFor(itemId), ...outputs.map(output => itemFor(output.itemId))] })).digest("hex");
   return plan;
 }
 
@@ -126,14 +136,14 @@ export async function previewCrafting(guild, user, selection) {
   return transaction(guild, user, async (client, account) => {
     const plan = planFor(guild, user, selection, await inventory(client, guild, user, account));
     const balance = integer(account.balance);
-    return { ...plan, balance, ready: balance >= plan.fee && plan.requirements.every(row => row.missing === 0) };
+    return { ...plan, balance, ready: balance >= plan.fee && !plan.blockers.length && plan.requirements.every(row => row.missing === 0) };
   });
 }
 
 export async function confirmCrafting(guild, user, requestId, selection, quote) {
   selection = selectionFor(selection);
   if (typeof requestId !== "string" || !requestId || requestId.length > 100 || !/^[0-9a-f]{64}$/.test(quote ?? "")) fail("Invalid crafting confirmation.");
-  const target = `${selection.itemId}:${selection.serialNumber ?? "-"}`;
+  const target = `${selection.itemId}:${selection.serialNumber ?? "-"}${selection.quantity > 1 ? `:q${selection.quantity}` : ""}`;
   return transaction(guild, user, async (client, account) => {
     const old = await client.query(
       `SELECT kind, target, result FROM public.crafting_actions WHERE guild_id = $1 AND user_id = $2 AND request_id = $3`, [guild, user, requestId]
@@ -144,6 +154,7 @@ export async function confirmCrafting(guild, user, requestId, selection, quote) 
     }
     const owned = await inventory(client, guild, user, account);
     const plan = planFor(guild, user, selection, owned);
+    if (plan.blockers.length) fail(plan.blockers.join(" "));
     if (plan.requirements.some(row => row.missing > 0)) fail("Requirements are no longer met. Open a new preview to see every requirement; nothing was consumed.");
     if (plan.quote !== quote) fail("Your eligible items or recipe changed. Open a new preview; nothing was consumed.");
     if (integer(account.balance) < plan.fee) fail("You no longer have enough currency for the crafting fee.");
@@ -176,6 +187,7 @@ export async function confirmCrafting(guild, user, requestId, selection, quote) 
       for (let i = 0; i < output.quantity; i++) {
         while (used.has(next)) next++;
         integer(next);
+        if (next > 2_147_483_647) fail("Inventory serial limit reached.");
         const result = await client.query(
           `INSERT INTO public.user_items (guild_id, user_id, item_id, serial_number, upgrade_level) VALUES ($1, $2, $3, $4, $5) RETURNING id, serial_number`, [guild, user, output.itemId, next, output.upgradeLevel ?? 0]
         );
@@ -184,10 +196,20 @@ export async function confirmCrafting(guild, user, requestId, selection, quote) 
         used.add(next);
       }
     }
-    const receipt = { kind: plan.kind, consumed: plan.consumed, outputs: plan.outputs, addedItems, updatedItem, fee: plan.fee };
+    const receipt = { kind: plan.kind, consumed: plan.consumed, outputs: plan.outputs, addedItems, updatedItem, fee: plan.fee, balance: integer(account.balance) - plan.fee };
     await client.query(
       `INSERT INTO public.crafting_actions (guild_id, user_id, request_id, kind, target, result) VALUES ($1, $2, $3, $4, $5, $6::jsonb)`, [guild, user, requestId, plan.kind, target, JSON.stringify(receipt)]
     );
     return receipt;
+  });
+}
+
+// A consistent, account-locked snapshot for the browser. This never spends items.
+export async function getCraftingInventory(guild, user) {
+  return transaction(guild, user, async (client, account) => {
+    const owned = await inventory(client, guild, user, account);
+    return { balance: integer(account.balance), rows: owned.rows.map(row => ({
+      ...row, is_equipped: owned.protectedIds.has(String(row.id)),
+    })) };
   });
 }

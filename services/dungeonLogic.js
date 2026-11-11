@@ -1,3 +1,7 @@
+import {
+  validateEncounterConfig, prepareEnemyIntent, enemyIntent, bossDamageTaken,
+  bossAttackMultiplier, bossGuardMultiplier, bossTargets, resolveBossChannel, recordBossSkillHit,
+} from "./dungeonEncounters.js";
 import { dungeonSpecials } from "../src/config/dungeonSpecials.js";
 import { resolvePlayerAttack } from "./dungeonAttack.js";
 import { randomInt } from "node:crypto";
@@ -392,6 +396,7 @@ export function makePlayer(
 }
 
 export function validateConfig(config) {
+  validateEncounterConfig(config);
   const combat = resolveCombatConfig(config.combat ?? {});
 
   for (const name of [
@@ -533,6 +538,7 @@ export function startState(dungeon, players, config) {
     combat,
     skillRules: structuredClone(ACTIVE_SKILLS),
     specialCombat: resolveSpecialConfig(config.specialCombat ?? dungeonSpecials),
+    ...(dungeon.encounterVersion === 1 ? { encounterVersion: 1 } : {}),
   };
 
   if (
@@ -543,7 +549,7 @@ export function startState(dungeon, players, config) {
     fail("Use one or two different players.");
   }
 
-  return {
+  const state = {
     version: 1,
     mode: players.length === 1 ? "solo" : "coop",
     status: "active",
@@ -560,6 +566,8 @@ export function startState(dungeon, players, config) {
         : "The party entered the dungeon. Lock in your first actions.",
     ],
   };
+  prepareEnemyIntent(state);
+  return state;
 }
 
 export function validateChoice(player, choice) {
@@ -621,6 +629,8 @@ export function resolveRound(input, rng = randomInt) {
     );
 
   const enemy = state.enemy;
+  const intent = enemyIntent(state);
+  const incomingFactor = bossDamageTaken(state);
 
   const alive = state.players.filter(
     (player) => player.hp > 0
@@ -649,7 +659,7 @@ export function resolveRound(input, rng = randomInt) {
     })),
     {
       enemy: true,
-      speed: enemy.speed,
+      speed: intent?.move.kind === "heal" ? Number.NEGATIVE_INFINITY : enemy.speed,
       index: alive.length,
     },
   ].sort(
@@ -660,34 +670,35 @@ export function resolveRound(input, rng = randomInt) {
     if (enemy.hp <= 0) break;
 
     if (actor.enemy) {
+      if (resolveBossChannel(state, log)) continue;
       const targets = state.players.filter(
         (player) => player.hp > 0
       );
 
       if (!targets.length) break;
 
-      const target = targets[
-        Math.floor(chance(rng) * targets.length)
-      ];
-
+      const selectedTargets = bossTargets(state, targets, () => chance(rng));
+      const weakened = enemy.weakAttacks > 0;
+      for (const target of selectedTargets) {
+      if (enemy.hp <= 0) break;
       const reduction = armorReduction(target.defense);
 
       let damage =
         enemy.attack *
         combat.enemyDamageMultiplier *
+        bossAttackMultiplier(state) *
         variance() *
         (1 - reduction);
 
-      if (enemy.weakAttacks > 0) {
+      if (weakened) {
         damage *=
           enemy.weakMultiplier ??
           combat.defaultWeakMultiplier;
 
-        enemy.weakAttacks -= 1;
       }
 
       if (target.choice === "defend") {
-        damage *= combat.defendDamageMultiplier;
+        damage *= bossGuardMultiplier(state, combat.defendDamageMultiplier);
       }
 
       damage *= target.passive?.damageMultiplier ?? 1;
@@ -759,6 +770,9 @@ export function resolveRound(input, rng = randomInt) {
         );
       }
 
+      }
+      // An all-party move is one attack for weaken effects, not one per target.
+      if (weakened && selectedTargets.length) enemy.weakAttacks -= 1;
       continue;
     }
 
@@ -767,7 +781,7 @@ export function resolveRound(input, rng = randomInt) {
 
     if (player.choice === "defend") {
       const reduction = Math.round(
-        (1 - combat.defendDamageMultiplier) * 100
+        (1 - bossGuardMultiplier(state, combat.defendDamageMultiplier)) * 100
       );
 
       log.push(
@@ -847,7 +861,7 @@ export function resolveRound(input, rng = randomInt) {
 
     let actualDamage = 0, landedHits = 1;
     if (specialCombat) {
-      const result = resolvePlayerAttack({ player, enemy, skill, combat, specialCombat, round: state.round,
+      const result = resolvePlayerAttack({ player, enemy, skill, combat: { ...combat, playerDamageMultiplier: combat.playerDamageMultiplier * incomingFactor }, specialCombat, round: state.round,
         roll: () => chance(rng), variance });
       actualDamage = result.actualDamage;
       landedHits = result.landedHits;
@@ -881,6 +895,7 @@ export function resolveRound(input, rng = randomInt) {
       Math.round(
         player.attack *
         combat.playerDamageMultiplier *
+        incomingFactor *
         buff *
         variance() *
         (skill?.multiplier ?? 1) *
@@ -903,6 +918,7 @@ export function resolveRound(input, rng = randomInt) {
 
     }
 
+    recordBossSkillHit(state, skill, actualDamage, landedHits, log);
     if (skill) {
       player.skillCooldown = skill.cooldown + 1;
 
@@ -1063,6 +1079,7 @@ export function resolveRound(input, rng = randomInt) {
   }
 
   state.round += 1;
+  prepareEnemyIntent(state);
   state.log = log.slice(-combat.maxLogEntries);
 
   return state;

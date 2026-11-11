@@ -89,6 +89,16 @@ export async function helpCommand(message) {
         ].join("\n"),
       },
       {
+        name: "⛏️ Gathering & Rare Components",
+        value: [
+          "`!mine` — Gather scrap; chance for a Starforged Core.",
+          "`!scavenge` / `!scavange` — Search for materials and Royal Thread.",
+          "`!hunt` — Gather enchanted fur; chance for a Moonlit Fang.",
+          "`!gathering` — View all three independent cooldowns.",
+          "Add `drops` to any activity to see its exact material/component odds.",
+        ].join("\n"),
+      },
+      {
         name: "🎲 Gambling & Minigames",
         value: [
           "`!dice <amount>` — Roll 1–100; 55+ returns 2× your wager.",
@@ -120,6 +130,8 @@ export async function helpCommand(message) {
           "`!dungeon` — Resume your dungeon.",
           "`!dungeon rewards` — Find an unclaimed reward.",
           "`!dungeon loot [difficulty]` — View current gear/material drop odds.",
+          "`!dungeon roster [difficulty]` — Preview the rotating enemy lineup.",
+          "`!dungeon mechanics` — Learn boss warnings and counters.",
           "Clear three rooms for currency and one loot roll per player.",
           `**Entry cooldowns:** ${cooldowns}.`,
           "The selected difficulty starts a shared entry cooldown across all dungeons.",
@@ -134,11 +146,12 @@ export async function helpCommand(message) {
       {
         name: "🔨 Crafting, Materials & Salvaging",
         value: [
-          "`!craft` — View crafting recipes and required ingredients.",
-          "`!craft <recipe-id> [base-serial]` — Preview and confirm a craft.",
-          "`!upgrade <item-id> <serial-number>` — Reinforce weapons/armor up to +3 after a preview.",
+          "`!craft` — Open the supplies, attachments, reinforcement and salvage browser.",
+          "`!craft <supply-id> [quantity]` — Open a supply recipe; craft up to 10 at once.",
+          "`!craft <attachment-id> [base-serial]` — Choose a base copy and review its upgrade.",
+          "`!upgrade [item-id] [serial-number]` — Browse reinforcement up to +3.",
           "`!prepare [supply-id|clear]` — Prepare one crafted supply for your next dungeon.",
-          "`!salvage <item-id> <serial-number>` — Preview and confirm salvaging a gear copy into materials.",
+          "`!salvage [item-id] [serial-number]` — Browse gear to salvage, with confirmation.",
           "**Eternal upgrade:** Millie's Wrath + Eternal Cosmic Cat Orb → Millie's Eternal Wrath.",
           "Example: `!craft millies-eternal-wrath 1`.",
           "Materials are inventory-only items. Unequip and unlock ingredients before consuming them.",

@@ -1,3 +1,4 @@
+import { describeEnemyIntent, selectDungeonEncounter } from "../../services/dungeonEncounters.js";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlags } from "discord.js";
 import { dungeon } from "../database/dungeon.js";
 import { dungeonConfig } from "../config/dungeon.js";
@@ -26,7 +27,7 @@ function lootView(table, difficulty, owner, source = "current", page = 0) {
   if (table == null) {
     return { embeds: [embed.setDescription(
       "This dungeon was entered before equipment drops were added. Its reward is currency only.\n\n" +
-      "Use `!dungeon loot easy`, `!dungeon loot normal`, or `!dungeon loot hard` to browse future runs."
+      "Use `!dungeon loot [easy|normal|hard|ultra]` to browse future runs."
     )], components: [], allowedMentions: quiet };
   }
   const total = table.reduce((sum, entry) => sum + entry.weight, 0);
@@ -126,7 +127,8 @@ function dungeonView(run) {
       (state.lootTable ? "Each player also gets one independent item drop roll.\n" : "") +
       `Free entry. Your entry cooldown starts on acceptance (**${Math.round(state.rules.cooldownMs / 60000)} minutes**).\n` +
       `Accept before <t:${Math.ceil(run.expires_at / 1000)}:R>.\n\n` +
-      "Equip your gear before accepting. Both players need economy accounts."
+      "Equip your gear before accepting. Both players need economy accounts." +
+      (state.dungeon.rotation ? "\n\n**Saved lineup:** " + state.dungeon.rooms.map(room => text(room.name, 60)).join(" → ") + "\nThis lineup stays fixed for the whole run." : "")
     );
     components = [row(button(run, "accept", "Accept", ButtonStyle.Success), button(run, "decline", "Decline / Cancel", ButtonStyle.Danger))];
   } else if (state.players.length) {
@@ -138,6 +140,10 @@ function dungeonView(run) {
         `Choose before <t:${Math.ceil(run.expires_at / 1000)}:R>. ` +
         (solo ? "Your action resolves the round immediately." : "Both living players must lock an action.") : "")
     );
+    if (run.status === "active") {
+      const intent = describeEnemyIntent(state);
+      if (intent) embed.addFields({ name: "⚠️ Enemy intent — choose your counter", value: intent });
+    }
     for (const player of state.players) {
       const skill = (state.rules.skillRules ?? skills)[player.skill];
       embed.addFields({ name: player.hp > 0 ? "🧑 Party member" : "💀 Knocked out", value:
@@ -155,7 +161,7 @@ function dungeonView(run) {
     if (run.status === "active") {
       components = [
         row(button(run, "attack", "⚔️ Attack", ButtonStyle.Primary), button(run, "defend", "🛡️ Defend"),
-          button(run, "skill", "✨ Weapon skill"), button(run, "heal", "🧪 Use potion"), button(run, "refresh", "Refresh")),
+          button(run, "skill", state.enemy.intent?.move.interruptible ? "✨ Skill — interrupt" : "✨ Weapon skill", state.enemy.intent?.move.interruptible ? ButtonStyle.Success : ButtonStyle.Secondary), button(run, "heal", "🧪 Use potion"), button(run, "refresh", "Refresh")),
         row(button(run, "leave", solo ? "Retreat — ends run" : "Retreat — ends party run", ButtonStyle.Danger)),
       ];
     }
@@ -186,6 +192,37 @@ function dungeonView(run) {
   embed.setFooter({ text: "Combat totals include base stats • Gear is saved on entry • Choices stay private • !dungeon resumes • !dungeon rewards finds unclaimed rewards" });
   return { embeds: [embed], components, allowedMentions: quiet };
 }
+function rosterView(difficulty) {
+  const dungeon = selectDungeonEncounter(dungeonConfig, difficulty);
+  const cooldown = dungeon.cooldownMs ?? dungeonConfig.cooldownMs;
+  const embed = new EmbedBuilder().setColor(0x9775fa).setTitle(`🌙 Current Lineup • ${text(dungeon.name, 100)}`)
+    .setDescription(`**${text(difficulty)}** • Co-op clear: **${money(dungeon.reward)} per player**\n` +
+      `Entry cooldown: **${Math.round(cooldown / 60_000)} minutes**\n` +
+      (dungeon.rotation ? `Global lineup changes <t:${Math.ceil(dungeon.rotation.nextAt / 1000)}:R>. Your lineup is saved when you create a run.\n` : "Rotation is disabled.\n") +
+      "Shown stats are before solo scaling. Loot odds are unchanged; use `!dungeon loot`.")
+    .addFields(...dungeon.rooms.map((room, i) => ({
+      name: `${i === dungeon.rooms.length - 1 ? "👑 Boss" : `Room ${i + 1}`}: ${text(room.name, 80)}`,
+      value: `HP **${room.health}** • ATK **${room.attack}** • DEF **${room.defense}** • SPD **${room.speed}**\n` +
+        (room.mechanics ? `Style: **${text(room.mechanics.name, 80)}**\nPattern: ${room.mechanics.pattern.map(move => text(move.name, 50)).join(" → ")}` : "Standard combat"),
+    })))
+    .setFooter({ text: "Daily rotation uses UTC • Solo and co-op share the same lineup • Use !dungeon mechanics for counters" });
+  return { embeds: [embed], allowedMentions: quiet };
+}
+
+function mechanicsView() {
+  const embed = new EmbedBuilder().setColor(0xf1c40f).setTitle("⚔️ Dungeon Boss Counters")
+    .setDescription("Read **Enemy intent** before choosing. The displayed move is the one the enemy will use this round.")
+    .addFields(
+      { name: "🛡️ Marked heavy strike", value: "The marked target is fixed before you choose. Defend for the reduction shown in the warning; healing does not change the marked target." },
+      { name: "🌪️ Party sweep", value: "Hits every living party member. Each player can Defend to reduce their own incoming damage." },
+      { name: "✨ Healing channel", value: "Land a damaging weapon skill to interrupt. The boss acts after the party for this channel. Normal attacks, misses and healing skills do not interrupt; killing the enemy also prevents its heal." },
+      { name: "🧱 Ironfur Stance", value: "The intent shows reduced direct damage taken and a weaker attack. Consider a potion, Defend, or saving your special. Bleeding still ticks normally." },
+      { name: "🔥 Enrage", value: "Crossing a configured HP threshold permanently increases attack damage from the next displayed intent. It is announced before that round's choices." },
+      { name: "🌙 Rotating enemies", value: "Use `!dungeon roster [difficulty]`. Lineups rotate daily in UTC and stay fixed for each created run. Existing runs keep their saved rules." }
+    );
+  return { embeds: [embed], allowedMentions: quiet };
+}
+
 async function refreshPanel(message, guild, user, id) {
   // Prevent concurrent local edits from replacing a newer round with an old one.
   const previous = publicEdits.get(id) ?? Promise.resolve();
@@ -201,6 +238,16 @@ export async function dungeonCommand(message) {
   if (!message.inGuild() || message.author.bot) return;
   const args = message.content.trim().split(/\s+/);
   try {
+    if (["roster", "lineup"].includes(args[1]?.toLowerCase())) {
+      const difficulty = (args[2] ?? "easy").toLowerCase();
+      if (args.length > 3 || !Object.hasOwn(dungeonConfig.difficulties, difficulty)) {
+        await message.reply("Usage: `!dungeon roster [easy|normal|hard|ultra]`"); return;
+      }
+      await message.reply(rosterView(difficulty)); return;
+    }
+    if (args[1]?.toLowerCase() === "mechanics") {
+      await message.reply(mechanicsView()); return;
+    }
     if (["loot", "drops"].includes(args[1]?.toLowerCase())) {
       const difficulty = (args[2] ?? "easy").toLowerCase();
       if (args.length > 3 || !Object.hasOwn(dungeonLootTables, difficulty)) {
@@ -218,7 +265,7 @@ export async function dungeonCommand(message) {
       if (!run) {
         await message.reply({ content: rewardsOnly ? "You have no unclaimed dungeon rewards." :
           "Solo: `!dungeon solo easy`\nCo-op: `!dungeon @friend easy`\n" +
-          "Difficulties: `easy`, `normal`, `hard`, `ultra`.\nResume: `!dungeon`\nUnclaimed rewards: `!dungeon rewards`\nLoot tables: `!dungeon loot [easy|normal|hard|ultra]`", allowedMentions: quiet });
+          "Difficulties: `easy`, `normal`, `hard`, `ultra`.\nResume: `!dungeon`\nUnclaimed rewards: `!dungeon rewards`\nLoot tables: `!dungeon loot [easy|normal|hard|ultra]`\nLineups: `!dungeon roster [difficulty]`\nBoss help: `!dungeon mechanics`", allowedMentions: quiet });
         return;
       }
     } else if (args[1]?.toLowerCase() === "solo") {

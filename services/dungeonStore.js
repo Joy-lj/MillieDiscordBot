@@ -1,3 +1,4 @@
+import { selectDungeonEncounter } from "./dungeonEncounters.js";
 import { consumePreparedSupply } from "./dungeonSupplies.js";
 import { createHash, randomInt, randomUUID } from "node:crypto";
 import { loadDungeonEquipment } from "./dungeonEquipment.js";
@@ -129,11 +130,11 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
   async function create(guild, channel, leader, partner = null, difficulty = "easy") {
     if (typeof leader !== "string" || !leader || (partner != null && (typeof partner !== "string" || !partner))) fail("Invalid dungeon player.");
     if (leader === partner) fail("Choose another player.");
-    if (!Object.hasOwn(config.difficulties, difficulty)) fail("Choose easy, normal, or hard.");
+    if (!Object.hasOwn(config.difficulties, difficulty)) fail("Choose easy, normal, hard, or ultra.");
     const party = partner == null ? [leader] : [leader, partner];
     const mode = party.length === 1 ? "solo" : "coop";
     const lootTable = lootTables === null ? null : snapshotLootTable(lootTables[difficulty], items);
-    const dungeon = dungeonForParty(config.difficulties[difficulty], party.length, config);
+    const dungeon = dungeonForParty(selectDungeonEncounter(config, difficulty, clock()), party.length, config);
     const runConfig = structuredClone(config);
     runConfig.cooldownMs =
       config.difficulties[difficulty].cooldownMs ??
