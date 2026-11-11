@@ -4,6 +4,7 @@ import { ABILITIES } from "./dungeonAbilities.js";
 export const WEAPON_SPECIALS = {
   feather: "flutter",
   "yarn-flail": "tangle",
+  "mithril-fang-saber": "fangFlurry",
   "black-cat-katana": "doubleSlash",
   "cookie-cannon": "cannonade",
   "starforged-claws": "starFlurry",

@@ -1,5 +1,10 @@
 // One source for item descriptions and the dungeon engine's actual effects.
 const definitions = {
+  fangFlurry: {
+    id: "mithril-double-cut", name: "Mithril Double Cut", cooldownTurns: 2,
+    description: "Two independent 55% damage hits at 94% accuracy. Each gains +5 percentage points critical chance and deals 165% critical damage.",
+    multiplier: 0.55, hits: 2, accuracy: 0.94, critBonus: 0.05, critDamageMultiplier: 1.65,
+  },
   moonfangDrain: {
     id: "moonfang-drain", name: "Moonfang Drain", cooldownTurns: 2,
     description: "Two 85% damage hits at 98% accuracy each, +8 percentage points crit chance and 180% critical damage. Heal for 25% of actual HP removed.",

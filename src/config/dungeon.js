@@ -36,12 +36,25 @@ export const dungeonConfig = {
       ],
     },
     ultra: {
-      name: "Millie's Cosmic Cataclysm", reward: 300_000, cooldownMs: 12 * 60 * 60 * 1000,
+      name: "Millie's Cosmic Cataclysm", reward: 300_000,
+      maxRoundsPerRoom: 22,
+      cooldownBucket: "ultra",
+      guaranteedLoot: [{ itemId: "cosmic-shard", quantity: 1 }], cooldownMs: 12 * 60 * 60 * 1000,
       rooms: [
         { name: "Cosmic Gatekeeper", health: 1400, attack: 120, defense: 115, speed: 20 },
         { name: "Voidwhisker Devourer", health: 2200, attack: 180, defense: 150, speed: 24 },
         { name: "The Eternal Purr Sovereign", health: 3500, attack: 250, defense: 200, speed: 22 },
       ],
     },
+  },
+};
+
+// Challenges modify a difficulty rather than introducing another random loot table.
+// Standard Ultra and Nightmare share one raid cooldown.
+dungeonConfig.challenges = {
+  nightmare: {
+    difficulty: "ultra", name: "Nightmare", healthMultiplier: 2,
+    attackMultiplier: 1.5, maxRoundsPerRoom: 22,
+    guaranteedLoot: [{ itemId: "cosmic-shard", quantity: 2 }],
   },
 };

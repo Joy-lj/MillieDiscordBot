@@ -80,6 +80,13 @@ export const SHOP_ITEMS = {
     skill: "tangle",
   }),
 
+  "mithril-fang-saber": equipment({
+    name: "Mithril Fang Saber", type: "weapon", slot: "main_hand",
+    handedness: 1, price: 150_000, rarity: "uncommon",
+    description: "A light mithril blade shaped like Millie's hunting fang.",
+    stats: { attack: 45, speed: 3, critChance: 0.10 }, skill: "fangFlurry",
+  }),
+
   "black-cat-katana": equipment({
     name: "Black Cat Katana",
     type: "weapon",

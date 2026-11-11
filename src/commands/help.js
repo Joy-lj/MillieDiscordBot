@@ -134,7 +134,7 @@ export async function helpCommand(message) {
           "`!dungeon mechanics` — Learn boss warnings and counters.",
           "Clear three rooms for currency and one loot roll per player.",
           `**Entry cooldowns:** ${cooldowns}.`,
-          "The selected difficulty starts a shared entry cooldown across all dungeons.",
+          "Easy / Normal / Hard share a regular timer. Ultra / Nightmare share a separate raid timer.",
         ].join("\n"),
       },
       {
@@ -197,6 +197,15 @@ export async function helpCommand(message) {
     "🐱 Millie's Guide • Economy & Adventures",
     "🐱 Millie's Guide • Crafting, Cards, Pets & Staff",
   ];
+  pages[0].push({ name: "🌌 Raid & Crafting Updates", value: [
+    "`!dungeon cooldowns` — View separate regular and Ultra timers.",
+    "`!dungeon solo ultra nightmare` — Harder Ultra; 2 guaranteed shards.",
+    "Co-op: `!dungeon @user ultra nightmare`.",
+    "Standard Ultra: 22 rounds per room; 1 guaranteed shard per clear.",
+    "`!craft` → Raid Components — Exchange shards for rare components.",
+    "`!upgrade` — Armor reinforcement now also adds HP.",
+  ].join("\n") });
+
   let currentPage = 0;
   const previousId = `help:${message.id}:previous`;
   const nextId = `help:${message.id}:next`;

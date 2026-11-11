@@ -24,6 +24,7 @@ const lootId = (owner, source, difficulty, page, action) =>
 function lootView(table, difficulty, owner, source = "current", page = 0) {
   const embed = new EmbedBuilder().setColor(0xf1c40f)
     .setTitle(`🎁 Dungeon Loot • ${text(difficulty, 40)}`);
+  if (difficulty === "ultra") embed.addFields({ name: "🌌 Shards on new clears", value: "Standard Ultra: **1 Cosmic Shard** • Nightmare: **2**. These are additional guaranteed rewards; percentages below describe the random roll. Existing runs keep saved rewards." });
   if (table == null) {
     return { embeds: [embed.setDescription(
       "This dungeon was entered before equipment drops were added. Its reward is currency only.\n\n" +
@@ -41,7 +42,7 @@ function lootView(table, difficulty, owner, source = "current", page = 0) {
   embed.setDescription(
     `**No item: ${percent(none, total)}**\n**Material item drop: ${percent(materialWeight, total)}**\n**Item drop: ${percent(itemWeight, total)}**\n\n` +
     "Each player gets **one independent roll per full clear**, alongside their currency reward.\n" +
-    "The percentages below are per clear. Only one item can drop per player.\n" +
+    "The percentages below are per clear. Only one random item can drop per player; guaranteed shards are additional.\n" +
     (source === "current" ? "These are the current odds for a new dungeon." : "These are the saved odds for this dungeon.")
   );
   for (const drop of drops.slice(page * LOOT_PER_PAGE, (page + 1) * LOOT_PER_PAGE)) {
@@ -119,6 +120,9 @@ function dungeonView(run) {
   const solo = (run.party_ids?.length ?? state.players.length) === 1;
   const embed = new EmbedBuilder().setTitle(`🏰 ${text(state.dungeon.name)} • ${solo ? "Solo" : "Co-op"}`)
     .setColor(run.status === "won" ? 0x2ecc71 : ongoing.includes(run.status) ? 0x63acff : 0xe74c3c);
+  if (state.guaranteedLoot?.length) embed.addFields({ name: "🌌 Guaranteed clear reward", value:
+    state.guaranteedLoot.map(drop => `**${drop.quantity} × ${text(drop.name, 80)}**`).join("\n") +
+    "\nPer player, alongside currency and the random loot roll. Claim after a full clear." });
   let components = [];
   if (run.status === "invited") {
     embed.setDescription(
@@ -199,7 +203,8 @@ function rosterView(difficulty) {
     .setDescription(`**${text(difficulty)}** • Co-op clear: **${money(dungeon.reward)} per player**\n` +
       `Entry cooldown: **${Math.round(cooldown / 60_000)} minutes**\n` +
       (dungeon.rotation ? `Global lineup changes <t:${Math.ceil(dungeon.rotation.nextAt / 1000)}:R>. Your lineup is saved when you create a run.\n` : "Rotation is disabled.\n") +
-      "Shown stats are before solo scaling. Loot odds are unchanged; use `!dungeon loot`.")
+      "Shown stats are before solo scaling. Loot odds are unchanged; use `!dungeon loot`." +
+      (difficulty === "ultra" ? "\nUltra allows 22 rounds per room and guarantees 1 Cosmic Shard per clear. Optional Nightmare doubles enemy HP, increases attack by 50%, and grants 2 shards. Both share a 12-hour raid timer." : ""))
     .addFields(...dungeon.rooms.map((room, i) => ({
       name: `${i === dungeon.rooms.length - 1 ? "👑 Boss" : `Room ${i + 1}`}: ${text(room.name, 80)}`,
       value: `HP **${room.health}** • ATK **${room.attack}** • DEF **${room.defense}** • SPD **${room.speed}**\n` +
@@ -245,6 +250,13 @@ export async function dungeonCommand(message) {
       }
       await message.reply(rosterView(difficulty)); return;
     }
+    if (args[1]?.toLowerCase() === "cooldowns") {
+      const timers = await dungeon.cooldowns(message.guildId, message.author.id);
+      const status = bucket => timers[bucket] > Date.now() ? `<t:${Math.ceil(timers[bucket] / 1000)}:R>` : "Ready";
+      await message.reply({ embeds: [new EmbedBuilder().setColor(0x63acff).setTitle("🏰 Dungeon Cooldowns")
+        .setDescription(`Regular (Easy / Normal / Hard): **${status("regular")}**\nUltra / Nightmare: **${status("ultra")}**\n\nThe two timers are independent. Only one active dungeon is allowed at a time.`)], allowedMentions: quiet });
+      return;
+    }
     if (args[1]?.toLowerCase() === "mechanics") {
       await message.reply(mechanicsView()); return;
     }
@@ -265,20 +277,20 @@ export async function dungeonCommand(message) {
       if (!run) {
         await message.reply({ content: rewardsOnly ? "You have no unclaimed dungeon rewards." :
           "Solo: `!dungeon solo easy`\nCo-op: `!dungeon @friend easy`\n" +
-          "Difficulties: `easy`, `normal`, `hard`, `ultra`.\nResume: `!dungeon`\nUnclaimed rewards: `!dungeon rewards`\nLoot tables: `!dungeon loot [easy|normal|hard|ultra]`\nLineups: `!dungeon roster [difficulty]`\nBoss help: `!dungeon mechanics`", allowedMentions: quiet });
+          "Difficulties: `easy`, `normal`, `hard`, `ultra`.\nResume: `!dungeon`\nUnclaimed rewards: `!dungeon rewards`\nLoot tables: `!dungeon loot [easy|normal|hard|ultra]`\nLineups: `!dungeon roster [difficulty]`\nBoss help: `!dungeon mechanics`\nTimers: `!dungeon cooldowns`\nEndgame: `!dungeon solo ultra nightmare`", allowedMentions: quiet });
         return;
       }
     } else if (args[1]?.toLowerCase() === "solo") {
       const difficulty = (args[2] ?? "easy").toLowerCase();
-      if (args.length > 3 || !Object.hasOwn(dungeonConfig.difficulties, difficulty)) {
-        await message.reply("Usage: `!dungeon solo [easy|normal|hard|ultra]`"); return;
+      if (args.length > 4 || !Object.hasOwn(dungeonConfig.difficulties, difficulty)) {
+        await message.reply("Usage: `!dungeon solo [easy|normal|hard|ultra] [nightmare]`"); return;
       }
-      run = await dungeon.create(message.guildId, message.channelId, message.author.id, null, difficulty);
+      run = await dungeon.create(message.guildId, message.channelId, message.author.id, null, difficulty, args[3]?.toLowerCase() ?? null);
     } else {
       const mention = args[1]?.match(/^<@!?(\d+)>$/);
       const partner = mention ? message.mentions.users.get(mention[1]) : null;
       const difficulty = (args[2] ?? "easy").toLowerCase();
-      if (!partner || args.length > 3 || !Object.hasOwn(dungeonConfig.difficulties, difficulty)) {
+      if (!partner || args.length > 4 || !Object.hasOwn(dungeonConfig.difficulties, difficulty)) {
         await message.reply("Usage: `!dungeon @friend [easy|normal|hard|ultra]` or `!dungeon solo [easy|normal|hard|ultra]`"); return;
       }
       if (partner.bot || partner.id === message.author.id) {
@@ -286,7 +298,7 @@ export async function dungeonCommand(message) {
       }
       try { await message.guild.members.fetch(partner.id); }
       catch { await message.reply("Could not verify that player is in this server."); return; }
-      run = await dungeon.create(message.guildId, message.channelId, message.author.id, partner.id, difficulty);
+      run = await dungeon.create(message.guildId, message.channelId, message.author.id, partner.id, difficulty, args[3]?.toLowerCase() ?? null);
       invited = true;
     }
     await message.reply({ ...dungeonView(run), ...(invited ? {

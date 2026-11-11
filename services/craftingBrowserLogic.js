@@ -1,14 +1,14 @@
 export const CRAFT_CATEGORIES = {
-  supplies: "Dungeon Supplies", attachments: "Rare Attachments",
+  supplies: "Dungeon Supplies", attachments: "Rare Attachments", materials: "Raid Components",
   upgrade: "Reinforcement", salvage: "Salvaging",
 };
 
 export function recipeCategory(recipe, items) {
-  return items[recipe.outputItemId]?.type === "consumable" ? "supplies" : "attachments";
+  return items[recipe.outputItemId]?.type === "material" ? "materials" : items[recipe.outputItemId]?.type === "consumable" ? "supplies" : "attachments";
 }
 
 export function browserEntries(category, recipes, items, rows) {
-  if (["supplies", "attachments"].includes(category)) {
+  if (["supplies", "attachments", "materials"].includes(category)) {
     return Object.entries(recipes).filter(([, recipe]) => recipeCategory(recipe, items) === category)
       .map(([id, recipe]) => ({ id, name: recipe.name, itemId: recipe.outputItemId, recipe }));
   }

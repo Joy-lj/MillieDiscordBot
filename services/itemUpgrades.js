@@ -20,6 +20,15 @@ export function applyItemUpgrade(item, value = 0) {
   const bonus = base > 0 ? Math.max(level, Math.round(base * rate * level)) : 0;
   result.stats = { ...item.stats, [key]: base + bonus };
   result.stat = base + bonus;
+  if (item.type === "armor") {
+    const hp = Number(item.stats?.health ?? item.dungeon?.healthBonus ?? 0);
+    const { armorHealthPerLevel: hpRate, minimumArmorHealthPerLevel: hpMin } = craftingConfig.reinforcement;
+    if (!Number.isFinite(hp) || hp < 0 || !Number.isFinite(hpRate) || hpRate < 0 || hpRate > 1 ||
+        !Number.isSafeInteger(hpMin) || hpMin < 0) throw new Error("Invalid reinforcement health bonus.");
+    const health = hp + Math.max(hpMin * level, Math.round(hp * hpRate * level));
+    result.stats.health = health;
+    result.dungeon = { ...result.dungeon, healthBonus: health };
+  }
   result.name = `${item.name} +${level}`;
   return result;
 }

@@ -75,7 +75,7 @@ function planFor(guild, user, selection, owned) {
       const before = applyItemUpgrade(item, copy.upgrade_level), after = applyItemUpgrade(item, next);
       const key = item.type === "weapon" ? "attack" : "defense";
       if (!(after.stats[key] > before.stats[key])) fail("This item has no reinforceable combat stat.");
-      upgrade = { id: copy.id, itemId, serialNumber, from: copy.upgrade_level, to: next, key, before: before.stats[key], after: after.stats[key] };
+      upgrade = { id: copy.id, itemId, serialNumber, from: copy.upgrade_level, to: next, key, before: before.stats[key], after: after.stats[key], healthBefore: before.stats?.health ?? 0, healthAfter: after.stats?.health ?? 0 };
       recipe = { ...costs, name: after.name };
       name = after.name;
     } else {

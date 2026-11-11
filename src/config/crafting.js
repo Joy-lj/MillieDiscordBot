@@ -9,6 +9,7 @@ const material = (name, rarity, description) => ({
 });
 
 export const MATERIAL_ITEMS = {
+  "cosmic-shard": material("Cosmic Shard", "legendary", "Guaranteed progress from an Ultra clear. Exchange shards in !craft for rare components."),
   "catsteel-scrap": material("Catsteel Scrap", "common", "Metal recovered from unwanted equipment and dungeon debris."),
   "enchanted-fur": material("Enchanted Fur", "uncommon", "Soft enchanted fibers salvaged from armor and found in catacombs."),
   "eternal-cosmic-cat-orb": material("Eternal Cosmic Cat Orb", "mythic", "A tiny feline cosmos capable of awakening Millie's Wrath."),
@@ -36,11 +37,17 @@ export const craftingConfig = {
   },
   reinforcement: {
     maxLevel: 3, ratePerLevel: 0.03,
+    armorHealthPerLevel: 0.03, minimumArmorHealthPerLevel: 1,
     fees: { 1: 25_000, 2: 75_000, 3: 200_000 },
     materialCounts: { 1: 5, 2: 10, 3: 20 },
     rarityFactors: { common: 1, uncommon: 1, rare: 2, epic: 3, legendary: 5, mythic: 8 },
   },
   recipes: {
+    "fang-from-shards": { name: "Moonlit Fang", ingredients: [{ itemId: "cosmic-shard", quantity: 20 }], outputItemId: "moonlit-fang", fee: 0 },
+    "core-from-shards": { name: "Starforged Core", ingredients: [{ itemId: "cosmic-shard", quantity: 20 }], outputItemId: "starforged-core", fee: 0 },
+    "thread-from-shards": { name: "Royal Thread", ingredients: [{ itemId: "cosmic-shard", quantity: 20 }], outputItemId: "royal-thread", fee: 0 },
+    "orb-from-shards": { name: "Eternal Cosmic Cat Orb", ingredients: [{ itemId: "cosmic-shard", quantity: 100 }], outputItemId: "eternal-cosmic-cat-orb", fee: 0 },
+
     "millies-eternal-wrath": {
       name: "Millie's Eternal Wrath", baseItemId: "millies-wrath",
       ingredients: [{ itemId: "millies-wrath", quantity: 1 }, { itemId: "eternal-cosmic-cat-orb", quantity: 1 }],

@@ -161,7 +161,7 @@ async function buildView(state) {
     const p = state.pending.plan;
     embed.setTitle("🔨 Confirm Crafting Action").setColor(0xe0a338)
       .setDescription(`**${clean(p.name, 90)}**\n\n**Permanently consumes:**\n${consumedText(p.consumed)}\n\n` +
-        (p.upgrade ? `**Reinforces copy #${p.upgrade.serialNumber}:** ${p.upgrade.key.toUpperCase()} ${p.upgrade.before} → ${p.upgrade.after}`
+        (p.upgrade ? `**Reinforces copy #${p.upgrade.serialNumber}:** ${p.upgrade.key.toUpperCase()} ${p.upgrade.before} → ${p.upgrade.after}` + healthChange(p.upgrade)
           : "**Creates:**\n" + p.outputs.map(o => `• ${o.quantity} × ${clean(o.name, 90)}`).join("\n")) +
         `\n\n**Fee:** ${money(p.fee)}\nConfirmation expires <t:${Math.ceil(state.pending.expiresAt / 1000)}:R>.\nCancel keeps all your items.`);
   } else if (state.mode === "uncertain") {
@@ -172,7 +172,7 @@ async function buildView(state) {
     const r = state.receipt;
     imageId = r.updatedItem?.itemId ?? r.outputs?.[0]?.itemId;
     embed.setColor(0x39c995).setTitle("✨ Crafting Complete")
-      .setDescription((r.updatedItem ? `**${clean(r.updatedItem.name, 90)} #${r.updatedItem.serialNumber}**\n${r.updatedItem.key.toUpperCase()}: **${r.updatedItem.before} → ${r.updatedItem.after}**`
+      .setDescription((r.updatedItem ? `**${clean(r.updatedItem.name, 90)} #${r.updatedItem.serialNumber}**\n${r.updatedItem.key.toUpperCase()}: **${r.updatedItem.before} → ${r.updatedItem.after}**` + healthChange(r.updatedItem)
         : r.outputs.map(o => `**${o.quantity} × ${clean(o.name, 90)}**`).join("\n")) +
         `\n\nFee paid: **${money(r.fee)}**` + (r.balance == null ? "" : `\nBalance after action: **${money(r.balance)}**`) +
         (r.addedItems.length ? `\nCopies: ${r.addedItems.slice(0, 8).map(i => `#${i.serialNumber}`).join(", ")}${r.addedItems.length > 8 ? "…" : ""}` : "") +
@@ -188,6 +188,7 @@ async function buildView(state) {
         (state.category === "salvage" ? "Salvaging permanently destroys the selected copy. Reinforcement costs are not refunded."
           : state.category === "upgrade" ? "Guaranteed reinforcement, one level at a time, up to +3. The same item instance and serial are kept."
           : state.category === "supplies" ? `Batch: **${state.quantity} supplies**. Materials and fees scale equally; no bulk discount.`
+          : state.category === "materials" ? "Exchange Cosmic Shards for one chosen component. No equipment is consumed."
           : "Craft one attachment variant. The exact base copy is consumed and its reinforcement level carries into the result."));
     if (state.copy) embed.addFields({ name: "Selected gear copy", value:
       `**${clean(copyItem.name, 80)} #${state.copy.serial_number}**${state.copy.is_equipped ? " • Equipped" : ""}${state.copy.is_locked ? " • Locked" : ""}` });
@@ -195,7 +196,7 @@ async function buildView(state) {
       addRequirements(embed, plan);
       if (plan.blockers.length) embed.addFields({ name: "Before you continue", value: plan.blockers.map(b => clean(b)).join("\n") });
       if (plan.upgrade) embed.addFields({ name: "Upgrade preview", value:
-        `+${plan.upgrade.from} → +${plan.upgrade.to}\n${plan.upgrade.key.toUpperCase()}: **${plan.upgrade.before} → ${plan.upgrade.after}**` });
+        `+${plan.upgrade.from} → +${plan.upgrade.to}\n${plan.upgrade.key.toUpperCase()}: **${plan.upgrade.before} → ${plan.upgrade.after}**` + healthChange(plan.upgrade) });
       else if (state.category === "salvage") embed.addFields({ name: "You receive", value: plan.outputs.map(o => `${o.quantity} × ${clean(o.name, 80)}`).join("\n") });
       if (!plan.ready && !plan.blockers.length) embed.addFields({ name: "Missing requirements", value: "Gather the missing materials or currency, then press Refresh." });
     } else if (state.error) embed.addFields({ name: "Before you continue", value: clean(state.error, 900) });
@@ -342,6 +343,7 @@ export async function craftCommand(message) {
   const n = args[2] == null ? null : positive(args[2]);
   if (!recipe || args.length > 3 || (args[2] != null && !n)) return message.reply("Usage: `!craft`, `!craft <supply-id> [quantity]`, or `!craft <attachment-id> [base-serial]`.");
   const category = recipeCategory(recipe, ITEMS);
+  if (category === "materials" && n != null) return message.reply("Exchange one component at a time: `!craft <recipe-id>`.");
   if (category === "supplies" && n > MAX_CRAFT_BATCH) return message.reply("Craft up to 10 supplies at a time.");
   return openBrowser(message, { category, entryId: id, quantity: category === "supplies" ? n ?? 1 : 1,
     serialNumber: recipe.baseItemId ? n : null });
@@ -382,4 +384,8 @@ export async function prepareCommand(message) {
     console.error("Supply preparation failed:", error);
     return message.reply({ content: "Couldn't confirm preparation. Use !prepare to check your selected supply.", allowedMentions: quiet });
   }
+}
+
+function healthChange(change) {
+  return change.healthAfter > change.healthBefore ? `\nHP: **${change.healthBefore} → ${change.healthAfter}**` : "";
 }

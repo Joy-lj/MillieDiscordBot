@@ -10,7 +10,7 @@ export function snapshotLootTable(table, items) {
     seen.add(itemId);
     if (!Number.isSafeInteger(weight) || weight < 1) fail("Invalid dungeon loot weight.");
     if (itemId !== null && (typeof itemId !== "string" || !Object.hasOwn(items, itemId) ||
-      !["weapon", "armor", "accessory", "material"].includes(items[itemId].type))) fail(`Unknown dungeon loot item: ${itemId}`);
+        !["weapon", "armor", "accessory", "material"].includes(items[itemId].type))) fail(`Unknown dungeon loot item: ${itemId}`);
     return { itemId, weight, name: itemId === null ? null : items[itemId].name };
   });
   const total = snapshot.reduce((n, entry) => n + entry.weight, 0);
@@ -23,8 +23,8 @@ export function rollDungeonLoot(table, rng = randomInt) {
   if (!Array.isArray(table) || !table.length) fail("Invalid saved dungeon loot table.");
   const total = table.reduce((n, entry) => n + entry.weight, 0);
   if (!Number.isSafeInteger(total) || total < 1 || total > 1_000_000_000 ||
-    table.some(entry => !Number.isSafeInteger(entry.weight) || entry.weight < 1 ||
-      (entry.itemId !== null && (typeof entry.itemId !== "string" || !entry.itemId || typeof entry.name !== "string")))) {
+      table.some(entry => !Number.isSafeInteger(entry.weight) || entry.weight < 1 ||
+        (entry.itemId !== null && (typeof entry.itemId !== "string" || !entry.itemId || typeof entry.name !== "string")))) {
     fail("Invalid saved dungeon loot table.");
   }
   let roll = rng(total);
@@ -67,7 +67,7 @@ export async function grantDungeonLoot(client, guild, user, loot, items) {
       );
       const instance = inserted[0];
       if (!instance || !Number.isSafeInteger(Number(instance.id)) || Number(instance.id) < 1 ||
-        Number(instance.serial_number) !== next) fail("Could not confirm the dungeon item grant.");
+          Number(instance.serial_number) !== next) fail("Could not confirm the dungeon item grant.");
       receipts.push({ itemId: drop.itemId, name: drop.name, instanceId: Number(instance.id), serialNumber: next });
       used.add(next);
     }

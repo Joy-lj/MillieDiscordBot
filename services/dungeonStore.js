@@ -1,3 +1,4 @@
+import { buildDungeonBalance, scaleDungeonChallenge, cooldownBucket } from "./dungeonBalance.js";
 import { selectDungeonEncounter } from "./dungeonEncounters.js";
 import { consumePreparedSupply } from "./dungeonSupplies.js";
 import { createHash, randomInt, randomUUID } from "node:crypto";
@@ -35,6 +36,8 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
       fail(`Invalid dungeon cooldown for "${difficulty}".`);
     }
   }
+  for (const difficulty of Object.keys(config.difficulties)) buildDungeonBalance(config, difficulty, null, items);
+  for (const [challenge, modifier] of Object.entries(config.challenges ?? {})) buildDungeonBalance(config, modifier.difficulty, challenge, items);
   // Fail at startup for malformed/missing tables, not after a successful fight.
   if (lootTables !== null) for (const difficulty of Object.keys(config.difficulties)) {
     snapshotLootTable(lootTables[difficulty], items);
@@ -127,18 +130,31 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
     });
   }
 
-  async function create(guild, channel, leader, partner = null, difficulty = "easy") {
+  async function entryTime(client, guild, user, bucket) {
+    const { rows } = await client.query("SELECT next_entry_at FROM public.dungeon_entry_cooldowns WHERE guild_id = $1 AND user_id = $2 AND bucket = $3", [guild, user, bucket]);
+    return Number(rows[0]?.next_entry_at ?? 0);
+  }
+
+  async function setEntryTime(client, guild, user, bucket, next) {
+    await client.query(`INSERT INTO public.dungeon_entry_cooldowns (guild_id, user_id, bucket, next_entry_at)
+      VALUES ($1, $2, $3, $4) ON CONFLICT (guild_id, user_id, bucket)
+      DO UPDATE SET next_entry_at = EXCLUDED.next_entry_at`, [guild, user, bucket, next]);
+    // Keep the legacy regular timer available for older administration tools.
+    if (bucket === "regular") await client.query("UPDATE public.dungeon_members SET next_entry_at = $1 WHERE guild_id = $2 AND user_id = $3", [next, guild, user]);
+  }
+
+  async function create(guild, channel, leader, partner = null, difficulty = "easy", challenge = null) {
     if (typeof leader !== "string" || !leader || (partner != null && (typeof partner !== "string" || !partner))) fail("Invalid dungeon player.");
     if (leader === partner) fail("Choose another player.");
     if (!Object.hasOwn(config.difficulties, difficulty)) fail("Choose easy, normal, hard, or ultra.");
     const party = partner == null ? [leader] : [leader, partner];
     const mode = party.length === 1 ? "solo" : "coop";
     const lootTable = lootTables === null ? null : snapshotLootTable(lootTables[difficulty], items);
-    const dungeon = dungeonForParty(selectDungeonEncounter(config, difficulty, clock()), party.length, config);
-    const runConfig = structuredClone(config);
-    runConfig.cooldownMs =
-      config.difficulties[difficulty].cooldownMs ??
-      config.cooldownMs;
+    let balance;
+    try { balance = buildDungeonBalance(config, difficulty, challenge, items); }
+    catch (error) { fail(error.message); }
+    const dungeon = dungeonForParty(scaleDungeonChallenge(selectDungeonEncounter(config, difficulty, clock()), balance), party.length, config);
+    const runConfig = balance.rules;
 
     return transaction(guild, async (client) => {
       const accounts = await lockAccounts(client, guild, party);
@@ -156,9 +172,8 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
           await expire(client, previous);
           if (["invited", "active"].includes(previous.status)) fail("A player already has a dungeon. Use !dungeon to resume or leave it.");
         }
-        if (Number(member.next_entry_at) > clock()) {
-          fail(`A player can enter again <t:${Math.ceil(Number(member.next_entry_at) / 1000)}:R>.`);
-        }
+        const next = await entryTime(client, guild, user, runConfig.cooldownBucket);
+        if (next > clock()) fail(`A player's ${runConfig.cooldownBucket} dungeon cooldown ends <t:${Math.ceil(next / 1000)}:R>.`);
       }
       const now = clock();
       const run = {
@@ -188,6 +203,8 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
       if (mode === "solo") {
         run.state.players[0] = await consumePreparedSupply(client, guild, leader, run.state.players[0], items);
       }
+      run.state.challenge = challenge;
+      run.state.guaranteedLoot = balance.guaranteedLoot;
       run.state.lootTable = lootTable;
       await client.query(
         `INSERT INTO public.dungeon_runs
@@ -198,10 +215,7 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
       for (const user of party) {
         await client.query("UPDATE public.dungeon_members SET run_id = $1 WHERE guild_id = $2 AND user_id = $3", [run.id, guild, user]);
         if (mode === "solo") {
-          await client.query(
-            "UPDATE public.dungeon_members SET next_entry_at = $1 WHERE guild_id = $2 AND user_id = $3",
-            [now + run.state.rules.cooldownMs, guild, user]
-          );
+          await setEntryTime(client, guild, user, cooldownBucket(difficulty, run.state.rules), now + run.state.rules.cooldownMs);
         }
       }
       return present(client, run);
@@ -250,7 +264,7 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
             "SELECT run_id, next_entry_at FROM public.dungeon_members WHERE guild_id = $1 AND user_id = $2 FOR UPDATE", [guild, player]
           );
           if (rows[0]?.run_id !== id) fail("This invitation is no longer active.");
-          if (Number(rows[0].next_entry_at) > clock()) fail("A player's dungeon cooldown is still active.");
+          if (await entryTime(client, guild, player, cooldownBucket(run.state.difficulty, run.state.rules)) > clock()) fail("A player's dungeon cooldown is still active.");
         }
         const players = users.map((player) => {
           const account = accounts.get(player);
@@ -265,19 +279,20 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
         });
         const difficulty = run.state.difficulty;
         const lootTable = run.state.lootTable ?? null;
+        const guaranteedLoot = run.state.guaranteedLoot ?? [];
+        const challenge = run.state.challenge ?? null;
         for (let i = 0; i < players.length; i++) {
           players[i] = await consumePreparedSupply(client, guild, users[i], players[i], items);
         }
         run.state = startState(run.state.dungeon, players, run.state.rules);
         run.state.difficulty = difficulty;
         run.state.lootTable = lootTable;
+        run.state.guaranteedLoot = guaranteedLoot;
+        run.state.challenge = challenge;
         run.status = "active";
         run.expires_at = clock() + run.state.rules.roundMs;
         for (const player of users) {
-          await client.query(
-            "UPDATE public.dungeon_members SET next_entry_at = $1 WHERE guild_id = $2 AND user_id = $3",
-            [clock() + run.state.rules.cooldownMs, guild, player]
-          );
+          await setEntryTime(client, guild, player, cooldownBucket(difficulty, run.state.rules), clock() + run.state.rules.cooldownMs);
         }
       } else if (action === "leave") {
         run.status = "retreated"; run.state.status = "retreated"; run.expires_at = 0;
@@ -295,7 +310,7 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
             await releaseParty(client, run);
             if (run.status === "won") {
               for (const recipient of run.party_ids) {
-                const loot = rollDungeonLoot(run.state.lootTable, lootRng);
+                const loot = [...rollDungeonLoot(run.state.lootTable, lootRng), ...decodeLoot(run.state.guaranteedLoot ?? [])];
                 await client.query(
                   `INSERT INTO public.dungeon_rewards (run_id, guild_id, user_id, amount, loot, loot_rolled)
                    VALUES ($1, $2, $3, $4, $5::jsonb, $6) ON CONFLICT (run_id, user_id) DO NOTHING`,
@@ -322,5 +337,10 @@ export function createDungeonStore(db, items, config, { rng = randomInt, lootRng
     return (await act(guild, user, rows[0].id, 0, "refresh")).run;
   }
 
-  return { create, act, current };
+  async function cooldowns(guild, user) {
+    const { rows } = await db.query("SELECT bucket, next_entry_at FROM public.dungeon_entry_cooldowns WHERE guild_id = $1 AND user_id = $2", [guild, user]);
+    return Object.fromEntries(rows.map(row => [row.bucket, Number(row.next_entry_at)]));
+  }
+
+  return { create, act, current, cooldowns };
 }
